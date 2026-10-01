@@ -33,6 +33,16 @@ internal static class DesktopVerification
             File.WriteAllText(Path.Combine(settingsDirectory, "settings.json"), "{\"Scale\":1.2,\"AlwaysOnTop\":false}");
             Check(store.Load().Details == DetailsMode.Hover && store.Load().Scale == 1.2,
                 "existing settings default to hover details");
+            var legacy = new MainWindow(store, verification: true);
+            Check(legacy.Settings.EffectiveCharacterScale == 1.2 && legacy.Settings.EffectiveQuotaScale == 1.2
+                && Math.Abs(legacy.PetStage.Width - 230 * 1.2) < 0.01
+                && Math.Abs(legacy.QuotaCard.Width - 116 * 1.2) < 0.01,
+                "legacy global scale migrates to both independent sizes");
+            await legacy.StopAsync();
+            legacy.Close();
+            var invalidSizes = new Preferences(CharacterScale: double.NaN, QuotaScale: 99).Validated();
+            Check(invalidSizes.EffectiveCharacterScale == 1 && invalidSizes.EffectiveQuotaScale == 2,
+                "invalid independent sizes recover and clamp");
             Check(new Preferences(Details: (DetailsMode)99).Validated().Details == DetailsMode.Hover,
                 "invalid details mode recovers");
             Check(store.Load().QuotaPosition == QuotaDock.Left
@@ -179,9 +189,9 @@ internal static class DesktopVerification
                 Render(window, directory, "tianyi-" + dock.ToString().ToLowerInvariant(), 144);
             }
             window.SetQuotaPosition(QuotaDock.Left);
-            window.SetScale(1.4);
+            window.SetCharacterScale(1.4);
             Render(window, directory, "tianyi-140-percent", 192);
-            window.SetScale(1);
+            window.SetCharacterScale(1);
             window.SetCharacter(PetCharacter.Cat);
             Check(window.CatArt.Visibility == Visibility.Visible && window.TianyiArt.Visibility == Visibility.Collapsed
                 && store.Load().Character == PetCharacter.Cat && window.Width == previousWidth,
@@ -203,12 +213,60 @@ internal static class DesktopVerification
             window.Model.Failure("账号发生变化", clear: true);
             Check(!window.Model.HasData && window.Model.Windows.Single().RemainingText == "—",
                 "account changes clear quota");
-            window.SetScale(1.2);
-            Check(Math.Abs(window.Width - window.LayoutSize.Width * 1.2) < 0.1 && store.Load().Scale == 1.2,
-                "scale applies and persists");
+            window.SetCharacterScale(1.2);
+            Check(Math.Abs(window.PetStage.Width - 230 * 1.2) < 0.1
+                && window.QuotaCard.Width == 116 && store.Load().EffectiveCharacterScale == 1.2
+                && store.Load().EffectiveQuotaScale == 1,
+                "character size changes without resizing quota and persists");
             window.ToggleTopmost();
             Check(!window.Topmost && !store.Load().AlwaysOnTop, "topmost toggle persists");
-            window.SetScale(1);
+            window.SetCharacterScale(1);
+            window.Model.Apply(Snapshot(100, 99.9), demo: true);
+            window.SetCharacter(PetCharacter.Tianyi);
+            window.SetQuotaScale(1.6);
+            Check(window.PetStage.Width == 230 && Math.Abs(window.QuotaCard.Width - 116 * 1.6) < 0.01
+                && store.Load().EffectiveCharacterScale == 1 && store.Load().EffectiveQuotaScale == 1.6,
+                "quota size changes without resizing character and persists");
+            var sizeRestored = new MainWindow(store, verification: true);
+            Check(sizeRestored.Settings.EffectiveCharacterScale == 1 && sizeRestored.Settings.EffectiveQuotaScale == 1.6
+                && sizeRestored.Settings.Character == PetCharacter.Tianyi
+                && Math.Abs(sizeRestored.QuotaCard.Width - window.QuotaCard.Width) < 0.01,
+                "independent sizes and character restore together");
+            await sizeRestored.StopAsync();
+            sizeRestored.Close();
+            var detailSize = new Size(window.DetailsViewport.Width, window.DetailsViewport.Height);
+            foreach (var (characterScale, quotaScale) in new[] { (2.0, 0.8), (0.8, 2.0), (1.4, 1.6) })
+            {
+                window.SetCharacterScale(characterScale);
+                window.SetQuotaScale(quotaScale);
+                foreach (var dock in Enum.GetValues<QuotaDock>())
+                {
+                    window.SetQuotaPosition(dock);
+                    var layout = DockLayout.For(dock, characterScale, quotaScale);
+                    var frame = new Rect(new Point(), layout.Size);
+                    var workspace = DockLayout.DragWorkspace(dock, characterScale, quotaScale);
+                    var dragFrame = new Rect(new Point(), workspace.Size);
+                    Check(frame.Contains(layout.Pet) && frame.Contains(layout.Quota)
+                        && Enum.GetValues<QuotaDock>().All(candidate => dragFrame.Contains(
+                            DockLayout.Target(candidate, workspace.Pet.TopLeft, characterScale, quotaScale))),
+                        $"independent sizes {characterScale}/{quotaScale} fit {dock} and its drag targets");
+                    Render(window, directory, $"sizes-{characterScale:0.0}-{quotaScale:0.0}-{dock}", 144);
+                    window.BeginQuotaDrag(new Point(16, 16));
+                    var targetDock = dock == QuotaDock.Left ? QuotaDock.Top : QuotaDock.Left;
+                    var target = DockLayout.Target(targetDock, workspace.Pet.TopLeft, characterScale, quotaScale);
+                    window.UpdateQuotaDrag(new Point(target.X + target.Width / 2 - window.QuotaCard.Width / 2 + 16,
+                        target.Y + target.Height / 2 - window.QuotaCard.Height / 2 + 16));
+                    window.EndQuotaDrag(cancel: false);
+                    Check(window.Settings.QuotaPosition == targetDock
+                        && window.Settings.EffectiveCharacterScale == characterScale && window.Settings.EffectiveQuotaScale == quotaScale,
+                        $"scaled drag {characterScale}/{quotaScale} from {dock} keeps independent sizes");
+                }
+            }
+            Check(new Size(window.DetailsViewport.Width, window.DetailsViewport.Height) == detailSize,
+                "independent sizes keep detail panel readable at its existing size");
+            window.SetCharacterScale(1);
+            window.SetQuotaScale(1);
+            window.SetQuotaPosition(QuotaDock.Left);
 
             using (var first = new SingleInstance("CutePet.Verify." + Guid.NewGuid().ToString("N")))
             {

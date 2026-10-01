@@ -45,6 +45,8 @@ internal sealed class TrayController : IDisposable
             characters.DropDownItems.Add(item);
         }
         menu.Items.Add(characters);
+        var characterSize = AddSizeMenu("角色大小", window.SetCharacterScale);
+        var quotaSize = AddSizeMenu("额度数字大小", window.SetQuotaScale);
         menu.Opening += (_, _) =>
         {
             window.BeginDetailsMenu();
@@ -54,6 +56,10 @@ internal sealed class TrayController : IDisposable
                 item.Checked = (QuotaDock)item.Tag! == window.Settings.QuotaPosition;
             foreach (Forms.ToolStripMenuItem item in characters.DropDownItems)
                 item.Checked = (PetCharacter)item.Tag! == window.Settings.Character;
+            foreach (Forms.ToolStripMenuItem item in characterSize.DropDownItems)
+                item.Checked = Math.Abs(window.Settings.EffectiveCharacterScale - (double)item.Tag!) < 0.01;
+            foreach (Forms.ToolStripMenuItem item in quotaSize.DropDownItems)
+                item.Checked = Math.Abs(window.Settings.EffectiveQuotaScale - (double)item.Tag!) < 0.01;
         };
         menu.Closed += (_, _) => window.EndDetailsMenu();
         menu.Items.Add(new Forms.ToolStripSeparator());
@@ -61,6 +67,18 @@ internal sealed class TrayController : IDisposable
         Add("退出 CutePet", exit);
         tray = new Forms.NotifyIcon { Icon = icon, Text = "CutePet · Codex 额度", ContextMenuStrip = menu, Visible = true };
         tray.DoubleClick += (_, _) => window.RestorePet();
+        Forms.ToolStripMenuItem AddSizeMenu(string label, Action<double> setScale)
+        {
+            var size = new Forms.ToolStripMenuItem(label);
+            foreach (var scale in new[] { 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0 })
+            {
+                var item = new Forms.ToolStripMenuItem($"{scale * 100:0}%") { Tag = scale };
+                item.Click += (_, _) => setScale(scale);
+                size.DropDownItems.Add(item);
+            }
+            menu.Items.Add(size);
+            return size;
+        }
         Forms.ToolStripMenuItem Add(string text, Action action)
         {
             var item = new Forms.ToolStripMenuItem(text);

@@ -8,7 +8,8 @@
           LostMouseCapture="OnDockCaptureLost">
       <Border x:Name="DockTarget" CornerRadius="14" BorderBrush="#568B70" BorderThickness="2" Background="#24568B70"
               IsHitTestVisible="False" Visibility="Collapsed" />
-      <Grid x:Name="PetStage" Width="230" Height="178" Canvas.Left="110" Canvas.Top="2">
+      <Viewbox x:Name="PetStage" Width="230" Height="178" Canvas.Left="110" Canvas.Top="2" Stretch="Uniform">
+       <Grid Width="230" Height="178">
         <Ellipse Fill="#2029443B" Width="108" Height="13" VerticalAlignment="Bottom" Margin="0,0,0,1" />
         <Grid x:Name="PetArt" RenderTransformOrigin="0.5,0.85" Margin="0,16,0,14">
           <Grid.RenderTransform><TranslateTransform x:Name="Bob" /></Grid.RenderTransform>
@@ -39,8 +40,10 @@
                 Visibility="{Binding ShowCharacterMessage, Converter={StaticResource VisibleWhenTrue}}">
           <TextBlock Text="{Binding CharacterMessage}" FontSize="11" Foreground="#456054" TextWrapping="Wrap" />
         </Border>
-      </Grid>
-      <Border x:Name="QuotaCard" Canvas.Left="12" Canvas.Top="104" Width="116" Height="68" Cursor="SizeAll"
+       </Grid>
+      </Viewbox>
+      <Viewbox x:Name="QuotaCard" Canvas.Left="12" Canvas.Top="104" Width="116" Height="68" Cursor="SizeAll" Stretch="Uniform">
+       <Border x:Name="QuotaSurface" Width="116" Height="68"
               CornerRadius="12" Background="#FFFAF4" BorderBrush="#D9E3DB" BorderThickness="1">
           <ItemsControl ItemsSource="{Binding CompactWindows}" Margin="8,4">
             <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="{Binding CompactColumns, RelativeSource={RelativeSource AncestorType=Window}}" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
@@ -54,7 +57,8 @@
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
-      </Border>
+       </Border>
+      </Viewbox>
       <Border x:Name="DockHint" Background="#FFF9ED" CornerRadius="7" Padding="7,4" IsHitTestVisible="False" Visibility="Collapsed">
         <TextBlock x:Name="DockHintText" FontSize="10" Foreground="#345449" />
       </Border>

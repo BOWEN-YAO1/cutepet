@@ -16,7 +16,8 @@ namespace CutePet.Desktop;
 
 public partial class MainWindow : Window
 {
-    public Size LayoutSize => DockLayout.For(Settings.QuotaPosition).Size;
+    private DockLayout CurrentLayout => DockLayout.For(Settings.QuotaPosition, Settings.EffectiveCharacterScale, Settings.EffectiveQuotaScale);
+    public Size LayoutSize => CurrentLayout.Size;
     public static readonly DependencyProperty CompactColumnsProperty = DependencyProperty.Register(
         nameof(CompactColumns), typeof(int), typeof(MainWindow), new PropertyMetadata(1));
     public int CompactColumns { get => (int)GetValue(CompactColumnsProperty); private set => SetValue(CompactColumnsProperty, value); }
@@ -50,7 +51,9 @@ public partial class MainWindow : Window
         DataContext = Model;
         DetailsViewport.DataContext = Model;
         ApplyCharacter();
-        SetScale(Settings.Scale, save: false);
+        DetailsViewport.Width = 348 * Settings.Scale;
+        DetailsViewport.Height = 256 * Settings.Scale;
+        ApplyDockLayout(CurrentLayout, null, constrain: true);
         Topmost = Settings.AlwaysOnTop;
         countdown.Tick += (_, _) => Model.Tick();
         blink.Tick += (_, _) => Blink();
@@ -124,15 +127,16 @@ public partial class MainWindow : Window
         AutomationProperties.SetName(PetStage, CharacterCatalog.Label(Settings.Character));
     }
 
-    public void SetScale(double value, bool save = true)
+    public void SetCharacterScale(double value) => SetIndependentScale(value, character: true);
+    public void SetQuotaScale(double value) => SetIndependentScale(value, character: false);
+
+    private void SetIndependentScale(double value, bool character)
     {
         if (quotaDragging) EndQuotaDrag(cancel: true);
         var anchor = PetScreenOrigin();
-        Settings = (Settings with { Scale = value }).Validated();
-        DetailsViewport.Width = 348 * Settings.Scale;
-        DetailsViewport.Height = 256 * Settings.Scale;
-        ApplyDockLayout(DockLayout.For(Settings.QuotaPosition), anchor, constrain: true);
-        if (save) SavePlacement();
+        Settings = (character ? Settings with { CharacterScale = value } : Settings with { QuotaScale = value }).Validated();
+        ApplyDockLayout(CurrentLayout, anchor, constrain: true);
+        SavePlacement();
     }
 
     public void SetQuotaPosition(QuotaDock dock)
@@ -140,7 +144,7 @@ public partial class MainWindow : Window
         if (quotaDragging) EndQuotaDrag(cancel: true);
         var anchor = PetScreenOrigin();
         Settings = (Settings with { QuotaPosition = dock }).Validated();
-        ApplyDockLayout(DockLayout.For(Settings.QuotaPosition), anchor, constrain: true);
+        ApplyDockLayout(CurrentLayout, anchor, constrain: true);
         SavePlacement();
     }
 
@@ -151,10 +155,12 @@ public partial class MainWindow : Window
     {
         Scene.Width = layout.Size.Width;
         Scene.Height = layout.Size.Height;
-        Width = layout.Size.Width * Settings.Scale;
-        Height = layout.Size.Height * Settings.Scale;
+        Width = layout.Size.Width;
+        Height = layout.Size.Height;
         Place(PetStage, layout.Pet);
         Place(QuotaCard, layout.Quota);
+        QuotaSurface.Width = layout.Columns == 2 ? 224 : 116;
+        QuotaSurface.Height = layout.Columns == 2 ? 40 : 68;
         CompactColumns = layout.Columns;
         SpeechBubble.Margin = new Thickness(Settings.QuotaPosition == QuotaDock.Right ? 0 : -26, 4, 0, 0);
         DetailsPopup.Placement = Settings.QuotaPosition switch
@@ -163,8 +169,8 @@ public partial class MainWindow : Window
         if (anchor is Point physical)
         {
             var dpi = VisualTreeHelper.GetDpi(this);
-            var left = physical.X - layout.Pet.X * Settings.Scale * dpi.DpiScaleX;
-            var top = physical.Y - layout.Pet.Y * Settings.Scale * dpi.DpiScaleY;
+            var left = physical.X - layout.Pet.X * dpi.DpiScaleX;
+            var top = physical.Y - layout.Pet.Y * dpi.DpiScaleY;
             if (constrain) NativePlacement.Apply(this, left, top);
             else NativePlacement.MoveUnclamped(this, left, top);
         }
@@ -239,15 +245,8 @@ public partial class MainWindow : Window
         var pin = Add("始终置顶", ToggleTopmost);
         pin.IsCheckable = true;
         pin.IsChecked = Topmost;
-        var size = new MenuItem { Header = "桌宠大小" };
-        foreach (var scale in new[] { 0.8, 1.0, 1.2, 1.4 })
-        {
-            var item = new MenuItem { Header = $"{scale * 100:0}%", IsCheckable = true,
-                IsChecked = Math.Abs(Settings.Scale - scale) < 0.01 };
-            item.Click += (_, _) => SetScale(scale);
-            size.Items.Add(item);
-        }
-        menu.Items.Add(size);
+        var characterSize = AddSizeMenu("角色大小", SetCharacterScale);
+        var quotaSize = AddSizeMenu("额度数字大小", SetQuotaScale);
         var characters = new MenuItem { Header = "角色选择" };
         foreach (var character in Enum.GetValues<PetCharacter>())
         {
@@ -281,15 +280,28 @@ public partial class MainWindow : Window
         {
             BeginDetailsMenu();
             pin.IsChecked = Topmost;
-            var index = 0;
-            foreach (MenuItem item in size.Items)
-                item.IsChecked = Math.Abs(Settings.Scale - new[] { 0.8, 1.0, 1.2, 1.4 }[index++]) < 0.01;
+            foreach (MenuItem item in characterSize.Items)
+                item.IsChecked = Math.Abs(Settings.EffectiveCharacterScale - (double)item.Tag) < 0.01;
+            foreach (MenuItem item in quotaSize.Items)
+                item.IsChecked = Math.Abs(Settings.EffectiveQuotaScale - (double)item.Tag) < 0.01;
             foreach (MenuItem item in details.Items) item.IsChecked = (DetailsMode)item.Tag == Settings.Details;
             foreach (MenuItem item in position.Items) item.IsChecked = (QuotaDock)item.Tag == Settings.QuotaPosition;
             foreach (MenuItem item in characters.Items) item.IsChecked = (PetCharacter)item.Tag == Settings.Character;
         };
         menu.Closed += (_, _) => EndDetailsMenu();
         return menu;
+        MenuItem AddSizeMenu(string label, Action<double> setScale)
+        {
+            var size = new MenuItem { Header = label };
+            foreach (var scale in new[] { 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0 })
+            {
+                var item = new MenuItem { Header = $"{scale * 100:0}%", IsCheckable = true, Tag = scale };
+                item.Click += (_, _) => setScale(scale);
+                size.Items.Add(item);
+            }
+            menu.Items.Add(size);
+            return size;
+        }
         MenuItem Add(string text, Action action)
         {
             var item = new MenuItem { Header = text };
@@ -430,7 +442,7 @@ public partial class MainWindow : Window
         mouseStart = null;
         StopDetailsTimers();
         ShowDetails(false);
-        ApplyDockLayout(DockLayout.DragWorkspace(originalDock), anchor, constrain: false);
+        ApplyDockLayout(DockLayout.DragWorkspace(originalDock, Settings.EffectiveCharacterScale, Settings.EffectiveQuotaScale), anchor, constrain: false);
         DockTarget.Visibility = DockHint.Visibility = Visibility.Visible;
         ShowDockTarget();
         if (!verification)
@@ -445,14 +457,16 @@ public partial class MainWindow : Window
         var x = pointer.X - quotaGrabOffset.X;
         var y = pointer.Y - quotaGrabOffset.Y;
         var center = new Point(x + QuotaCard.Width / 2, y + QuotaCard.Height / 2);
-        draftDock = DockLayout.Nearest(center, new(Canvas.GetLeft(PetStage), Canvas.GetTop(PetStage)), draftDock);
+        draftDock = DockLayout.Nearest(center, new(Canvas.GetLeft(PetStage), Canvas.GetTop(PetStage)), draftDock,
+            Settings.EffectiveCharacterScale, Settings.EffectiveQuotaScale);
         Canvas.SetLeft(QuotaCard, Math.Clamp(x, 0, Scene.Width - QuotaCard.Width));
         Canvas.SetTop(QuotaCard, Math.Clamp(y, 0, Scene.Height - QuotaCard.Height));
         ShowDockTarget();
     }
     private void ShowDockTarget()
     {
-        var target = DockLayout.Target(draftDock, new(Canvas.GetLeft(PetStage), Canvas.GetTop(PetStage)));
+        var target = DockLayout.Target(draftDock, new(Canvas.GetLeft(PetStage), Canvas.GetTop(PetStage)),
+            Settings.EffectiveCharacterScale, Settings.EffectiveQuotaScale);
         Place(DockTarget, target);
         DockHintText.Text = "松开 → " + DockLayout.Label(draftDock) + " · Esc 取消";
         Canvas.SetLeft(DockHint, Math.Clamp(target.X, 0, Scene.Width - 150));
@@ -466,7 +480,7 @@ public partial class MainWindow : Window
         if (Scene.IsMouseCaptured) Scene.ReleaseMouseCapture();
         DockTarget.Visibility = DockHint.Visibility = Visibility.Collapsed;
         Settings = Settings with { QuotaPosition = cancel ? originalDock : draftDock };
-        ApplyDockLayout(DockLayout.For(Settings.QuotaPosition), anchor, constrain: true);
+        ApplyDockLayout(CurrentLayout, anchor, constrain: true);
         SavePlacement();
         if (Settings.Details == DetailsMode.Always) ShowDetails(true);
         else PointerChanged(Scene.IsMouseOver);
