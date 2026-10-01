@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -14,7 +15,10 @@ namespace CutePet.Desktop;
 
 public partial class MainWindow : Window
 {
-    public const double BaseWidth = 280, BaseHeight = 252;
+    public Size LayoutSize => DockLayout.For(Settings.QuotaPosition).Size;
+    public static readonly DependencyProperty CompactColumnsProperty = DependencyProperty.Register(
+        nameof(CompactColumns), typeof(int), typeof(MainWindow), new PropertyMetadata(1));
+    public int CompactColumns { get => (int)GetValue(CompactColumnsProperty); private set => SetValue(CompactColumnsProperty, value); }
     public bool DetailsVisible { get; private set; }
     public PetViewModel Model { get; } = new();
     public Preferences Settings { get; private set; }
@@ -29,6 +33,9 @@ public partial class MainWindow : Window
     private Task? syncTask;
     private Point? mouseStart;
     private bool dragged, loaded, exiting;
+    private bool quotaGesture, quotaDragging;
+    private Point quotaGrabOffset;
+    private QuotaDock originalDock, draftDock;
     private bool hovered;
     private int menusOpen;
     public event Action? ExitRequested;
@@ -59,8 +66,7 @@ public partial class MainWindow : Window
             if (loaded)
             {
                 var current = NativePlacement.Get(this);
-                NativePlacement.Apply(this, current.Left, current.Top);
-                SavePlacement();
+                if (!quotaDragging) { NativePlacement.Apply(this, current.Left, current.Top); SavePlacement(); }
                 RepositionDetails();
             }
         });
@@ -98,19 +104,56 @@ public partial class MainWindow : Window
 
     public void SetScale(double value, bool save = true)
     {
+        if (quotaDragging) EndQuotaDrag(cancel: true);
+        var anchor = PetScreenOrigin();
         Settings = (Settings with { Scale = value }).Validated();
-        Width = BaseWidth * Settings.Scale;
-        Height = BaseHeight * Settings.Scale;
         DetailsViewport.Width = 348 * Settings.Scale;
         DetailsViewport.Height = 256 * Settings.Scale;
-        if (loaded)
-        {
-            UpdateLayout();
-            var current = NativePlacement.Get(this);
-            NativePlacement.Apply(this, current.Left, current.Top);
-            RepositionDetails();
-        }
+        ApplyDockLayout(DockLayout.For(Settings.QuotaPosition), anchor, constrain: true);
         if (save) SavePlacement();
+    }
+
+    public void SetQuotaPosition(QuotaDock dock)
+    {
+        if (quotaDragging) EndQuotaDrag(cancel: true);
+        var anchor = PetScreenOrigin();
+        Settings = (Settings with { QuotaPosition = dock }).Validated();
+        ApplyDockLayout(DockLayout.For(Settings.QuotaPosition), anchor, constrain: true);
+        SavePlacement();
+    }
+
+    private Point? PetScreenOrigin() => PresentationSource.FromVisual(PetStage) is not null
+        ? PetStage.PointToScreen(new Point()) : null;
+
+    private void ApplyDockLayout(DockLayout layout, Point? anchor, bool constrain)
+    {
+        Scene.Width = layout.Size.Width;
+        Scene.Height = layout.Size.Height;
+        Width = layout.Size.Width * Settings.Scale;
+        Height = layout.Size.Height * Settings.Scale;
+        Place(PetStage, layout.Pet);
+        Place(QuotaCard, layout.Quota);
+        CompactColumns = layout.Columns;
+        SpeechBubble.Margin = new Thickness(Settings.QuotaPosition == QuotaDock.Right ? 0 : -26, 4, 0, 0);
+        DetailsPopup.Placement = Settings.QuotaPosition switch
+        { QuotaDock.Left => PlacementMode.Left, QuotaDock.Right => PlacementMode.Right, _ => PlacementMode.Top };
+        UpdateLayout();
+        if (anchor is Point physical)
+        {
+            var dpi = VisualTreeHelper.GetDpi(this);
+            var left = physical.X - layout.Pet.X * Settings.Scale * dpi.DpiScaleX;
+            var top = physical.Y - layout.Pet.Y * Settings.Scale * dpi.DpiScaleY;
+            if (constrain) NativePlacement.Apply(this, left, top);
+            else NativePlacement.MoveUnclamped(this, left, top);
+        }
+        RepositionDetails();
+    }
+    private static void Place(FrameworkElement element, Rect bounds)
+    {
+        Canvas.SetLeft(element, bounds.X);
+        Canvas.SetTop(element, bounds.Y);
+        element.Width = bounds.Width;
+        element.Height = bounds.Height;
     }
 
     public void ToggleTopmost()
@@ -134,7 +177,7 @@ public partial class MainWindow : Window
         Activate();
     }
 
-    public void HidePet() { StopDetailsTimers(); ShowDetails(false); SavePlacement(); Hide(); }
+    public void HidePet() { if (quotaDragging) EndQuotaDrag(cancel: true); StopDetailsTimers(); ShowDetails(false); SavePlacement(); Hide(); }
 
     public void ResetPosition()
     {
@@ -158,6 +201,7 @@ public partial class MainWindow : Window
 
     private void SavePlacement()
     {
+        if (quotaDragging) return; // Never persist the temporary drag workspace.
         if (loaded)
         {
             var point = NativePlacement.Get(this);
@@ -182,6 +226,14 @@ public partial class MainWindow : Window
             size.Items.Add(item);
         }
         menu.Items.Add(size);
+        var position = new MenuItem { Header = "额度条位置" };
+        foreach (var dock in Enum.GetValues<QuotaDock>())
+        {
+            var item = new MenuItem { Header = DockLayout.Label(dock), IsCheckable = true, Tag = dock };
+            item.Click += (_, _) => SetQuotaPosition(dock);
+            position.Items.Add(item);
+        }
+        menu.Items.Add(position);
         var details = new MenuItem { Header = "详情显示" };
         foreach (var (mode, label) in new[] { (DetailsMode.Hover, "悬停显示"), (DetailsMode.Always, "固定显示"), (DetailsMode.Hidden, "隐藏详情") })
         {
@@ -203,6 +255,7 @@ public partial class MainWindow : Window
             foreach (MenuItem item in size.Items)
                 item.IsChecked = Math.Abs(Settings.Scale - new[] { 0.8, 1.0, 1.2, 1.4 }[index++]) < 0.01;
             foreach (MenuItem item in details.Items) item.IsChecked = (DetailsMode)item.Tag == Settings.Details;
+            foreach (MenuItem item in position.Items) item.IsChecked = (QuotaDock)item.Tag == Settings.QuotaPosition;
         };
         menu.Closed += (_, _) => EndDetailsMenu();
         return menu;
@@ -285,18 +338,36 @@ public partial class MainWindow : Window
     {
         // Let buttons and scroll bars keep their own mouse gestures.
         var target = e.OriginalSource as DependencyObject;
+        quotaGesture = false;
         while (target is not null && target != Scene)
         {
             if (target is System.Windows.Controls.Primitives.ButtonBase or System.Windows.Controls.Primitives.ScrollBar) return;
-            target = VisualTreeHelper.GetParent(target);
+            if (target == QuotaCard) quotaGesture = true;
+            target = target is Visual ? VisualTreeHelper.GetParent(target) : LogicalTreeHelper.GetParent(target);
         }
-        mouseStart = e.GetPosition(this);
+        if (target != Scene) return; // Popup controls keep their own input surface.
+        mouseStart = e.GetPosition(Scene);
+        quotaGrabOffset = e.GetPosition(QuotaCard);
         dragged = false;
     }
     private void OnMouseMove(object sender, MouseEventArgs e)
     {
+        if (quotaDragging)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed) UpdateQuotaDrag(e.GetPosition(Scene));
+            else EndQuotaDrag(cancel: false);
+            e.Handled = true;
+            return;
+        }
         if (mouseStart is not Point start || e.LeftButton != MouseButtonState.Pressed || dragged) return;
-        if ((e.GetPosition(this) - start).Length < 4) return;
+        if ((e.GetPosition(Scene) - start).Length < 4) return;
+        if (quotaGesture)
+        {
+            BeginQuotaDrag(quotaGrabOffset);
+            if (quotaDragging) UpdateQuotaDrag(e.GetPosition(Scene));
+            e.Handled = true;
+            return;
+        }
         dragged = true;
         StopDetailsTimers();
         ShowDetails(false);
@@ -314,6 +385,7 @@ public partial class MainWindow : Window
     }
     private async void OnMouseUp(object sender, MouseButtonEventArgs e)
     {
+        if (quotaDragging) { EndQuotaDrag(cancel: false); e.Handled = true; return; }
         var clicked = mouseStart is not null && !dragged && PetStage.IsMouseOver;
         mouseStart = null;
         if (!clicked) return;
@@ -321,6 +393,66 @@ public partial class MainWindow : Window
         Blink();
         try { await Task.Delay(1800, stop.Token); } catch (OperationCanceledException) { return; }
         Model.RestoreCharacterMessage();
+    }
+
+    internal void BeginQuotaDrag(Point grabOffset)
+    {
+        if (quotaDragging || exiting) return;
+        var anchor = PetScreenOrigin();
+        originalDock = draftDock = Settings.QuotaPosition;
+        quotaGrabOffset = grabOffset;
+        quotaDragging = dragged = true;
+        mouseStart = null;
+        StopDetailsTimers();
+        ShowDetails(false);
+        ApplyDockLayout(DockLayout.DragWorkspace(originalDock), anchor, constrain: false);
+        DockTarget.Visibility = DockHint.Visibility = Visibility.Visible;
+        ShowDockTarget();
+        if (!verification)
+        {
+            Scene.Focus();
+            if (!Scene.CaptureMouse()) EndQuotaDrag(cancel: true);
+        }
+    }
+    internal void UpdateQuotaDrag(Point pointer)
+    {
+        if (!quotaDragging) return;
+        var x = pointer.X - quotaGrabOffset.X;
+        var y = pointer.Y - quotaGrabOffset.Y;
+        var center = new Point(x + QuotaCard.Width / 2, y + QuotaCard.Height / 2);
+        draftDock = DockLayout.Nearest(center, new(Canvas.GetLeft(PetStage), Canvas.GetTop(PetStage)), draftDock);
+        Canvas.SetLeft(QuotaCard, Math.Clamp(x, 0, Scene.Width - QuotaCard.Width));
+        Canvas.SetTop(QuotaCard, Math.Clamp(y, 0, Scene.Height - QuotaCard.Height));
+        ShowDockTarget();
+    }
+    private void ShowDockTarget()
+    {
+        var target = DockLayout.Target(draftDock, new(Canvas.GetLeft(PetStage), Canvas.GetTop(PetStage)));
+        Place(DockTarget, target);
+        DockHintText.Text = "松开 → " + DockLayout.Label(draftDock) + " · Esc 取消";
+        Canvas.SetLeft(DockHint, Math.Clamp(target.X, 0, Scene.Width - 150));
+        Canvas.SetTop(DockHint, Math.Max(0, target.Y - 27));
+    }
+    internal void EndQuotaDrag(bool cancel)
+    {
+        if (!quotaDragging) return;
+        var anchor = PetScreenOrigin();
+        quotaDragging = dragged = quotaGesture = false;
+        if (Scene.IsMouseCaptured) Scene.ReleaseMouseCapture();
+        DockTarget.Visibility = DockHint.Visibility = Visibility.Collapsed;
+        Settings = Settings with { QuotaPosition = cancel ? originalDock : draftDock };
+        ApplyDockLayout(DockLayout.For(Settings.QuotaPosition), anchor, constrain: true);
+        SavePlacement();
+        if (Settings.Details == DetailsMode.Always) ShowDetails(true);
+        else PointerChanged(Scene.IsMouseOver);
+    }
+    private void OnDockCaptureLost(object sender, MouseEventArgs e)
+    {
+        if (quotaDragging && !Scene.IsMouseCaptured) EndQuotaDrag(cancel: true);
+    }
+    private void OnDockKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape && quotaDragging) { EndQuotaDrag(cancel: true); e.Handled = true; }
     }
 
     private void Blink()
@@ -360,6 +492,7 @@ public partial class MainWindow : Window
     public async Task StopAsync()
     {
         if (exiting) return;
+        if (quotaDragging) EndQuotaDrag(cancel: true);
         exiting = true;
         SavePlacement();
         countdown.Stop();

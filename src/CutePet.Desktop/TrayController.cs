@@ -29,11 +29,21 @@ internal sealed class TrayController : IDisposable
             details.DropDownItems.Add(item);
         }
         menu.Items.Add(details);
+        var position = new Forms.ToolStripMenuItem("额度条位置");
+        foreach (var dock in Enum.GetValues<QuotaDock>())
+        {
+            var item = new Forms.ToolStripMenuItem(DockLayout.Label(dock)) { Tag = dock };
+            item.Click += (_, _) => window.SetQuotaPosition(dock);
+            position.DropDownItems.Add(item);
+        }
+        menu.Items.Add(position);
         menu.Opening += (_, _) =>
         {
             window.BeginDetailsMenu();
             foreach (Forms.ToolStripMenuItem item in details.DropDownItems)
                 item.Checked = (DetailsMode)item.Tag! == window.Settings.Details;
+            foreach (Forms.ToolStripMenuItem item in position.DropDownItems)
+                item.Checked = (QuotaDock)item.Tag! == window.Settings.QuotaPosition;
         };
         menu.Closed += (_, _) => window.EndDetailsMenu();
         menu.Items.Add(new Forms.ToolStripSeparator());

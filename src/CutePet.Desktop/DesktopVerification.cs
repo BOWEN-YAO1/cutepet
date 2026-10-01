@@ -35,6 +35,9 @@ internal static class DesktopVerification
                 "existing settings default to hover details");
             Check(new Preferences(Details: (DetailsMode)99).Validated().Details == DetailsMode.Hover,
                 "invalid details mode recovers");
+            Check(store.Load().QuotaPosition == QuotaDock.Left
+                && new Preferences(QuotaPosition: (QuotaDock)99).Validated().QuotaPosition == QuotaDock.Left,
+                "legacy and invalid quota positions use left docking");
             Check(new Preferences(double.MaxValue, double.NaN, double.PositiveInfinity).Validated() == new Preferences(),
                 "invalid coordinates and scale recover");
             store.Save(new Preferences());
@@ -64,7 +67,7 @@ internal static class DesktopVerification
             Check(!window.DetailsVisible, "brief hover cancels pending open");
             window.PointerChanged(true);
             window.CompleteHoverOpen();
-            Check(window.DetailsVisible && window.Height == MainWindow.BaseHeight,
+            Check(window.DetailsVisible && window.Height == window.LayoutSize.Height,
                 "hover opens details without resizing character host");
             window.PointerChanged(false);
             Check(window.DetailsVisible, "leaving starts a grace period");
@@ -96,6 +99,50 @@ internal static class DesktopVerification
             window.SetDetailsMode(DetailsMode.Hover);
             window.PointerChanged(false);
             window.CompleteHoverClose();
+
+            foreach (var dock in Enum.GetValues<QuotaDock>())
+            {
+                window.SetQuotaPosition(dock);
+                var layout = DockLayout.For(dock);
+                var frame = new Rect(new Point(), layout.Size);
+                Check(store.Load().QuotaPosition == dock && frame.Contains(layout.Pet) && frame.Contains(layout.Quota),
+                    $"{dock} docking fits its host and persists");
+                Render(window, directory, "dock-" + dock.ToString().ToLowerInvariant(), 144);
+                window.BeginQuotaDrag(new Point(16, 16));
+                var workspace = DockLayout.DragWorkspace(dock);
+                var target = DockLayout.Target(dock, workspace.Pet.TopLeft);
+                // Position the grabbed card's center on the actual drop target center.
+                window.UpdateQuotaDrag(new Point(target.X + target.Width / 2 - window.QuotaCard.Width / 2 + 16,
+                    target.Y + target.Height / 2 - window.QuotaCard.Height / 2 + 16));
+                window.EndQuotaDrag(cancel: false);
+                Check(window.Settings.QuotaPosition == dock && window.Width == layout.Size.Width,
+                    $"{dock} drop returns to a compact saved layout");
+            }
+            window.SetQuotaPosition(QuotaDock.Bottom);
+            window.BeginQuotaDrag(new Point(16, 16));
+            var dragWorkspace = DockLayout.DragWorkspace(QuotaDock.Bottom);
+            var leftTarget = DockLayout.Target(QuotaDock.Left, dragWorkspace.Pet.TopLeft);
+            window.UpdateQuotaDrag(new Point(leftTarget.X + leftTarget.Width / 2 - window.QuotaCard.Width / 2 + 16,
+                leftTarget.Y + leftTarget.Height / 2 - window.QuotaCard.Height / 2 + 16));
+            Render(window, directory, "dock-drag-preview", 144);
+            window.PointerChanged(true);
+            window.CompleteHoverOpen();
+            Check(!window.DetailsVisible && store.Load().QuotaPosition == QuotaDock.Bottom,
+                "dragging suspends details and does not save a preview");
+            window.EndQuotaDrag(cancel: true);
+            Check(window.Settings.QuotaPosition == QuotaDock.Bottom && window.LayoutSize == DockLayout.For(QuotaDock.Bottom).Size,
+                "cancelled drag restores the previous docking layout");
+            window.BeginQuotaDrag(new Point(16, 16));
+            window.UpdateQuotaDrag(new Point(leftTarget.X + leftTarget.Width / 2 - window.QuotaCard.Width / 2 + 16,
+                leftTarget.Y + leftTarget.Height / 2 - window.QuotaCard.Height / 2 + 16));
+            window.EndQuotaDrag(cancel: false);
+            Check(window.Settings.QuotaPosition == QuotaDock.Left && store.Load().QuotaPosition == QuotaDock.Left,
+                "dragging from bottom to left commits the selected side");
+            var dockRestored = new MainWindow(store, verification: true);
+            Check(dockRestored.Settings.QuotaPosition == QuotaDock.Left && dockRestored.Width == window.Width,
+                "docking preference restores in a new host");
+            await dockRestored.StopAsync();
+            dockRestored.Close();
             window.Model.Apply(Snapshot(8, 0, expired: true), demo: true);
             Check(window.Model.IsLow && window.Model.Windows.Last().RemainingText == "0%", "low and exhausted quota");
             Check(window.Model.Windows.All(w => w.ResetText == "等待官方额度更新"), "expired reset does not invent restored quota");
@@ -110,7 +157,7 @@ internal static class DesktopVerification
             Check(!window.Model.HasData && window.Model.Windows.Single().RemainingText == "—",
                 "account changes clear quota");
             window.SetScale(1.2);
-            Check(Math.Abs(window.Width - MainWindow.BaseWidth * 1.2) < 0.1 && store.Load().Scale == 1.2,
+            Check(Math.Abs(window.Width - window.LayoutSize.Width * 1.2) < 0.1 && store.Load().Scale == 1.2,
                 "scale applies and persists");
             window.ToggleTopmost();
             Check(!window.Topmost && !store.Load().AlwaysOnTop, "topmost toggle persists");

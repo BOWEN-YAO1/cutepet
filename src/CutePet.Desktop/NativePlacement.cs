@@ -49,6 +49,13 @@ internal static class NativePlacement
         return (long)Math.Max(overlap.Width, 0) * Math.Max(overlap.Height, 0);
     }
 
+    public static void MoveUnclamped(Window window, double left, double top)
+    {
+        var handle = new WindowInteropHelper(window).Handle;
+        if (handle != IntPtr.Zero)
+            SetWindowPos(handle, IntPtr.Zero, (int)Math.Round(left), (int)Math.Round(top), 0, 0, 0x0001 | 0x0004 | 0x0010);
+    }
+
     public static void SetPopupTopmost(FrameworkElement content, bool topmost)
     {
         if (PresentationSource.FromVisual(content) is HwndSource source)

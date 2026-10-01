@@ -5,9 +5,11 @@ using System.Text.Json;
 namespace CutePet.Desktop;
 
 public enum DetailsMode { Hover, Always, Hidden }
+public enum QuotaDock { Bottom, Top, Left, Right }
 
 public sealed record Preferences(double? Left = null, double? Top = null, double Scale = 1,
-    bool AlwaysOnTop = true, string? CodexPath = null, DetailsMode Details = DetailsMode.Hover)
+    bool AlwaysOnTop = true, string? CodexPath = null, DetailsMode Details = DetailsMode.Hover,
+    QuotaDock QuotaPosition = QuotaDock.Left)
 {
     public Preferences Validated() => this with
     {
@@ -15,7 +17,8 @@ public sealed record Preferences(double? Left = null, double? Top = null, double
         Top = Top is double y && double.IsFinite(y) && Math.Abs(y) < 1_000_000 ? y : null,
         Scale = double.IsFinite(Scale) ? Math.Clamp(Scale, 0.8, 1.4) : 1,
         CodexPath = string.IsNullOrWhiteSpace(CodexPath) ? null : CodexPath,
-        Details = Enum.IsDefined(Details) ? Details : DetailsMode.Hover
+        Details = Enum.IsDefined(Details) ? Details : DetailsMode.Hover,
+        QuotaPosition = Enum.IsDefined(QuotaPosition) ? QuotaPosition : QuotaDock.Left
     };
 }
 
