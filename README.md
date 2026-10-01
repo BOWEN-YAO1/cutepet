@@ -2,7 +2,26 @@
 
 一个计划面向 Windows 的桌面宠物，用角色动画和小面板显示 Codex 剩余额度与重置时间，并在使用后自动同步官方数据。
 
-> 当前处于开发规划阶段，尚未提供可运行程序。下列功能为目标，不代表已经实现。
+> 已实现第一阶段的独立额度读取模块和命令行验证原型，桌宠窗口与动画尚未实现。
+
+## 额度读取原型
+
+需要 .NET 8 SDK（开发）和兼容的原生 Codex CLI。本机已验证 `codex-cli 0.159.2`。程序复用官方 CLI 的已有 ChatGPT 登录，只查询账号状态与额度，不运行模型任务，不复制凭据。
+
+```powershell
+dotnet build CutePet.sln
+dotnet run --project src/CutePet.QuotaProbe --no-build
+```
+
+持续观察并输出脱敏 JSON：
+
+```powershell
+dotnet run --project src/CutePet.QuotaProbe --no-build -- --watch --json
+```
+
+CLI 不在 PATH 时，添加 `--codex "完整路径\codex.exe"`。当前 Windows 原型不支持 `.cmd` / `.ps1` 启动器。未登录时先执行官方 `codex login`；程序不会自动打开登录或注销已有账号。
+
+详见 [额度模块接入说明](docs/quota-reader.md) 和 [接入验证记录](docs/codex-integration-validation.md)。验证记录区分真实账号测试、模拟协议测试和待验证项。
 
 ## 计划功能
 
@@ -12,7 +31,7 @@
 - 基础动画、点击回应和低额度表情。
 - 通过 GitHub Releases 提供 Windows 便携包。
 
-“自动扣除”指同步官方扣除后的结果，不自行估算或修改账号额度。独立读取、认证及跨客户端同步将在第一阶段验证。
+“自动扣除”指同步官方扣除后的结果，不自行估算或修改账号额度。独立读取和本机正常使用后的同步已验证；其他设备的推送、重置和真实账号切换仍待验证。
 
 ## 开发文档
 

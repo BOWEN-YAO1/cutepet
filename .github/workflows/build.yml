@@ -1,0 +1,16 @@
+name: Build and protocol tests
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet build CutePet.sln -c Release
+      - run: dotnet run --project tests/CutePet.Tests -c Release --no-build
