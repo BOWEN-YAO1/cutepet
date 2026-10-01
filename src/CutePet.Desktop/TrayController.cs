@@ -37,6 +37,14 @@ internal sealed class TrayController : IDisposable
             position.DropDownItems.Add(item);
         }
         menu.Items.Add(position);
+        var characters = new Forms.ToolStripMenuItem("角色选择");
+        foreach (var character in Enum.GetValues<PetCharacter>())
+        {
+            var item = new Forms.ToolStripMenuItem(CharacterCatalog.Label(character)) { Tag = character };
+            item.Click += (_, _) => window.SetCharacter(character);
+            characters.DropDownItems.Add(item);
+        }
+        menu.Items.Add(characters);
         menu.Opening += (_, _) =>
         {
             window.BeginDetailsMenu();
@@ -44,6 +52,8 @@ internal sealed class TrayController : IDisposable
                 item.Checked = (DetailsMode)item.Tag! == window.Settings.Details;
             foreach (Forms.ToolStripMenuItem item in position.DropDownItems)
                 item.Checked = (QuotaDock)item.Tag! == window.Settings.QuotaPosition;
+            foreach (Forms.ToolStripMenuItem item in characters.DropDownItems)
+                item.Checked = (PetCharacter)item.Tag! == window.Settings.Character;
         };
         menu.Closed += (_, _) => window.EndDetailsMenu();
         menu.Items.Add(new Forms.ToolStripSeparator());

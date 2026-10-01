@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
@@ -48,6 +49,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = Model;
         DetailsViewport.DataContext = Model;
+        ApplyCharacter();
         SetScale(Settings.Scale, save: false);
         Topmost = Settings.AlwaysOnTop;
         countdown.Tick += (_, _) => Model.Tick();
@@ -101,6 +103,26 @@ public partial class MainWindow : Window
     }
 
     public void RefreshQuota() => session?.Refresh();
+
+    public void SetCharacter(PetCharacter character)
+    {
+        if (quotaDragging) EndQuotaDrag(cancel: true);
+        Settings = (Settings with { Character = character }).Validated();
+        ApplyCharacter();
+        SavePlacement();
+    }
+
+    private void ApplyCharacter()
+    {
+        var tianyi = Settings.Character == PetCharacter.Tianyi;
+        CatArt.Visibility = tianyi ? Visibility.Collapsed : Visibility.Visible;
+        TianyiArt.Visibility = tianyi ? Visibility.Visible : Visibility.Collapsed;
+        if (tianyi) TianyiArt.Source = CharacterCatalog.Tianyi;
+        LeftEye.BeginAnimation(HeightProperty, null);
+        RightEye.BeginAnimation(HeightProperty, null);
+        PetStage.ToolTip = CharacterCatalog.Label(Settings.Character);
+        AutomationProperties.SetName(PetStage, CharacterCatalog.Label(Settings.Character));
+    }
 
     public void SetScale(double value, bool save = true)
     {
@@ -226,6 +248,14 @@ public partial class MainWindow : Window
             size.Items.Add(item);
         }
         menu.Items.Add(size);
+        var characters = new MenuItem { Header = "角色选择" };
+        foreach (var character in Enum.GetValues<PetCharacter>())
+        {
+            var item = new MenuItem { Header = CharacterCatalog.Label(character), IsCheckable = true, Tag = character };
+            item.Click += (_, _) => SetCharacter(character);
+            characters.Items.Add(item);
+        }
+        menu.Items.Add(characters);
         var position = new MenuItem { Header = "额度条位置" };
         foreach (var dock in Enum.GetValues<QuotaDock>())
         {
@@ -256,6 +286,7 @@ public partial class MainWindow : Window
                 item.IsChecked = Math.Abs(Settings.Scale - new[] { 0.8, 1.0, 1.2, 1.4 }[index++]) < 0.01;
             foreach (MenuItem item in details.Items) item.IsChecked = (DetailsMode)item.Tag == Settings.Details;
             foreach (MenuItem item in position.Items) item.IsChecked = (QuotaDock)item.Tag == Settings.QuotaPosition;
+            foreach (MenuItem item in characters.Items) item.IsChecked = (PetCharacter)item.Tag == Settings.Character;
         };
         menu.Closed += (_, _) => EndDetailsMenu();
         return menu;
@@ -457,7 +488,7 @@ public partial class MainWindow : Window
 
     private void Blink()
     {
-        if (!IsVisible || verification) return;
+        if (!IsVisible || verification || Settings.Character != PetCharacter.Cat) return;
         var animation = new DoubleAnimationUsingKeyFrames { Duration = TimeSpan.FromSeconds(0.2), FillBehavior = FillBehavior.Stop };
         animation.KeyFrames.Add(new DiscreteDoubleKeyFrame(13, KeyTime.FromTimeSpan(TimeSpan.Zero)));
         animation.KeyFrames.Add(new DiscreteDoubleKeyFrame(1, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0.06))));

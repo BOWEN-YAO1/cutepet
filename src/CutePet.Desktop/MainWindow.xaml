@@ -12,7 +12,7 @@
         <Ellipse Fill="#2029443B" Width="108" Height="13" VerticalAlignment="Bottom" Margin="0,0,0,1" />
         <Grid x:Name="PetArt" RenderTransformOrigin="0.5,0.85" Margin="0,16,0,14">
           <Grid.RenderTransform><TranslateTransform x:Name="Bob" /></Grid.RenderTransform>
-          <Viewbox Width="166" Height="148" VerticalAlignment="Bottom">
+          <Viewbox x:Name="CatArt" Width="166" Height="148" VerticalAlignment="Bottom">
             <Canvas Width="180" Height="160">
               <Path Fill="#A9CDBB" Stroke="#3D6858" StrokeThickness="3" StrokeLineJoin="Round"
                     Data="M 54,95 C 15,80 10,116 42,124 C 32,142 56,155 92,150 C 133,155 159,142 146,121 C 167,96 146,79 128,95 Z" />
@@ -31,6 +31,8 @@
               <Path Fill="#FFF9ED" Stroke="#3D6858" StrokeThickness="2.5" Data="M 57,129 Q 44,136 56,145 L 68,145 Q 76,137 66,130 Z M 119,129 Q 105,137 117,145 L 129,145 Q 137,137 127,130 Z" />
             </Canvas>
           </Viewbox>
+          <Image x:Name="TianyiArt" Width="178" Height="148" Stretch="Uniform" VerticalAlignment="Bottom"
+                 Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality" />
         </Grid>
         <Border x:Name="SpeechBubble" Background="#FFF9ED" CornerRadius="10" BorderBrush="#D8E5DB" BorderThickness="1"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-26,4,0,0" Padding="10,6" MaxWidth="110"

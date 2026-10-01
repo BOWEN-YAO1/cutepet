@@ -38,6 +38,9 @@ internal static class DesktopVerification
             Check(store.Load().QuotaPosition == QuotaDock.Left
                 && new Preferences(QuotaPosition: (QuotaDock)99).Validated().QuotaPosition == QuotaDock.Left,
                 "legacy and invalid quota positions use left docking");
+            Check(store.Load().Character == PetCharacter.Cat
+                && new Preferences(Character: (PetCharacter)99).Validated().Character == PetCharacter.Cat,
+                "legacy and invalid character preferences retain the cat");
             Check(new Preferences(double.MaxValue, double.NaN, double.PositiveInfinity).Validated() == new Preferences(),
                 "invalid coordinates and scale recover");
             store.Save(new Preferences());
@@ -143,6 +146,46 @@ internal static class DesktopVerification
                 "docking preference restores in a new host");
             await dockRestored.StopAsync();
             dockRestored.Close();
+            var previousSettings = window.Settings;
+            var previousWidth = window.Width;
+            var previousRemaining = window.Model.Windows.First().RemainingText;
+            window.SetCharacter(PetCharacter.Tianyi);
+            Check(window.TianyiArt.Visibility == Visibility.Visible && window.CatArt.Visibility == Visibility.Collapsed
+                && window.TianyiArt.Source == CharacterCatalog.Tianyi && CharacterCatalog.Tianyi.IsFrozen,
+                "character selection displays the cached embedded Tianyi sprite");
+            Check(window.Settings == previousSettings with { Character = PetCharacter.Tianyi }
+                && window.Width == previousWidth && window.Model.Windows.First().RemainingText == previousRemaining,
+                "character switching preserves placement, display preferences and quota");
+            var sprite = new FormatConvertedBitmap(CharacterCatalog.Tianyi, PixelFormats.Bgra32, null, 0);
+            var pixels = new byte[sprite.PixelWidth * sprite.PixelHeight * 4];
+            sprite.CopyPixels(pixels, sprite.PixelWidth * 4, 0);
+            var transparent = false;
+            var opaque = false;
+            for (var i = 3; i < pixels.Length; i += 4)
+            {
+                transparent |= pixels[i] == 0;
+                opaque |= pixels[i] == 255;
+            }
+            Check(transparent && opaque, "Tianyi sprite contains transparent background and visible artwork");
+            var characterRestored = new MainWindow(store, verification: true);
+            Check(characterRestored.Settings.Character == PetCharacter.Tianyi
+                && characterRestored.TianyiArt.Visibility == Visibility.Visible,
+                "selected character restores in a new host");
+            await characterRestored.StopAsync();
+            characterRestored.Close();
+            foreach (var dock in Enum.GetValues<QuotaDock>())
+            {
+                window.SetQuotaPosition(dock);
+                Render(window, directory, "tianyi-" + dock.ToString().ToLowerInvariant(), 144);
+            }
+            window.SetQuotaPosition(QuotaDock.Left);
+            window.SetScale(1.4);
+            Render(window, directory, "tianyi-140-percent", 192);
+            window.SetScale(1);
+            window.SetCharacter(PetCharacter.Cat);
+            Check(window.CatArt.Visibility == Visibility.Visible && window.TianyiArt.Visibility == Visibility.Collapsed
+                && store.Load().Character == PetCharacter.Cat && window.Width == previousWidth,
+                "switching back restores the original cat and persists selection");
             window.Model.Apply(Snapshot(8, 0, expired: true), demo: true);
             Check(window.Model.IsLow && window.Model.Windows.Last().RemainingText == "0%", "low and exhausted quota");
             Check(window.Model.Windows.All(w => w.ResetText == "等待官方额度更新"), "expired reset does not invent restored quota");

@@ -9,7 +9,7 @@ public enum QuotaDock { Bottom, Top, Left, Right }
 
 public sealed record Preferences(double? Left = null, double? Top = null, double Scale = 1,
     bool AlwaysOnTop = true, string? CodexPath = null, DetailsMode Details = DetailsMode.Hover,
-    QuotaDock QuotaPosition = QuotaDock.Left)
+    QuotaDock QuotaPosition = QuotaDock.Left, PetCharacter Character = PetCharacter.Cat)
 {
     public Preferences Validated() => this with
     {
@@ -18,7 +18,8 @@ public sealed record Preferences(double? Left = null, double? Top = null, double
         Scale = double.IsFinite(Scale) ? Math.Clamp(Scale, 0.8, 1.4) : 1,
         CodexPath = string.IsNullOrWhiteSpace(CodexPath) ? null : CodexPath,
         Details = Enum.IsDefined(Details) ? Details : DetailsMode.Hover,
-        QuotaPosition = Enum.IsDefined(QuotaPosition) ? QuotaPosition : QuotaDock.Left
+        QuotaPosition = Enum.IsDefined(QuotaPosition) ? QuotaPosition : QuotaDock.Left,
+        Character = Enum.IsDefined(Character) ? Character : PetCharacter.Cat
     };
 }
 
