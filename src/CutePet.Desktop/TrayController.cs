@@ -21,6 +21,21 @@ internal sealed class TrayController : IDisposable
         Add("刷新额度", window.RefreshQuota);
         var pin = Add("始终置顶", window.ToggleTopmost);
         menu.Opening += (_, _) => pin.Checked = window.Topmost;
+        var details = new Forms.ToolStripMenuItem("详情显示");
+        foreach (var (mode, label) in new[] { (DetailsMode.Hover, "悬停显示"), (DetailsMode.Always, "固定显示"), (DetailsMode.Hidden, "隐藏详情") })
+        {
+            var item = new Forms.ToolStripMenuItem(label) { Tag = mode };
+            item.Click += (_, _) => window.SetDetailsMode(mode);
+            details.DropDownItems.Add(item);
+        }
+        menu.Items.Add(details);
+        menu.Opening += (_, _) =>
+        {
+            window.BeginDetailsMenu();
+            foreach (Forms.ToolStripMenuItem item in details.DropDownItems)
+                item.Checked = (DetailsMode)item.Tag! == window.Settings.Details;
+        };
+        menu.Closed += (_, _) => window.EndDetailsMenu();
         menu.Items.Add(new Forms.ToolStripSeparator());
         Add("移回屏幕右下角", window.ResetPosition);
         Add("退出 CutePet", exit);

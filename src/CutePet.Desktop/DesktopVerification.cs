@@ -30,21 +30,72 @@ internal static class DesktopVerification
             Check(store.Load() == new Preferences(32, 48, 1.2, false), "settings round trip");
             File.WriteAllText(Path.Combine(settingsDirectory, "settings.json"), "broken json");
             Check(store.Load() == new Preferences(), "corrupt settings recover");
+            File.WriteAllText(Path.Combine(settingsDirectory, "settings.json"), "{\"Scale\":1.2,\"AlwaysOnTop\":false}");
+            Check(store.Load().Details == DetailsMode.Hover && store.Load().Scale == 1.2,
+                "existing settings default to hover details");
+            Check(new Preferences(Details: (DetailsMode)99).Validated().Details == DetailsMode.Hover,
+                "invalid details mode recovers");
             Check(new Preferences(double.MaxValue, double.NaN, double.PositiveInfinity).Validated() == new Preferences(),
                 "invalid coordinates and scale recover");
             store.Save(new Preferences());
             window = new MainWindow(store, verification: true);
             Check(window.AllowsTransparency && window.WindowStyle == WindowStyle.None && !window.ShowInTaskbar,
                 "transparent borderless desktop host");
+            Check(!window.DetailsVisible && window.Width * window.Height < 348 * 440 / 2,
+                "default compact host uses less than half the previous area");
             Check(window.Model.Windows.Single().RemainingText == "—", "unknown quota stays unknown");
             Render(window, directory, "unknown", 96);
 
             window.Model.Apply(Snapshot(72, 48), demo: true);
             Check(window.Model.Windows.Count == 2 && !window.Model.IsLow && !window.Model.IsStale,
                 "two quota windows display");
+            Check(window.Model.CompactWindows.Count() == 2 && !window.Model.ShowCharacterMessage,
+                "normal compact display keeps quota and hides idle speech");
             Render(window, directory, "normal", 96);
             Render(window, directory, "normal-150dpi", 144);
             Render(window, directory, "normal-200dpi", 192);
+            Render(window, directory, "details", 96, details: true);
+            Render(window, directory, "details-150dpi", 144, details: true);
+
+            window.PointerChanged(true);
+            Check(!window.DetailsVisible, "hover waits before opening");
+            window.PointerChanged(false);
+            window.CompleteHoverOpen();
+            Check(!window.DetailsVisible, "brief hover cancels pending open");
+            window.PointerChanged(true);
+            window.CompleteHoverOpen();
+            Check(window.DetailsVisible && window.Height == MainWindow.BaseHeight,
+                "hover opens details without resizing character host");
+            window.PointerChanged(false);
+            Check(window.DetailsVisible, "leaving starts a grace period");
+            window.PointerChanged(true);
+            window.CompleteHoverClose();
+            Check(window.DetailsVisible, "entering details cancels pending close");
+            window.BeginDetailsMenu();
+            window.PointerChanged(false);
+            window.CompleteHoverClose();
+            Check(window.DetailsVisible, "details stay open during menu interaction");
+            window.EndDetailsMenu();
+            window.CompleteHoverClose();
+            Check(!window.DetailsVisible, "details close after leaving both surfaces");
+            window.SetDetailsMode(DetailsMode.Always);
+            window.PointerChanged(false);
+            window.CompleteHoverClose();
+            Check(window.DetailsVisible && store.Load().Details == DetailsMode.Always,
+                "pinned details survive pointer leave and persist");
+            var restored = new MainWindow(store, verification: true);
+            Check(restored.DetailsVisible && restored.Settings.Details == DetailsMode.Always,
+                "pinned preference restores in a new host");
+            await restored.StopAsync();
+            restored.Close();
+            window.SetDetailsMode(DetailsMode.Hidden);
+            window.PointerChanged(true);
+            window.CompleteHoverOpen();
+            Check(!window.DetailsVisible && store.Load().Details == DetailsMode.Hidden,
+                "hidden details ignore hover and persist");
+            window.SetDetailsMode(DetailsMode.Hover);
+            window.PointerChanged(false);
+            window.CompleteHoverClose();
             window.Model.Apply(Snapshot(8, 0, expired: true), demo: true);
             Check(window.Model.IsLow && window.Model.Windows.Last().RemainingText == "0%", "low and exhausted quota");
             Check(window.Model.Windows.All(w => w.ResetText == "等待官方额度更新"), "expired reset does not invent restored quota");
@@ -52,6 +103,8 @@ internal static class DesktopVerification
             window.Model.Failure("读取超时 · 稍后重试", clear: false);
             Check(window.Model.IsStale && window.Model.HasData && window.Model.Windows.First().RemainingText == "8%",
                 "transient failure marks retained quota stale");
+            Check(window.Model.CompactStatus == "上次数据" && window.Model.ShowCharacterMessage,
+                "compact display keeps stale-data warning visible");
             Render(window, directory, "stale", 96);
             window.Model.Failure("账号发生变化", clear: true);
             Check(!window.Model.HasData && window.Model.Windows.Single().RemainingText == "—",
@@ -118,14 +171,16 @@ internal static class DesktopVerification
                 new QuotaWindow("secondary", 100 - secondary, secondary, 10080, expired ? now.AddSeconds(-1) : now.AddDays(4)) }) });
     }
 
-    private static void Render(MainWindow window, string directory, string name, double dpi)
+    private static void Render(MainWindow window, string directory, string name, double dpi, bool details = false)
     {
-        var visual = (FrameworkElement)window.Content;
-        visual.Measure(new Size(window.Width, window.Height));
-        visual.Arrange(new Rect(0, 0, window.Width, window.Height));
+        var visual = details ? window.DetailsViewport : (FrameworkElement)window.Content;
+        var width = details ? window.DetailsViewport.Width : window.Width;
+        var height = details ? window.DetailsViewport.Height : window.Height;
+        visual.Measure(new Size(width, height));
+        visual.Arrange(new Rect(0, 0, width, height));
         visual.UpdateLayout();
-        var bitmap = new RenderTargetBitmap((int)Math.Ceiling(window.Width * dpi / 96),
-            (int)Math.Ceiling(window.Height * dpi / 96), dpi, dpi, PixelFormats.Pbgra32);
+        var bitmap = new RenderTargetBitmap((int)Math.Ceiling(width * dpi / 96),
+            (int)Math.Ceiling(height * dpi / 96), dpi, dpi, PixelFormats.Pbgra32);
         bitmap.Render(visual);
         var encoder = new PngBitmapEncoder();
         encoder.Frames.Add(BitmapFrame.Create(bitmap));

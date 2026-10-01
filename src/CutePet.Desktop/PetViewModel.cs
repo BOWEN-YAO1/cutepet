@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -12,6 +13,8 @@ public sealed record WindowRow(string Label, string RemainingText, double Progre
     double Opacity, Brush Accent, DateTimeOffset? ResetsAtUtc) : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
+    public string ShortLabel => Label.Replace(" 小时额度", "h").Replace("每周额度", "周")
+        .Replace(" 分钟额度", "m").Replace("额度窗口", "额度");
     public string ResetText => ResetsAtUtc is not DateTimeOffset reset ? "重置时间暂无数据"
         : reset <= DateTimeOffset.UtcNow ? "等待官方额度更新"
         : (reset - DateTimeOffset.UtcNow).TotalDays >= 1
@@ -24,6 +27,8 @@ public sealed class PetViewModel : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public ObservableCollection<WindowRow> Windows { get; } = new();
+    public IEnumerable<WindowRow> CompactWindows => Windows.Take(2);
+    public string MoreWindowsText => Windows.Count > 2 ? $" +{Windows.Count - 2}" : "";
     private string statusText = "正在连接 Codex…";
     private string footerText = "拖动角色移动 · 右键更多";
     private Brush statusBrush = Brushes.DarkSeaGreen;
@@ -32,17 +37,29 @@ public sealed class PetViewModel : INotifyPropertyChanged
     public bool HasData { get; private set; }
     public bool IsStale { get; private set; }
     public bool IsLow { get; private set; }
-    public string StatusText { get => statusText; private set { statusText = value; Changed(); } }
+    public string StatusText { get => statusText; private set { statusText = value; Changed(); Changed(nameof(CompactStatus)); } }
+    public string CompactStatus => StatusText switch
+    {
+        "已同步官方额度" => "已同步",
+        "演示数据 · 用于界面验证" => "演示数据",
+        "官方提示：当前使用受限" => "使用受限",
+        "未同步 · 当前为上次数据" => "上次数据",
+        "暂未取得额度" => "未连接",
+        "正在刷新 · 当前为上次数据" => "刷新中 · 上次数据",
+        _ => "连接中"
+    };
     public string FooterText { get => footerText; private set { footerText = value; Changed(); } }
     public Brush StatusBrush { get => statusBrush; private set { statusBrush = value; Changed(); } }
     public bool CanRefresh { get => canRefresh; set { canRefresh = value; Changed(); } }
-    public string CharacterMessage { get => characterMessage; set { characterMessage = value; Changed(); } }
+    public string CharacterMessage { get => characterMessage; set { characterMessage = value; Changed(); Changed(nameof(ShowCharacterMessage)); } }
+    public bool ShowCharacterMessage => IsStale || IsLow || CharacterMessage != "我来帮你看额度";
 
     public PetViewModel() => ShowUnknown();
     private void ShowUnknown()
     {
         Windows.Clear();
         Windows.Add(new("额度窗口", "—", 0, 0.4, Brush("#91A397"), null));
+        CompactChanged();
     }
 
     public void Loading()
@@ -67,6 +84,7 @@ public sealed class PetViewModel : INotifyPropertyChanged
                 Brush(window.RemainingPercent < 20 ? "#C18651" : "#568B70"), window.ResetsAtUtc));
         }
         if (Windows.Count == 0) ShowUnknown();
+        CompactChanged();
         HasData = true;
         IsStale = false;
         IsLow = snapshot.Buckets.SelectMany(b => b.Windows).Any(w => w.RemainingPercent < 20);
@@ -90,6 +108,7 @@ public sealed class PetViewModel : INotifyPropertyChanged
 
     public void RestoreCharacterMessage() => CharacterMessage = IsStale ? "等连接恢复再看哦" : IsLow ? "额度快用完啦" : "我来帮你看额度";
     public void Tick() { foreach (var window in Windows) window.Tick(); }
+    private void CompactChanged() { Changed(nameof(CompactWindows)); Changed(nameof(MoreWindowsText)); }
     private static Brush Brush(string value) => new SolidColorBrush((Color)ColorConverter.ConvertFromString(value));
     private void Changed([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new(name));
 }

@@ -48,4 +48,10 @@ internal static class NativePlacement
         var overlap = System.Drawing.Rectangle.Intersect(a, b);
         return (long)Math.Max(overlap.Width, 0) * Math.Max(overlap.Height, 0);
     }
+
+    public static void SetPopupTopmost(FrameworkElement content, bool topmost)
+    {
+        if (PresentationSource.FromVisual(content) is HwndSource source)
+            SetWindowPos(source.Handle, new IntPtr(topmost ? -1 : -2), 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010);
+    }
 }

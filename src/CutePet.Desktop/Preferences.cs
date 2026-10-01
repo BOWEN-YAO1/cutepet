@@ -4,15 +4,18 @@ using System.Text.Json;
 
 namespace CutePet.Desktop;
 
+public enum DetailsMode { Hover, Always, Hidden }
+
 public sealed record Preferences(double? Left = null, double? Top = null, double Scale = 1,
-    bool AlwaysOnTop = true, string? CodexPath = null)
+    bool AlwaysOnTop = true, string? CodexPath = null, DetailsMode Details = DetailsMode.Hover)
 {
     public Preferences Validated() => this with
     {
         Left = Left is double x && double.IsFinite(x) && Math.Abs(x) < 1_000_000 ? x : null,
         Top = Top is double y && double.IsFinite(y) && Math.Abs(y) < 1_000_000 ? y : null,
         Scale = double.IsFinite(Scale) ? Math.Clamp(Scale, 0.8, 1.4) : 1,
-        CodexPath = string.IsNullOrWhiteSpace(CodexPath) ? null : CodexPath
+        CodexPath = string.IsNullOrWhiteSpace(CodexPath) ? null : CodexPath,
+        Details = Enum.IsDefined(Details) ? Details : DetailsMode.Hover
     };
 }
 

@@ -3,7 +3,7 @@
 版本：0.1（开发基线草案）  
 日期：2026-10-01  
 仓库：[BOWEN-YAO1/cutepet](https://github.com/BOWEN-YAO1/cutepet)  
-状态：已实现独立额度读取和第一版桌宠窗口；核心接入、协议与界面状态检查通过，完整桌面人工验收及正式角色尚待完成。见 [接入记录](codex-integration-validation.md) 和 [窗口说明](desktop-shell.md)。
+状态：已实现独立额度读取与桌宠窗口，默认紧凑额度条、悬停详情及详情开关；核心接入、协议与界面状态检查通过。用户反馈 0.2.0 五项基础功能正常；0.3.0 新交互人工验收及正式角色尚待完成。见 [接入记录](codex-integration-validation.md) 和 [窗口说明](desktop-shell.md)。
 
 ## 1. 项目目标
 
