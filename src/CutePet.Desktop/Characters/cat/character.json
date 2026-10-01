@@ -1,0 +1,69 @@
+{
+  "formatVersion": 1,
+  "id": "cat",
+  "name": "小猫",
+  "author": "CutePet contributors",
+  "license": "GNU GPL v3；原项目矢量小猫导出为透明帧。",
+  "displayWidth": 166,
+  "displayHeight": 148,
+  "float": true,
+  "blinkIntervalMs": 4000,
+  "actions": {
+    "idle": {
+      "loop": true,
+      "frames": [
+        {
+          "image": "idle.png",
+          "durationMs": 1000
+        }
+      ]
+    },
+    "blink": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "blink.png",
+          "durationMs": 160
+        }
+      ]
+    },
+    "greeting": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "greeting.png",
+          "durationMs": 180
+        },
+        {
+          "image": "idle.png",
+          "durationMs": 180
+        },
+        {
+          "image": "greeting.png",
+          "durationMs": 180
+        },
+        {
+          "image": "idle.png",
+          "durationMs": 180
+        },
+        {
+          "image": "greeting.png",
+          "durationMs": 180
+        },
+        {
+          "image": "idle.png",
+          "durationMs": 180
+        }
+      ]
+    },
+    "low": {
+      "loop": true,
+      "frames": [
+        {
+          "image": "low.png",
+          "durationMs": 1000
+        }
+      ]
+    }
+  }
+}

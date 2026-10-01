@@ -40,13 +40,8 @@ internal sealed class TrayController : IDisposable
         }
         menu.Items.Add(position);
         var characters = new Forms.ToolStripMenuItem("角色选择");
-        foreach (var character in Enum.GetValues<PetCharacter>())
-        {
-            var item = new Forms.ToolStripMenuItem(CharacterCatalog.Label(character)) { Tag = character };
-            item.Click += (_, _) => window.SetCharacter(character);
-            characters.DropDownItems.Add(item);
-        }
         menu.Items.Add(characters);
+        Add("管理 / 导入角色…", window.ManageCharacters);
         var characterSize = AddSizeMenu("角色大小", window.SetCharacterScale);
         var quotaSize = AddSizeMenu("额度数字大小", window.SetQuotaScale);
         menu.Opening += (_, _) =>
@@ -59,8 +54,14 @@ internal sealed class TrayController : IDisposable
                 item.Checked = (DetailsMode)item.Tag! == window.Settings.Details;
             foreach (Forms.ToolStripMenuItem item in position.DropDownItems)
                 item.Checked = (QuotaDock)item.Tag! == window.Settings.QuotaPosition;
-            foreach (Forms.ToolStripMenuItem item in characters.DropDownItems)
-                item.Checked = (PetCharacter)item.Tag! == window.Settings.Character;
+            while (characters.DropDownItems.Count > 0)
+            { var old = characters.DropDownItems[0]; characters.DropDownItems.RemoveAt(0); old.Dispose(); }
+            foreach (var pack in window.Characters.Packs)
+            {
+                var item = new Forms.ToolStripMenuItem(pack.Name) { Checked = pack.Id == window.SelectedCharacter.Id };
+                item.Click += (_, _) => window.SetCharacterPackage(pack.Id);
+                characters.DropDownItems.Add(item);
+            }
             foreach (Forms.ToolStripMenuItem item in characterSize.DropDownItems)
                 item.Checked = Math.Abs(window.Settings.EffectiveCharacterScale - (double)item.Tag!) < 0.01;
             foreach (Forms.ToolStripMenuItem item in quotaSize.DropDownItems)

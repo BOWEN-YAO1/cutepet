@@ -55,6 +55,7 @@ internal static class DesktopVerification
                 "invalid coordinates and scale recover");
             store.Save(new Preferences());
             window = new MainWindow(store, verification: true);
+            CharacterPackVerification.Run(directory, Check);
             Check(window.AllowsTransparency && window.WindowStyle == WindowStyle.None && !window.ShowInTaskbar,
                 "transparent borderless desktop host");
             Check(!window.DetailsVisible && window.Width * window.Height < 348 * 440 / 2,
@@ -235,15 +236,16 @@ internal static class DesktopVerification
             var previousWidth = window.Width;
             var previousRemaining = window.Model.Windows.First().RemainingText;
             window.SetCharacter(PetCharacter.Tianyi);
-            Check(window.TianyiArt.Visibility == Visibility.Visible && window.CatArt.Visibility == Visibility.Collapsed
-                && window.TianyiArt.Source == CharacterCatalog.Tianyi && CharacterCatalog.Tianyi.IsFrozen,
+            Check(window.SelectedCharacter.Id == "tianyi" && window.CharacterArt.Visibility == Visibility.Visible
+                && window.CharacterArt.Source == window.SelectedCharacter.Idle.Frames[0].Image
+                && window.SelectedCharacter.Idle.Frames[0].Image.IsFrozen,
                 "character selection displays the cached embedded Tianyi sprite");
-            Check(window.Settings == previousSettings with { Character = PetCharacter.Tianyi }
+            Check(window.Settings == previousSettings with { Character = PetCharacter.Tianyi, CharacterPackId = "tianyi" }
                 && window.Width == previousWidth && window.Model.Windows.First().RemainingText == previousRemaining,
                 "character switching preserves placement, display preferences and quota");
-            foreach (var frame in Enum.GetValues<CharacterFrame>())
+            foreach (var (frame, clip) in window.SelectedCharacter.Actions)
             {
-                var image = CharacterCatalog.Frame(frame);
+                var image = clip.Frames[0].Image;
                 var frameBitmap = new FormatConvertedBitmap(image, PixelFormats.Bgra32, null, 0);
                 var framePixels = new byte[image.PixelWidth * image.PixelHeight * 4];
                 frameBitmap.CopyPixels(framePixels, image.PixelWidth * 4, 0);
@@ -251,13 +253,13 @@ internal static class DesktopVerification
                 var visibleFrame = false;
                 for (var pixel = 3; pixel < framePixels.Length; pixel += 4)
                 { transparentFrame |= framePixels[pixel] == 0; visibleFrame |= framePixels[pixel] == 255; }
-                Check(image.IsFrozen && image.PixelWidth == CharacterCatalog.Tianyi.PixelWidth
-                    && image.PixelHeight == CharacterCatalog.Tianyi.PixelHeight && transparentFrame && visibleFrame,
+                Check(image.IsFrozen && image.PixelWidth == window.SelectedCharacter.Idle.Frames[0].Image.PixelWidth
+                    && image.PixelHeight == window.SelectedCharacter.Idle.Frames[0].Image.PixelHeight && transparentFrame && visibleFrame,
                     $"{frame} animation frame is cached, transparent and keeps the original canvas size");
             }
             window.StartCharacterBlink();
             Check(window.CurrentCharacterFrame == CharacterFrame.Closed
-                && window.TianyiArt.Source == CharacterCatalog.Frame(CharacterFrame.Closed),
+                && window.CharacterArt.Source == window.SelectedCharacter.Actions["blink"].Frames[0].Image,
                 "Tianyi blink selects the closed-eye frame");
             Render(window, directory, "animation-blink", 144);
             window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(200));
@@ -281,7 +283,7 @@ internal static class DesktopVerification
                 "hidden host stops the actual WPF frame timer");
             window.HidePet();
             window.Model.Apply(Snapshot(8, 48), demo: true);
-            Check(window.CurrentCharacterFrame == CharacterFrame.Low && window.TianyiArt.Source == CharacterCatalog.Frame(CharacterFrame.Low),
+            Check(window.CurrentCharacterFrame == CharacterFrame.Low && window.CharacterArt.Source == window.SelectedCharacter.Actions["low"].Frames[0].Image,
                 "valid low quota selects the tired expression");
             Render(window, directory, "animation-low", 144);
             window.PlayGreeting();
@@ -295,14 +297,14 @@ internal static class DesktopVerification
             Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "hiding clears transient animation frames");
             window.PlayGreeting();
             window.SetCharacter(PetCharacter.Cat);
-            Check(window.CurrentCharacterFrame == CharacterFrame.Idle && window.CatArt.Visibility == Visibility.Visible,
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle && window.SelectedCharacter.Id == "cat",
                 "character switch clears an unfinished greeting");
             window.Model.Apply(Snapshot(8, 48), demo: true);
-            Check(window.LeftEye.Height == 6 && window.RightEye.Height == 6, "cat also has a low-quota eye expression");
+            Check(window.CharacterArt.Source == window.SelectedCharacter.Actions["low"].Frames[0].Image, "cat also has a low-quota eye expression");
             window.Model.Apply(Snapshot(72, 48), demo: true);
-            Check(window.LeftEye.Height == 13 && window.RightEye.Height == 13, "cat returns to its original eyes on quota recovery");
+            Check(window.CharacterArt.Source == window.SelectedCharacter.Idle.Frames[0].Image, "cat returns to its original eyes on quota recovery");
             window.SetCharacter(PetCharacter.Tianyi);
-            var sprite = new FormatConvertedBitmap(CharacterCatalog.Tianyi, PixelFormats.Bgra32, null, 0);
+            var sprite = new FormatConvertedBitmap(window.SelectedCharacter.Idle.Frames[0].Image, PixelFormats.Bgra32, null, 0);
             var pixels = new byte[sprite.PixelWidth * sprite.PixelHeight * 4];
             sprite.CopyPixels(pixels, sprite.PixelWidth * 4, 0);
             var transparent = false;
@@ -315,7 +317,7 @@ internal static class DesktopVerification
             Check(transparent && opaque, "Tianyi sprite contains transparent background and visible artwork");
             var characterRestored = new MainWindow(store, verification: true);
             Check(characterRestored.Settings.Character == PetCharacter.Tianyi
-                && characterRestored.TianyiArt.Visibility == Visibility.Visible,
+                && characterRestored.SelectedCharacter.Id == "tianyi",
                 "selected character restores in a new host");
             await characterRestored.StopAsync();
             characterRestored.Close();
@@ -329,7 +331,7 @@ internal static class DesktopVerification
             Render(window, directory, "tianyi-140-percent", 192);
             window.SetCharacterScale(1);
             window.SetCharacter(PetCharacter.Cat);
-            Check(window.CatArt.Visibility == Visibility.Visible && window.TianyiArt.Visibility == Visibility.Collapsed
+            Check(window.SelectedCharacter.Id == "cat" && window.CharacterArt.Visibility == Visibility.Visible
                 && store.Load().Character == PetCharacter.Cat && window.Width == previousWidth,
                 "switching back restores the original cat and persists selection");
             window.Model.Apply(Snapshot(8, 0, expired: true), demo: true);
@@ -404,6 +406,39 @@ internal static class DesktopVerification
             window.SetQuotaScale(1);
             window.SetQuotaPosition(QuotaDock.Left);
 
+            var preserved = window.Settings;
+            var custom = window.ImportCharacter(Path.Combine(directory, "character-pack-tests", "animated.zip"));
+            Check(window.SelectedCharacter.Id == custom.Id && store.Load().CharacterPackId == custom.Id
+                && window.Settings.EffectiveCharacterScale == preserved.EffectiveCharacterScale
+                && window.Settings.EffectiveQuotaScale == preserved.EffectiveQuotaScale
+                && window.Settings.QuotaPosition == preserved.QuotaPosition && window.Settings.PositionLocked == preserved.PositionLocked,
+                "import immediately selects a custom package without disturbing layout or interaction settings");
+            Render(window, directory, "custom-character", 144);
+            var customRestored = new MainWindow(store, verification: true);
+            Check(customRestored.SelectedCharacter.Id == custom.Id && customRestored.CharacterArt.Source.IsFrozen,
+                "custom character resources and selection survive a new host");
+            await customRestored.StopAsync();
+            customRestored.Close();
+            var manager = new CharacterManagerWindow(window);
+            Check(manager.CharacterList.Items.Count == 3 && manager.RemoveButton.IsEnabled && manager.PreviewButton.IsEnabled,
+                "character manager lists both built-ins and the selected custom animated character");
+            manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+            Check(manager.Preview.Source == window.SelectedCharacter.Actions["greeting"].Frames[0].Image,
+                "manager greeting preview uses the selected package's real frames");
+            RenderManager(manager, directory);
+            manager.CharacterList.SelectedItem = window.Characters.Find("cat");
+            Check(!manager.RemoveButton.IsEnabled && manager.Preview.Source == window.Characters.Find("cat").Idle.Frames[0].Image,
+                "manager updates previews and prevents removal of a built-in character");
+            manager.UseButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+            Check(window.SelectedCharacter.Id == "cat" && store.Load().CharacterPackId == "cat",
+                "manager use button applies and persists the chosen character");
+            manager.Close();
+            custom = window.Characters.Find(custom.Id);
+            window.SetCharacterPackage(custom.Id);
+            window.RemoveCharacter(custom);
+            Check(window.SelectedCharacter.Id == "cat" && store.Load().CharacterPackId == "cat",
+                "removing the active custom character safely selects and persists the built-in fallback");
+
             using (var first = new SingleInstance("CutePet.Verify." + Guid.NewGuid().ToString("N")))
             {
                 // A second object with the same name is exercised below through a separate shared test name.
@@ -449,6 +484,20 @@ internal static class DesktopVerification
             if (!condition) throw new InvalidOperationException(label);
             checks.Add(label);
         }
+    }
+
+    private static void RenderManager(CharacterManagerWindow window, string directory)
+    {
+        var visual = (FrameworkElement)window.Content;
+        visual.Measure(new Size(676, 456));
+        visual.Arrange(new Rect(0, 0, 676, 456));
+        visual.UpdateLayout();
+        var bitmap = new RenderTargetBitmap(1014, 684, 144, 144, PixelFormats.Pbgra32);
+        bitmap.Render(visual);
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using var file = File.Create(Path.Combine(directory, "character-manager.png"));
+        encoder.Save(file);
     }
 
     private static QuotaSnapshot Snapshot(double primary, double secondary, bool expired = false)

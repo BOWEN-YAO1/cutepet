@@ -26,13 +26,15 @@ public partial class MainWindow : Window
     public PetViewModel Model { get; } = new();
     public Preferences Settings { get; private set; }
     private readonly PreferencesStore store;
+    internal CharacterLibrary Characters { get; }
+    internal CharacterPack SelectedCharacter { get; private set; } = null!;
     private readonly bool verification;
     private readonly IStartupRegistration startup;
     internal bool CanDrag => !Settings.PositionLocked && !exiting;
     private readonly CancellationTokenSource stop = new();
     private readonly DispatcherTimer countdown = new() { Interval = TimeSpan.FromSeconds(30) };
     private readonly DispatcherTimer blink = new() { Interval = TimeSpan.FromSeconds(4) };
-    private readonly DispatcherTimer frameTimer = new() { Interval = TimeSpan.FromMilliseconds(80) };
+    private readonly DispatcherTimer frameTimer = new() { Interval = TimeSpan.FromMilliseconds(40) };
     private readonly Stopwatch animationClock = new();
     private readonly CharacterAnimation characterAnimation = new();
     internal CharacterFrame CurrentCharacterFrame => characterAnimation.Frame;
@@ -57,11 +59,13 @@ public partial class MainWindow : Window
             ? new StartupRegistration(new MemoryStartupStore(), @"C:\CutePet verification\CutePet.exe", _ => true)
             : StartupRegistration.ForCurrentApp());
         Settings = store.Load();
+        Characters = new CharacterLibrary(store.CharacterDirectory);
         InitializeComponent();
         DataContext = Model;
         DetailsViewport.DataContext = Model;
         Model.PropertyChanged += (_, _) => RefreshCharacterFrame();
         ApplyCharacter();
+        if (Characters.Warning is not null) Model.CharacterMessage = Characters.Warning;
         ApplyLockCursor();
         RefreshStartupState();
         // When upgrading an enabled portable installation, point its own entry at the current EXE.
@@ -154,26 +158,52 @@ public partial class MainWindow : Window
         if (state.Error is not null) Model.CharacterMessage = state.Error;
     }
 
-    public void SetCharacter(PetCharacter character)
+    public void SetCharacter(PetCharacter character) => SetCharacterPackage(CharacterCatalog.BuiltInId(character));
+
+    internal void SetCharacterPackage(string id)
     {
         if (quotaDragging) EndQuotaDrag(cancel: true);
-        Settings = (Settings with { Character = character }).Validated();
+        Settings = Settings with { CharacterPackId = Characters.Find(id).Id };
         ApplyCharacter();
         SavePlacement();
     }
 
     private void ApplyCharacter()
     {
-        var tianyi = Settings.Character == PetCharacter.Tianyi;
-        CatArt.Visibility = tianyi ? Visibility.Collapsed : Visibility.Visible;
-        TianyiArt.Visibility = tianyi ? Visibility.Visible : Visibility.Collapsed;
-        characterAnimation.ResetTransient();
+        var requested = Settings.CharacterPackId ?? CharacterCatalog.BuiltInId(Settings.Character);
+        SelectedCharacter = Characters.Find(requested);
+        Settings = Settings with { CharacterPackId = SelectedCharacter.Id,
+            Character = SelectedCharacter.Id == "tianyi" ? PetCharacter.Tianyi : PetCharacter.Cat };
+        characterAnimation.Configure(SelectedCharacter);
         GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
-        LeftEye.BeginAnimation(HeightProperty, null);
-        RightEye.BeginAnimation(HeightProperty, null);
+        CharacterArt.Width = SelectedCharacter.Manifest.DisplayWidth;
+        CharacterArt.Height = SelectedCharacter.Manifest.DisplayHeight;
+        blink.Interval = TimeSpan.FromMilliseconds(SelectedCharacter.Manifest.BlinkIntervalMs);
         RefreshCharacterFrame();
-        PetStage.ToolTip = CharacterCatalog.Label(Settings.Character);
-        AutomationProperties.SetName(PetStage, CharacterCatalog.Label(Settings.Character));
+        ApplyFloating();
+        PetStage.ToolTip = SelectedCharacter.Name;
+        AutomationProperties.SetName(PetStage, SelectedCharacter.Name);
+    }
+
+    private CharacterManagerWindow? characterManager;
+    public void ManageCharacters()
+    {
+        if (characterManager is not null) { characterManager.Activate(); return; }
+        characterManager = new CharacterManagerWindow(this) { Owner = this };
+        characterManager.Closed += (_, _) => characterManager = null;
+        characterManager.Show();
+    }
+
+    internal CharacterPack ImportCharacter(string path)
+    {
+        var imported = Characters.Import(path);
+        SetCharacterPackage(imported.Id);
+        return imported;
+    }
+    internal void RemoveCharacter(CharacterPack pack)
+    {
+        Characters.Remove(pack);
+        if (SelectedCharacter.Id == pack.Id) SetCharacter(PetCharacter.Cat);
     }
 
     public void SetCharacterScale(double value) => SetIndependentScale(value, character: true);
@@ -301,13 +331,8 @@ public partial class MainWindow : Window
         var characterSize = AddSizeMenu("角色大小", SetCharacterScale);
         var quotaSize = AddSizeMenu("额度数字大小", SetQuotaScale);
         var characters = new MenuItem { Header = "角色选择" };
-        foreach (var character in Enum.GetValues<PetCharacter>())
-        {
-            var item = new MenuItem { Header = CharacterCatalog.Label(character), IsCheckable = true, Tag = character };
-            item.Click += (_, _) => SetCharacter(character);
-            characters.Items.Add(item);
-        }
         menu.Items.Add(characters);
+        Add("管理 / 导入角色…", ManageCharacters);
         var position = new MenuItem { Header = "额度条位置" };
         foreach (var dock in Enum.GetValues<QuotaDock>())
         {
@@ -342,7 +367,13 @@ public partial class MainWindow : Window
                 item.IsChecked = Math.Abs(Settings.EffectiveQuotaScale - (double)item.Tag) < 0.01;
             foreach (MenuItem item in details.Items) item.IsChecked = (DetailsMode)item.Tag == Settings.Details;
             foreach (MenuItem item in position.Items) item.IsChecked = (QuotaDock)item.Tag == Settings.QuotaPosition;
-            foreach (MenuItem item in characters.Items) item.IsChecked = (PetCharacter)item.Tag == Settings.Character;
+            characters.Items.Clear();
+            foreach (var pack in Characters.Packs)
+            {
+                var item = new MenuItem { Header = pack.Name, IsCheckable = true, IsChecked = pack.Id == SelectedCharacter.Id };
+                item.Click += (_, _) => SetCharacterPackage(pack.Id);
+                characters.Items.Add(item);
+            }
         };
         menu.Closed += (_, _) => EndDetailsMenu();
         return menu;
@@ -553,14 +584,7 @@ public partial class MainWindow : Window
 
     private void Blink()
     {
-        if (!IsVisible || verification) return;
-        if (Settings.Character == PetCharacter.Tianyi) { StartCharacterBlink(); return; }
-        var animation = new DoubleAnimationUsingKeyFrames { Duration = TimeSpan.FromSeconds(0.2), FillBehavior = FillBehavior.Stop };
-        animation.KeyFrames.Add(new DiscreteDoubleKeyFrame(13, KeyTime.FromTimeSpan(TimeSpan.Zero)));
-        animation.KeyFrames.Add(new DiscreteDoubleKeyFrame(1, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0.06))));
-        animation.KeyFrames.Add(new DiscreteDoubleKeyFrame(13, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0.16))));
-        LeftEye.BeginAnimation(HeightProperty, animation);
-        RightEye.BeginAnimation(HeightProperty, animation);
+        if (IsVisible && !verification) StartCharacterBlink();
     }
 
     internal void StartCharacterBlink() { characterAnimation.Blink(); RefreshCharacterFrame(); }
@@ -570,27 +594,27 @@ public partial class MainWindow : Window
     {
         characterAnimation.Greet();
         RefreshCharacterFrame();
-        if (verification || !IsVisible) return;
+        if (verification || !IsVisible || !SelectedCharacter.Actions.ContainsKey("greeting")) return;
         var tilt = new DoubleAnimationUsingKeyFrames { Duration = TimeSpan.FromMilliseconds(1080), FillBehavior = FillBehavior.Stop };
         tilt.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.Zero)));
         tilt.KeyFrames.Add(new LinearDoubleKeyFrame(-3, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(180))));
         tilt.KeyFrames.Add(new LinearDoubleKeyFrame(3, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(540))));
         tilt.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(1080))));
         GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, tilt);
-        if (Settings.Character == PetCharacter.Cat) Blink();
+
     }
     private void RefreshCharacterFrame()
     {
         characterAnimation.Low = Model.IsLow && !Model.IsStale;
-        if (Settings.Character == PetCharacter.Tianyi)
-        {
-            var source = CharacterCatalog.Frame(characterAnimation.Frame);
-            if (TianyiArt.Source != source) TianyiArt.Source = source;
-        }
-        else
-        {
-            LeftEye.Height = RightEye.Height = characterAnimation.Low ? 6 : 13;
-        }
+        if (CharacterArt.Source != characterAnimation.Image) CharacterArt.Source = characterAnimation.Image;
+    }
+
+    private void ApplyFloating()
+    {
+        Bob.BeginAnimation(TranslateTransform.YProperty, null);
+        if (IsVisible && !verification && SelectedCharacter.Manifest.Float)
+            Bob.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, -4, TimeSpan.FromSeconds(2.2))
+            { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever, EasingFunction = new SineEase() });
     }
 
     private void Animate(bool active)
@@ -599,8 +623,7 @@ public partial class MainWindow : Window
         {
             blink.Start();
             StartAnimationClock();
-            Bob.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, -4, TimeSpan.FromSeconds(2.2))
-            { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever, EasingFunction = new SineEase() });
+            ApplyFloating();
         }
         else
         {
@@ -611,8 +634,6 @@ public partial class MainWindow : Window
             GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
             RefreshCharacterFrame();
             Bob.BeginAnimation(TranslateTransform.YProperty, null);
-            LeftEye.BeginAnimation(HeightProperty, null);
-            RightEye.BeginAnimation(HeightProperty, null);
         }
     }
 
@@ -626,6 +647,7 @@ public partial class MainWindow : Window
     {
         if (exiting) return;
         if (quotaDragging) EndQuotaDrag(cancel: true);
+        characterManager?.Close();
         exiting = true;
         SavePlacement();
         countdown.Stop();

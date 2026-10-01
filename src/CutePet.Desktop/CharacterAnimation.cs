@@ -1,25 +1,42 @@
 using System;
+using System.Windows.Media.Imaging;
 
 namespace CutePet.Desktop;
 
 internal enum CharacterFrame { Idle, Closed, Wave, Low }
 
-// One bounded interaction, not an animation queue. Elapsed time is supplied by the UI clock.
+// Shared triggers; the selected package supplies clips and frame timings.
 internal sealed class CharacterAnimation
 {
-    private double blinkRemaining;
-    private double greetingRemaining;
-    public bool Low { get; set; }
-    public CharacterFrame Frame => greetingRemaining > 0
-        ? (int)((1080 - greetingRemaining) / 180) % 2 == 0 ? CharacterFrame.Wave : CharacterFrame.Idle
-        : Low ? CharacterFrame.Low : blinkRemaining > 0 ? CharacterFrame.Closed : CharacterFrame.Idle;
-    public void Blink() { if (greetingRemaining == 0 && !Low) blinkRemaining = 160; }
-    public void Greet() { greetingRemaining = 1080; blinkRemaining = 0; }
+    private CharacterPack pack = CharacterCatalog.BuiltIns[0];
+    private string? transient;
+    private double transientElapsed, baseElapsed;
+    private bool low;
+    public bool Low { get => low; set { if (low != value) { low = value; baseElapsed = 0; } } }
+    public string Action => transient ?? (Low && pack.Actions.ContainsKey("low") ? "low" : "idle");
+    public BitmapSource Image => pack.Actions[Action].At(transient is null ? baseElapsed : transientElapsed);
+    public CharacterFrame Frame => Action switch
+    { "low" => CharacterFrame.Low, "blink" => CharacterFrame.Closed,
+        "greeting" => ReferenceEquals(Image, pack.Idle.Frames[0].Image) ? CharacterFrame.Idle : CharacterFrame.Wave,
+        _ => CharacterFrame.Idle };
+    public void Configure(CharacterPack selected) { pack = selected; low = false; baseElapsed = 0; ResetTransient(); }
+    public void Blink() { if (transient is null && !Low) Start("blink"); }
+    public void Greet() => Start("greeting");
+    private void Start(string action)
+    {
+        if (!pack.Actions.ContainsKey(action)) return;
+        transient = action;
+        transientElapsed = 0;
+    }
     public void Advance(TimeSpan elapsed)
     {
         var milliseconds = Math.Max(0, elapsed.TotalMilliseconds);
-        blinkRemaining = Math.Max(0, blinkRemaining - milliseconds);
-        greetingRemaining = Math.Max(0, greetingRemaining - milliseconds);
+        if (transient is not null)
+        {
+            transientElapsed += milliseconds;
+            if (transientElapsed >= pack.Actions[transient].Duration) ResetTransient();
+        }
+        else baseElapsed = (baseElapsed + milliseconds) % pack.Actions[Action].Duration;
     }
-    public void ResetTransient() { blinkRemaining = greetingRemaining = 0; }
+    public void ResetTransient() { transient = null; transientElapsed = 0; }
 }

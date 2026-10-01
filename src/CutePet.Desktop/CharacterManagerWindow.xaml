@@ -1,0 +1,36 @@
+<Window x:Class="CutePet.Desktop.CharacterManagerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CutePet · 角色管理" Width="720" Height="540" MinWidth="680" MinHeight="520"
+        WindowStartupLocation="CenterScreen" Background="#FFFAF4" FontFamily="Microsoft YaHei UI">
+  <Grid Margin="22" Background="#FFFAF4">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <StackPanel Margin="0,0,0,16">
+      <TextBlock Text="我的角色" FontSize="21" FontWeight="SemiBold" Foreground="#345449"/>
+      <TextBlock Text="导入透明 PNG，或带动作配置的角色包。" Foreground="#74877B" Margin="0,6,0,0"/>
+    </StackPanel>
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="210"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+      <ListBox x:Name="CharacterList" DisplayMemberPath="Name" SelectionChanged="OnSelectionChanged"
+               Background="White" BorderBrush="#D9E3DB" Padding="6" FontSize="14">
+        <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem"><Setter Property="Padding" Value="9,10"/></Style></ListBox.ItemContainerStyle>
+      </ListBox>
+      <Grid Grid.Column="1" Margin="20,0,0,0">
+        <Grid.RowDefinitions><RowDefinition Height="150"/><RowDefinition Height="Auto"/><RowDefinition Height="*" MinHeight="62"/></Grid.RowDefinitions>
+        <Border Background="#EBF1E9" CornerRadius="12">
+          <Image x:Name="Preview" Margin="8" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </Border>
+        <TextBlock x:Name="CharacterInfo" Grid.Row="1" TextWrapping="Wrap" Foreground="#465C50" FontSize="12" Margin="0,10,0,0"/>
+        <TextBlock x:Name="RightsInfo" Grid.Row="2" TextWrapping="Wrap" Foreground="#74877B" FontSize="11" Margin="0,8,0,0" MaxHeight="62" TextTrimming="CharacterEllipsis"/>
+      </Grid>
+    </Grid>
+    <WrapPanel Grid.Row="2" Margin="0,16,0,0">
+      <Button Content="导入 PNG / 角色包…" Padding="12,7" Margin="0,0,8,0" Click="OnImport"/>
+      <Button x:Name="UseButton" Content="使用此角色" Padding="12,7" Margin="0,0,8,0" Click="OnUse"/>
+      <Button x:Name="PreviewButton" Content="预览打招呼" Padding="12,7" Margin="0,0,8,0" Click="OnPreview"/>
+      <Button x:Name="ExportButton" Content="导出…" Padding="12,7" Margin="0,0,8,0" Click="OnExport"/>
+      <Button x:Name="RemoveButton" Content="移除" Padding="12,7" Click="OnRemove"/>
+    </WrapPanel>
+    <TextBlock x:Name="StatusText" Grid.Row="3" TextWrapping="Wrap" Foreground="#74877B" FontSize="12" Margin="0,12,0,0"/>
+  </Grid>
+</Window>

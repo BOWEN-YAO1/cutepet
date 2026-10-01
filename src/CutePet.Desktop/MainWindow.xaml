@@ -13,27 +13,8 @@
         <Ellipse Fill="#2029443B" Width="108" Height="13" VerticalAlignment="Bottom" Margin="0,0,0,1" />
         <Grid x:Name="PetArt" RenderTransformOrigin="0.5,0.85" Margin="0,16,0,14">
           <Grid.RenderTransform><TransformGroup><TranslateTransform x:Name="Bob" /><RotateTransform x:Name="GreetingTilt" /></TransformGroup></Grid.RenderTransform>
-          <Viewbox x:Name="CatArt" Width="166" Height="148" VerticalAlignment="Bottom">
-            <Canvas Width="180" Height="160">
-              <Path Fill="#A9CDBB" Stroke="#3D6858" StrokeThickness="3" StrokeLineJoin="Round"
-                    Data="M 54,95 C 15,80 10,116 42,124 C 32,142 56,155 92,150 C 133,155 159,142 146,121 C 167,96 146,79 128,95 Z" />
-              <Path Fill="#FFF9ED" Stroke="#3D6858" StrokeThickness="3" StrokeLineJoin="Round"
-                    Data="M 37,46 L 28,12 Q 29,3 38,8 L 65,27 Q 89,19 116,28 L 142,8 Q 151,3 151,15 L 142,49 C 167,97 141,118 91,118 C 41,118 13,95 37,46 Z" />
-              <Path Fill="#E8C8B6" Data="M 37,17 L 43,44 L 58,32 Z M 139,17 L 133,44 L 119,32 Z" />
-              <Ellipse Fill="#EED5C4" Width="19" Height="9" Canvas.Left="43" Canvas.Top="76" />
-              <Ellipse Fill="#EED5C4" Width="19" Height="9" Canvas.Left="119" Canvas.Top="76" />
-              <Ellipse x:Name="LeftEye" Fill="#345449" Width="7" Height="13" Canvas.Left="64" Canvas.Top="62" />
-              <Ellipse x:Name="RightEye" Fill="#345449" Width="7" Height="13" Canvas.Left="108" Canvas.Top="62" />
-              <Path Stroke="#345449" StrokeThickness="2.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                    Data="M 80,79 Q 85,86 90,79 Q 95,86 100,79" />
-              <Path Fill="#3D6858" Data="M 51,109 Q 90,124 130,109 L 130,121 Q 89,136 50,121 Z" />
-              <Ellipse Fill="#FFF9ED" Stroke="#3D6858" StrokeThickness="2" Width="26" Height="26" Canvas.Left="78" Canvas.Top="116" />
-              <TextBlock Text="C" FontFamily="Segoe UI" FontWeight="Bold" FontSize="18" Foreground="#3D6858" Canvas.Left="85" Canvas.Top="117" />
-              <Path Fill="#FFF9ED" Stroke="#3D6858" StrokeThickness="2.5" Data="M 57,129 Q 44,136 56,145 L 68,145 Q 76,137 66,130 Z M 119,129 Q 105,137 117,145 L 129,145 Q 137,137 127,130 Z" />
-            </Canvas>
-          </Viewbox>
-          <Image x:Name="TianyiArt" Width="178" Height="148" Stretch="Uniform" VerticalAlignment="Bottom"
-                 Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality" />
+          <Image x:Name="CharacterArt" Width="178" Height="148" Stretch="Uniform" VerticalAlignment="Bottom"
+                 RenderOptions.BitmapScalingMode="HighQuality" />
         </Grid>
         <Border x:Name="SpeechBubble" Background="#FFF9ED" CornerRadius="10" BorderBrush="#D8E5DB" BorderThickness="1"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-26,4,0,0" Padding="10,6" MaxWidth="110"
