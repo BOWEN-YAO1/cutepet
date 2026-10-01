@@ -7,10 +7,10 @@ internal sealed record DockLayout(Size Size, Rect Pet, Rect Quota, int Columns)
 {
     public static DockLayout For(QuotaDock dock) => dock switch
     {
-        QuotaDock.Top => new(new(280, 252), new(38, 70, 230, 178), new(12, 10, 256, 58), 2),
-        QuotaDock.Bottom => new(new(280, 252), new(38, 2, 230, 178), new(12, 184, 256, 58), 2),
-        QuotaDock.Right => new(new(396, 192), new(12, 2, 230, 178), new(224, 104, 160, 78), 1),
-        _ => new(new(396, 192), new(154, 2, 230, 178), new(12, 104, 160, 78), 1)
+        QuotaDock.Top => new(new(280, 236), new(38, 54, 230, 178), new(28, 10, 224, 40), 2),
+        QuotaDock.Bottom => new(new(280, 234), new(38, 2, 230, 178), new(28, 184, 224, 40), 2),
+        QuotaDock.Right => new(new(352, 184), new(12, 2, 230, 178), new(224, 104, 116, 68), 1),
+        _ => new(new(352, 184), new(110, 2, 230, 178), new(12, 104, 116, 68), 1)
     };
 
     // Relative to the character origin, the temporary host includes all four drop targets.

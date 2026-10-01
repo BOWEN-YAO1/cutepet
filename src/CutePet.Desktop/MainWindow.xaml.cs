@@ -299,12 +299,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void OnMenu(object sender, RoutedEventArgs e)
-    {
-        var menu = BuildMenu();
-        menu.PlacementTarget = MenuButton;
-        menu.IsOpen = true;
-    }
     private void OnHide(object sender, RoutedEventArgs e) => HidePet();
     private void OnRefresh(object sender, RoutedEventArgs e) => RefreshQuota();
     private void OnPinDetails(object sender, RoutedEventArgs e) =>

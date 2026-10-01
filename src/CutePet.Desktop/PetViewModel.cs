@@ -13,8 +13,16 @@ public sealed record WindowRow(string Label, string RemainingText, double Progre
     double Opacity, Brush Accent, DateTimeOffset? ResetsAtUtc) : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
-    public string ShortLabel => Label.Replace(" 小时额度", "h").Replace("每周额度", "周")
-        .Replace(" 分钟额度", "m").Replace("额度窗口", "额度");
+    public string ShortLabel
+    {
+        get
+        {
+            var separator = Label.LastIndexOf(" · ", StringComparison.Ordinal);
+            var label = separator >= 0 ? Label[(separator + 3)..] : Label;
+            return label.Replace(" 小时额度", "h").Replace("每周额度", "周")
+                .Replace(" 分钟额度", "m").Replace("额度窗口", "额度");
+        }
+    }
     public string ResetText => ResetsAtUtc is not DateTimeOffset reset ? "重置时间暂无数据"
         : reset <= DateTimeOffset.UtcNow ? "等待官方额度更新"
         : (reset - DateTimeOffset.UtcNow).TotalDays >= 1
@@ -27,7 +35,9 @@ public sealed class PetViewModel : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public ObservableCollection<WindowRow> Windows { get; } = new();
-    public IEnumerable<WindowRow> CompactWindows => Windows.Take(2);
+    // Detailed rows retain the last snapshot. Without a status line, stale compact values must be unknown.
+    public IEnumerable<WindowRow> CompactWindows => Windows.Take(2).Select(row => IsStale
+        ? row with { RemainingText = "—", Accent = Brushes.Gray } : row);
     public string MoreWindowsText => Windows.Count > 2 ? $" +{Windows.Count - 2}" : "";
     private string statusText = "正在连接 Codex…";
     private string footerText = "拖动角色移动 · 右键更多";
@@ -84,9 +94,9 @@ public sealed class PetViewModel : INotifyPropertyChanged
                 Brush(window.RemainingPercent < 20 ? "#C18651" : "#568B70"), window.ResetsAtUtc));
         }
         if (Windows.Count == 0) ShowUnknown();
-        CompactChanged();
         HasData = true;
         IsStale = false;
+        CompactChanged();
         IsLow = snapshot.Buckets.SelectMany(b => b.Windows).Any(w => w.RemainingPercent < 20);
         StatusText = demo ? "演示数据 · 用于界面验证" : snapshot.OrdinaryUsageAllowed == false ? "官方提示：当前使用受限" : "已同步官方额度";
         FooterText = demo ? "占位角色 · 非正式形象" : $"更新于 {snapshot.LastSuccessfulSyncUtc.ToLocalTime():HH:mm:ss}";
@@ -99,6 +109,7 @@ public sealed class PetViewModel : INotifyPropertyChanged
     {
         if (clear) { HasData = false; IsLow = false; ShowUnknown(); }
         IsStale = true;
+        CompactChanged();
         StatusText = HasData ? "未同步 · 当前为上次数据" : "暂未取得额度";
         FooterText = message;
         StatusBrush = Brush("#C18651");

@@ -193,9 +193,13 @@ internal static class DesktopVerification
             window.Model.Failure("读取超时 · 稍后重试", clear: false);
             Check(window.Model.IsStale && window.Model.HasData && window.Model.Windows.First().RemainingText == "8%",
                 "transient failure marks retained quota stale");
-            Check(window.Model.CompactStatus == "上次数据" && window.Model.ShowCharacterMessage,
-                "compact display keeps stale-data warning visible");
+            Check(window.Model.CompactWindows.All(row => row.RemainingText == "—") && window.Model.ShowCharacterMessage,
+                "minimal compact display does not present stale percentages as current");
             Render(window, directory, "stale", 96);
+            window.Model.Apply(Snapshot(100, 99.9), demo: true);
+            Check(window.Model.CompactWindows.First().RemainingText == "100%" && !window.Model.IsStale,
+                "fresh sync restores minimal percentages after stale-data suppression");
+            Render(window, directory, "full-and-decimal", 144);
             window.Model.Failure("账号发生变化", clear: true);
             Check(!window.Model.HasData && window.Model.Windows.Single().RemainingText == "—",
                 "account changes clear quota");
