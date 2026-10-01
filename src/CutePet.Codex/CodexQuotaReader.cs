@@ -10,6 +10,7 @@ public sealed class CodexQuotaReader : IAsyncDisposable
     private readonly SemaphoreSlim reads = new(1, 1);
     private long accountRevision;
     public event Action? QuotaInvalidated;
+    public event Action? AccountInvalidated;
 
     private CodexQuotaReader(StdioRpcClient rpc)
     {
@@ -45,7 +46,11 @@ public sealed class CodexQuotaReader : IAsyncDisposable
 
     private void HandleNotification(string method)
     {
-        if (method == "account/updated") Interlocked.Increment(ref accountRevision);
+        if (method == "account/updated")
+        {
+            Interlocked.Increment(ref accountRevision);
+            AccountInvalidated?.Invoke();
+        }
         if (method is "account/updated" or "account/rateLimits/updated") QuotaInvalidated?.Invoke();
     }
 

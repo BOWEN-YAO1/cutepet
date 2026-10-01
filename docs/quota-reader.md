@@ -61,7 +61,7 @@ dotnet run --project src/CutePet.QuotaProbe --no-build -- --watch --interval 10 
 
 `account/updated` 使账号版本变化。初始化期间的通知不直接报错；读取额度期间收到变化时，丢弃该结果并最多重试一次，持续变化返回 `AccountChanged`。
 
-`account/rateLimits/updated` 触发 `QuotaInvalidated` 事件，要求重新读取完整数据，不用局部通知覆盖完整快照。事件处理器运行于读取线程，应快速返回，界面消费者应调度到自己的 UI 线程。事件不包含原始账号信息。
+`account/rateLimits/updated` 触发 `QuotaInvalidated` 事件，要求重新读取完整数据，不用局部通知覆盖完整快照。`account/updated` 额外触发 `AccountInvalidated`，让桌面消费者立即清空旧显示；仍触发额度重新读取。事件处理器运行于读取线程，应快速返回，界面消费者应调度到自己的 UI 线程。事件不包含原始账号信息。
 
 ## 5. 供后续桌宠使用
 
@@ -89,7 +89,7 @@ var snapshot = await reader.ReadAsync();
 
 watch 默认 60 秒后重新读取，额度/账号通知可提前唤醒；同一连接至少间隔 10 秒，防止通知风暴。服务错误和超时指数退避至最多 300 秒，并添加少量抖动；失败时通知不绕过退避。
 
-此 PoC 不持久化缓存，失败输出仅说明错误，不伪造为“剩余 0%”。未来桌宠缓存、最后数据标记、账号范围隔离、断线重连和官方 Retry-After 解析需要在同步服务中继续实现。子进程崩溃后当前验证工具退出，下一次运行建立新连接。
+此命令行 PoC 不持久化缓存，失败输出仅说明错误，不伪造为“剩余 0%”。子进程崩溃后当前验证工具退出，下一次运行建立新连接。桌面端现有内存旧数据标记和重连策略见 [窗口说明](desktop-shell.md)；持久缓存、完整账号范围隔离和官方 Retry-After 解析仍待实现。
 
 | 状态 | 行为 |
 |---|---|
@@ -111,6 +111,6 @@ dotnet run --project tests/CutePet.Tests --no-build
 dotnet publish src/CutePet.QuotaProbe -c Release --self-contained false -o artifacts/quota-probe
 ```
 
-测试程序退出非零表示失败。它执行 parser 和进程协议测试，不连接真实账号、不发模型请求。CI 也只执行这些测试，不保存个人凭据。
+测试程序退出非零表示失败。它执行 parser 和进程协议测试，不连接真实账号、不发模型请求。CI 另执行不带账号的 WPF 状态验证，不保存个人凭据。
 
-发布目录中的 `CutePet.QuotaProbe.exe` 可从终端运行；可用 `--watch` 持续显示。本次本地 ZIP 另附 `Read-Quota.cmd`（一次读取后保留窗口）和 `Watch-Quota.cmd`（持续读取），可双击启动。仓库中的两个脚本用于放进发布目录，不用于在 scripts 源码目录直接运行。此阶段没有桌宠 UI，也没有开机启动设置。
+发布目录中的 `CutePet.QuotaProbe.exe` 可从终端运行；可用 `--watch` 持续显示。额度原型 ZIP 另附 `Read-Quota.cmd`（一次读取后保留窗口）和 `Watch-Quota.cmd`（持续读取），可双击启动。仓库中的两个脚本用于放进发布目录，不用于在 scripts 源码目录直接运行。此命令行工具没有桌宠 UI；独立桌面工程见 [窗口说明](desktop-shell.md)。

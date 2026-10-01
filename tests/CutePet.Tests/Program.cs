@@ -47,7 +47,10 @@ var tests = new (string Name, Func<Task> Run)[]
     ("读取中账号切换不发布混合快照", async () =>
     {
         await using var reader = await CodexQuotaReader.ConnectAsync(Start("account-changing"), TimeSpan.FromSeconds(3));
+        var invalidations = 0;
+        reader.AccountInvalidated += () => Interlocked.Increment(ref invalidations);
         await Expect(QuotaFailure.AccountChanged, () => reader.ReadAsync());
+        Check(invalidations >= 2);
     }),
     ("账号响应形状变化给出兼容性错误", async () =>
     {
