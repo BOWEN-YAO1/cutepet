@@ -60,6 +60,81 @@ internal static class DesktopVerification
             Check(!window.DetailsVisible && window.Width * window.Height < 348 * 440 / 2,
                 "default compact host uses less than half the previous area");
             Check(window.Model.Windows.Single().RemainingText == "—", "unknown quota stays unknown");
+            Check(!window.Settings.PositionLocked && !window.Settings.StartWithWindows && window.CanDrag,
+                "new interaction settings default to unlocked and no startup");
+            window.TogglePositionLock();
+            var lockedSize = new Size(window.Width, window.Height);
+            window.BeginQuotaDrag(new Point(16, 16));
+            Check(!window.CanDrag && store.Load().PositionLocked
+                && window.DockTarget.Visibility == Visibility.Collapsed && new Size(window.Width, window.Height) == lockedSize,
+                "locked position blocks quota and character drag without changing layout");
+            window.SetDetailsMode(DetailsMode.Hover);
+            window.PointerChanged(true);
+            window.CompleteHoverOpen();
+            Check(window.DetailsVisible, "locked position keeps hover details available");
+            var lockRestored = new MainWindow(store, verification: true);
+            Check(lockRestored.Settings.PositionLocked && !lockRestored.CanDrag, "position lock restores after restart");
+            await lockRestored.StopAsync();
+            lockRestored.Close();
+            window.TogglePositionLock();
+            window.BeginQuotaDrag(new Point(16, 16));
+            Check(window.DockTarget.Visibility == Visibility.Visible && window.CanDrag, "unlock restores dragging");
+            window.TogglePositionLock();
+            Check(window.DockTarget.Visibility == Visibility.Collapsed && new Size(window.Width, window.Height) == lockedSize,
+                "locking during a quota drag cancels the temporary workspace");
+            window.TogglePositionLock();
+            window.PointerChanged(false);
+            window.CompleteHoverClose();
+
+            var startupMemory = new MemoryStartupStore();
+            var startupService = new StartupRegistration(startupMemory, @"C:\CutePet test folder\CutePet.exe", _ => true);
+            var startupPreferences = new PreferencesStore(Path.Combine(directory, "startup-settings"));
+            var startupWindow = new MainWindow(startupPreferences, verification: true, startup: startupService);
+            Check(!startupWindow.Settings.StartWithWindows && startupMemory.Writes == 0,
+                "startup remains off until explicitly selected");
+            startupWindow.ToggleStartup();
+            Check(startupWindow.Settings.StartWithWindows && startupPreferences.Load().StartWithWindows
+                && startupMemory.Command == "\"C:\\CutePet test folder\\CutePet.exe\" --autostart",
+                "startup switch writes a quoted executable command and records success");
+            var startupRestored = new MainWindow(startupPreferences, verification: true, startup: startupService);
+            Check(startupRestored.Settings.StartWithWindows, "startup state reads the actual registration on restart");
+            await startupRestored.StopAsync();
+            startupRestored.Close();
+            startupMemory.RejectWrites = true;
+            startupWindow.ToggleStartup();
+            Check(startupWindow.Settings.StartWithWindows && startupMemory.Command is not null
+                && startupWindow.Model.CharacterMessage == "无法修改开机启动项",
+                "failed startup removal retains enabled state and reports failure");
+            startupMemory.RejectWrites = false;
+            startupWindow.ToggleStartup();
+            Check(!startupWindow.Settings.StartWithWindows && startupMemory.Command is null
+                && !startupPreferences.Load().StartWithWindows, "startup switch removes its own entry");
+            startupMemory.RejectWrites = true;
+            startupWindow.ToggleStartup();
+            Check(!startupWindow.Settings.StartWithWindows && !startupPreferences.Load().StartWithWindows,
+                "failed startup enable never reports or persists success");
+            startupMemory.RejectWrites = false;
+            // External removal is respected: opening a menu must not recreate an entry.
+            startupMemory.Command = StartupRegistration.CommandFor(@"C:\previous CutePet\CutePet.exe");
+            startupWindow.RefreshStartupState();
+            startupMemory.Command = null;
+            var writesBeforeRefresh = startupMemory.Writes;
+            startupWindow.RefreshStartupState();
+            Check(!startupWindow.Settings.StartWithWindows && startupMemory.Writes == writesBeforeRefresh,
+                "external startup removal is respected without writing a new entry");
+            var invalidCommandRejected = false;
+            try { StartupRegistration.CommandFor("C:\\bad\"name\\CutePet.exe"); }
+            catch (ArgumentException) { invalidCommandRejected = true; }
+            Check(invalidCommandRejected, "startup command rejects embedded quotation marks");
+            var missingExecutable = new StartupRegistration(startupMemory, @"C:\missing CutePet\CutePet.exe", _ => false);
+            Check(missingExecutable.SetEnabled(true).Error is not null && startupMemory.Command is null,
+                "missing executable never creates a broken startup entry");
+            var longCommandRejected = false;
+            try { StartupRegistration.CommandFor("C:\\" + new string('a', 260) + "\\CutePet.exe"); }
+            catch (ArgumentException) { longCommandRejected = true; }
+            Check(longCommandRejected, "startup command respects the documented 260-character limit");
+            await startupWindow.StopAsync();
+            startupWindow.Close();
             Render(window, directory, "unknown", 96);
 
             window.Model.Apply(Snapshot(72, 48), demo: true);
@@ -166,6 +241,67 @@ internal static class DesktopVerification
             Check(window.Settings == previousSettings with { Character = PetCharacter.Tianyi }
                 && window.Width == previousWidth && window.Model.Windows.First().RemainingText == previousRemaining,
                 "character switching preserves placement, display preferences and quota");
+            foreach (var frame in Enum.GetValues<CharacterFrame>())
+            {
+                var image = CharacterCatalog.Frame(frame);
+                var frameBitmap = new FormatConvertedBitmap(image, PixelFormats.Bgra32, null, 0);
+                var framePixels = new byte[image.PixelWidth * image.PixelHeight * 4];
+                frameBitmap.CopyPixels(framePixels, image.PixelWidth * 4, 0);
+                var transparentFrame = false;
+                var visibleFrame = false;
+                for (var pixel = 3; pixel < framePixels.Length; pixel += 4)
+                { transparentFrame |= framePixels[pixel] == 0; visibleFrame |= framePixels[pixel] == 255; }
+                Check(image.IsFrozen && image.PixelWidth == CharacterCatalog.Tianyi.PixelWidth
+                    && image.PixelHeight == CharacterCatalog.Tianyi.PixelHeight && transparentFrame && visibleFrame,
+                    $"{frame} animation frame is cached, transparent and keeps the original canvas size");
+            }
+            window.StartCharacterBlink();
+            Check(window.CurrentCharacterFrame == CharacterFrame.Closed
+                && window.TianyiArt.Source == CharacterCatalog.Frame(CharacterFrame.Closed),
+                "Tianyi blink selects the closed-eye frame");
+            Render(window, directory, "animation-blink", 144);
+            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(200));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "blink finishes and restores idle");
+            window.PlayGreeting();
+            Check(window.CurrentCharacterFrame == CharacterFrame.Wave, "click greeting starts the wave frame");
+            Render(window, directory, "animation-wave", 144);
+            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(180));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "greeting alternates the raised and lowered arm poses");
+            window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "greeting stops without queuing interactions");
+            window.PlayGreeting();
+            window.StartAnimationClock();
+            await Task.Delay(1350);
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle,
+                "actual WPF frame timer finishes a greeting without manual stepping");
+            window.HidePet();
+            window.PlayGreeting();
+            await Task.Delay(250);
+            Check(window.CurrentCharacterFrame == CharacterFrame.Wave,
+                "hidden host stops the actual WPF frame timer");
+            window.HidePet();
+            window.Model.Apply(Snapshot(8, 48), demo: true);
+            Check(window.CurrentCharacterFrame == CharacterFrame.Low && window.TianyiArt.Source == CharacterCatalog.Frame(CharacterFrame.Low),
+                "valid low quota selects the tired expression");
+            Render(window, directory, "animation-low", 144);
+            window.PlayGreeting();
+            window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Low, "greeting returns to the current low-quota state");
+            window.Model.Failure("读取超时", clear: false);
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "stale quota does not drive the tired expression");
+            window.Model.Apply(Snapshot(72, 48), demo: true);
+            window.PlayGreeting();
+            window.HidePet();
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "hiding clears transient animation frames");
+            window.PlayGreeting();
+            window.SetCharacter(PetCharacter.Cat);
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle && window.CatArt.Visibility == Visibility.Visible,
+                "character switch clears an unfinished greeting");
+            window.Model.Apply(Snapshot(8, 48), demo: true);
+            Check(window.LeftEye.Height == 6 && window.RightEye.Height == 6, "cat also has a low-quota eye expression");
+            window.Model.Apply(Snapshot(72, 48), demo: true);
+            Check(window.LeftEye.Height == 13 && window.RightEye.Height == 13, "cat returns to its original eyes on quota recovery");
+            window.SetCharacter(PetCharacter.Tianyi);
             var sprite = new FormatConvertedBitmap(CharacterCatalog.Tianyi, PixelFormats.Bgra32, null, 0);
             var pixels = new byte[sprite.PixelWidth * sprite.PixelHeight * 4];
             sprite.CopyPixels(pixels, sprite.PixelWidth * 4, 0);

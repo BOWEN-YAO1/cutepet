@@ -11,7 +11,8 @@ public enum QuotaDock { Bottom, Top, Left, Right }
 public sealed record Preferences(double? Left = null, double? Top = null, double Scale = 1,
     bool AlwaysOnTop = true, string? CodexPath = null, DetailsMode Details = DetailsMode.Hover,
     QuotaDock QuotaPosition = QuotaDock.Left, PetCharacter Character = PetCharacter.Cat,
-    double? CharacterScale = null, double? QuotaScale = null)
+    double? CharacterScale = null, double? QuotaScale = null,
+    bool PositionLocked = false, bool StartWithWindows = false)
 {
     // Older settings used Scale for the entire widget. Missing independent values inherit that size.
     [JsonIgnore] public double EffectiveCharacterScale => CharacterScale ?? Scale;

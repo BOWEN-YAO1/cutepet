@@ -20,6 +20,8 @@ internal sealed class TrayController : IDisposable
         Add("隐藏桌宠", window.HidePet);
         Add("刷新额度", window.RefreshQuota);
         var pin = Add("始终置顶", window.ToggleTopmost);
+        var positionLock = Add("锁定位置", window.TogglePositionLock);
+        var autoStart = Add("开机启动", window.ToggleStartup);
         menu.Opening += (_, _) => pin.Checked = window.Topmost;
         var details = new Forms.ToolStripMenuItem("详情显示");
         foreach (var (mode, label) in new[] { (DetailsMode.Hover, "悬停显示"), (DetailsMode.Always, "固定显示"), (DetailsMode.Hidden, "隐藏详情") })
@@ -50,6 +52,9 @@ internal sealed class TrayController : IDisposable
         menu.Opening += (_, _) =>
         {
             window.BeginDetailsMenu();
+            window.RefreshStartupState();
+            positionLock.Checked = window.Settings.PositionLocked;
+            autoStart.Checked = window.Settings.StartWithWindows;
             foreach (Forms.ToolStripMenuItem item in details.DropDownItems)
                 item.Checked = (DetailsMode)item.Tag! == window.Settings.Details;
             foreach (Forms.ToolStripMenuItem item in position.DropDownItems)

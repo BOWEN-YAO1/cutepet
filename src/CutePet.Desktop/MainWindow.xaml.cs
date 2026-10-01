@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -26,9 +27,15 @@ public partial class MainWindow : Window
     public Preferences Settings { get; private set; }
     private readonly PreferencesStore store;
     private readonly bool verification;
+    private readonly IStartupRegistration startup;
+    internal bool CanDrag => !Settings.PositionLocked && !exiting;
     private readonly CancellationTokenSource stop = new();
     private readonly DispatcherTimer countdown = new() { Interval = TimeSpan.FromSeconds(30) };
     private readonly DispatcherTimer blink = new() { Interval = TimeSpan.FromSeconds(4) };
+    private readonly DispatcherTimer frameTimer = new() { Interval = TimeSpan.FromMilliseconds(80) };
+    private readonly Stopwatch animationClock = new();
+    private readonly CharacterAnimation characterAnimation = new();
+    internal CharacterFrame CurrentCharacterFrame => characterAnimation.Frame;
     private readonly DispatcherTimer openDetails = new() { Interval = TimeSpan.FromMilliseconds(350) };
     private readonly DispatcherTimer closeDetails = new() { Interval = TimeSpan.FromMilliseconds(650) };
     private QuotaSession? session;
@@ -42,21 +49,35 @@ public partial class MainWindow : Window
     private int menusOpen;
     public event Action? ExitRequested;
 
-    public MainWindow(PreferencesStore store, bool verification = false)
+    public MainWindow(PreferencesStore store, bool verification = false, IStartupRegistration? startup = null)
     {
         this.store = store;
         this.verification = verification;
+        this.startup = startup ?? (verification
+            ? new StartupRegistration(new MemoryStartupStore(), @"C:\CutePet verification\CutePet.exe", _ => true)
+            : StartupRegistration.ForCurrentApp());
         Settings = store.Load();
         InitializeComponent();
         DataContext = Model;
         DetailsViewport.DataContext = Model;
+        Model.PropertyChanged += (_, _) => RefreshCharacterFrame();
         ApplyCharacter();
+        ApplyLockCursor();
+        RefreshStartupState();
+        // When upgrading an enabled portable installation, point its own entry at the current EXE.
+        if (!verification && Settings.StartWithWindows) ApplyStartupResult(this.startup.SetEnabled(true));
         DetailsViewport.Width = 348 * Settings.Scale;
         DetailsViewport.Height = 256 * Settings.Scale;
         ApplyDockLayout(CurrentLayout, null, constrain: true);
         Topmost = Settings.AlwaysOnTop;
         countdown.Tick += (_, _) => Model.Tick();
         blink.Tick += (_, _) => Blink();
+        frameTimer.Tick += (_, _) =>
+        {
+            var elapsed = animationClock.Elapsed;
+            animationClock.Restart();
+            AdvanceCharacterAnimation(elapsed);
+        };
         openDetails.Tick += (_, _) => CompleteHoverOpen();
         closeDetails.Tick += (_, _) => CompleteHoverClose();
         Loaded += OnLoaded;
@@ -107,6 +128,32 @@ public partial class MainWindow : Window
 
     public void RefreshQuota() => session?.Refresh();
 
+    public void TogglePositionLock()
+    {
+        if (quotaDragging) EndQuotaDrag(cancel: true);
+        mouseStart = null;
+        Settings = Settings with { PositionLocked = !Settings.PositionLocked };
+        ApplyLockCursor();
+        SavePlacement();
+    }
+    private void ApplyLockCursor()
+    {
+        PetStage.Cursor = QuotaCard.Cursor = Settings.PositionLocked ? Cursors.Arrow : Cursors.SizeAll;
+    }
+    public void RefreshStartupState() => ApplyStartupResult(startup.Read());
+    public void ToggleStartup()
+    {
+        var state = startup.Read();
+        if (state.Error is not null) { ApplyStartupResult(state); return; }
+        ApplyStartupResult(startup.SetEnabled(!state.Enabled));
+        SavePlacement();
+    }
+    private void ApplyStartupResult(StartupState state)
+    {
+        Settings = Settings with { StartWithWindows = state.Enabled };
+        if (state.Error is not null) Model.CharacterMessage = state.Error;
+    }
+
     public void SetCharacter(PetCharacter character)
     {
         if (quotaDragging) EndQuotaDrag(cancel: true);
@@ -120,9 +167,11 @@ public partial class MainWindow : Window
         var tianyi = Settings.Character == PetCharacter.Tianyi;
         CatArt.Visibility = tianyi ? Visibility.Collapsed : Visibility.Visible;
         TianyiArt.Visibility = tianyi ? Visibility.Visible : Visibility.Collapsed;
-        if (tianyi) TianyiArt.Source = CharacterCatalog.Tianyi;
+        characterAnimation.ResetTransient();
+        GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
         LeftEye.BeginAnimation(HeightProperty, null);
         RightEye.BeginAnimation(HeightProperty, null);
+        RefreshCharacterFrame();
         PetStage.ToolTip = CharacterCatalog.Label(Settings.Character);
         AutomationProperties.SetName(PetStage, CharacterCatalog.Label(Settings.Character));
     }
@@ -205,7 +254,7 @@ public partial class MainWindow : Window
         Activate();
     }
 
-    public void HidePet() { if (quotaDragging) EndQuotaDrag(cancel: true); StopDetailsTimers(); ShowDetails(false); SavePlacement(); Hide(); }
+    public void HidePet() { if (quotaDragging) EndQuotaDrag(cancel: true); StopDetailsTimers(); ShowDetails(false); Animate(false); SavePlacement(); Hide(); }
 
     public void ResetPosition()
     {
@@ -245,6 +294,10 @@ public partial class MainWindow : Window
         var pin = Add("始终置顶", ToggleTopmost);
         pin.IsCheckable = true;
         pin.IsChecked = Topmost;
+        var positionLock = Add("锁定位置", TogglePositionLock);
+        positionLock.IsCheckable = true;
+        var autoStart = Add("开机启动", ToggleStartup);
+        autoStart.IsCheckable = true;
         var characterSize = AddSizeMenu("角色大小", SetCharacterScale);
         var quotaSize = AddSizeMenu("额度数字大小", SetQuotaScale);
         var characters = new MenuItem { Header = "角色选择" };
@@ -280,6 +333,9 @@ public partial class MainWindow : Window
         {
             BeginDetailsMenu();
             pin.IsChecked = Topmost;
+            RefreshStartupState();
+            positionLock.IsChecked = Settings.PositionLocked;
+            autoStart.IsChecked = Settings.StartWithWindows;
             foreach (MenuItem item in characterSize.Items)
                 item.IsChecked = Math.Abs(Settings.EffectiveCharacterScale - (double)item.Tag) < 0.01;
             foreach (MenuItem item in quotaSize.Items)
@@ -398,6 +454,7 @@ public partial class MainWindow : Window
         }
         if (mouseStart is not Point start || e.LeftButton != MouseButtonState.Pressed || dragged) return;
         if ((e.GetPosition(Scene) - start).Length < 4) return;
+        if (!CanDrag) { mouseStart = null; return; }
         if (quotaGesture)
         {
             BeginQuotaDrag(quotaGrabOffset);
@@ -427,14 +484,14 @@ public partial class MainWindow : Window
         mouseStart = null;
         if (!clicked) return;
         Model.CharacterMessage = "收到！我会看着的";
-        Blink();
+        PlayGreeting();
         try { await Task.Delay(1800, stop.Token); } catch (OperationCanceledException) { return; }
         Model.RestoreCharacterMessage();
     }
 
     internal void BeginQuotaDrag(Point grabOffset)
     {
-        if (quotaDragging || exiting) return;
+        if (quotaDragging || !CanDrag) return;
         var anchor = PetScreenOrigin();
         originalDock = draftDock = Settings.QuotaPosition;
         quotaGrabOffset = grabOffset;
@@ -496,7 +553,8 @@ public partial class MainWindow : Window
 
     private void Blink()
     {
-        if (!IsVisible || verification || Settings.Character != PetCharacter.Cat) return;
+        if (!IsVisible || verification) return;
+        if (Settings.Character == PetCharacter.Tianyi) { StartCharacterBlink(); return; }
         var animation = new DoubleAnimationUsingKeyFrames { Duration = TimeSpan.FromSeconds(0.2), FillBehavior = FillBehavior.Stop };
         animation.KeyFrames.Add(new DiscreteDoubleKeyFrame(13, KeyTime.FromTimeSpan(TimeSpan.Zero)));
         animation.KeyFrames.Add(new DiscreteDoubleKeyFrame(1, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0.06))));
@@ -505,17 +563,53 @@ public partial class MainWindow : Window
         RightEye.BeginAnimation(HeightProperty, animation);
     }
 
+    internal void StartCharacterBlink() { characterAnimation.Blink(); RefreshCharacterFrame(); }
+    internal void StartAnimationClock() { animationClock.Restart(); frameTimer.Start(); }
+    internal void AdvanceCharacterAnimation(TimeSpan elapsed) { characterAnimation.Advance(elapsed); RefreshCharacterFrame(); }
+    internal void PlayGreeting()
+    {
+        characterAnimation.Greet();
+        RefreshCharacterFrame();
+        if (verification || !IsVisible) return;
+        var tilt = new DoubleAnimationUsingKeyFrames { Duration = TimeSpan.FromMilliseconds(1080), FillBehavior = FillBehavior.Stop };
+        tilt.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.Zero)));
+        tilt.KeyFrames.Add(new LinearDoubleKeyFrame(-3, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(180))));
+        tilt.KeyFrames.Add(new LinearDoubleKeyFrame(3, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(540))));
+        tilt.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(1080))));
+        GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, tilt);
+        if (Settings.Character == PetCharacter.Cat) Blink();
+    }
+    private void RefreshCharacterFrame()
+    {
+        characterAnimation.Low = Model.IsLow && !Model.IsStale;
+        if (Settings.Character == PetCharacter.Tianyi)
+        {
+            var source = CharacterCatalog.Frame(characterAnimation.Frame);
+            if (TianyiArt.Source != source) TianyiArt.Source = source;
+        }
+        else
+        {
+            LeftEye.Height = RightEye.Height = characterAnimation.Low ? 6 : 13;
+        }
+    }
+
     private void Animate(bool active)
     {
-        if (active)
+        if (active && !verification)
         {
             blink.Start();
+            StartAnimationClock();
             Bob.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, -4, TimeSpan.FromSeconds(2.2))
             { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever, EasingFunction = new SineEase() });
         }
         else
         {
             blink.Stop();
+            frameTimer.Stop();
+            animationClock.Reset();
+            characterAnimation.ResetTransient();
+            GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
+            RefreshCharacterFrame();
             Bob.BeginAnimation(TranslateTransform.YProperty, null);
             LeftEye.BeginAnimation(HeightProperty, null);
             RightEye.BeginAnimation(HeightProperty, null);

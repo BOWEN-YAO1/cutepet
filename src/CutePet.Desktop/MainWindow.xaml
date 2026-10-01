@@ -12,7 +12,7 @@
        <Grid Width="230" Height="178">
         <Ellipse Fill="#2029443B" Width="108" Height="13" VerticalAlignment="Bottom" Margin="0,0,0,1" />
         <Grid x:Name="PetArt" RenderTransformOrigin="0.5,0.85" Margin="0,16,0,14">
-          <Grid.RenderTransform><TranslateTransform x:Name="Bob" /></Grid.RenderTransform>
+          <Grid.RenderTransform><TransformGroup><TranslateTransform x:Name="Bob" /><RotateTransform x:Name="GreetingTilt" /></TransformGroup></Grid.RenderTransform>
           <Viewbox x:Name="CatArt" Width="166" Height="148" VerticalAlignment="Bottom">
             <Canvas Width="180" Height="160">
               <Path Fill="#A9CDBB" Stroke="#3D6858" StrokeThickness="3" StrokeLineJoin="Round"
