@@ -194,3 +194,8 @@ dotnet publish src/CutePet.Desktop -c Release --self-contained false -o artifact
 ## 0.13.0 坐姿互动
 
 2026-10-02：新增 sit-blink-v1.png、sit-happy-v1.png、sit-wave-v1.png 三张坐姿动作图，来自内置 image_gen.imagegen 对 sit-v1.png 的编辑，保留原图。公共播放器区分坐姿和站姿回应；CharacterPresenter 保留自动休息并触发坐姿微笑。天依共 13 种动作、20 张人物图和 1 张云层，像素限额保持不变。完整提示词在 SEATED-PROMPTS.md / SOURCE.md，原角色权利说明继续适用。行为和 348 项窗口 / 功能验证见 docs/seated-actions.md。
+
+
+## 0.14.0 人物与额度独立窗口
+
+人物与额度改为两个透明小窗口，共享一个额度会话，独立拖动、缩放和保存位置。乘云只移动人物；详情锚定额度，四方向菜单只做一次性相对摆放。旧组合窗口坐标按原几何迁移一次。角色包格式和全部素材保留。当前仍为短距离乘云，尚未扩展为桌面巡游；行为、376 项窗口 / 功能验证与人工验收边界见 [独立窗口说明](independent-windows.md)。

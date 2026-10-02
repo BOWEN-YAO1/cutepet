@@ -13,11 +13,16 @@ namespace CutePet.Desktop;
 
 public partial class MainWindow : Window
 {
-    internal DockLayout CurrentLayout => DockLayout.For(Settings.QuotaPosition, Settings.EffectiveCharacterScale, Settings.EffectiveQuotaScale);
+    internal DockLayout CurrentLayout => SplitWindowLayout.For(Settings);
     public Size LayoutSize => CurrentLayout.Size;
-    public static readonly DependencyProperty CompactColumnsProperty = DependencyProperty.Register(
-        nameof(CompactColumns), typeof(int), typeof(MainWindow), new PropertyMetadata(1));
-    public int CompactColumns { get => (int)GetValue(CompactColumnsProperty); private set => SetValue(CompactColumnsProperty, value); }
+    internal QuotaWindow QuotaHost { get; }
+    internal Viewbox QuotaCard => QuotaHost.QuotaCard;
+    internal Border QuotaSurface => QuotaHost.QuotaSurface;
+    internal Viewbox DetailsViewport => QuotaHost.DetailsViewport;
+    internal Grid DetailsScene => QuotaHost.DetailsScene;
+    internal Popup DetailsPopup => QuotaHost.DetailsPopup;
+    internal Button PinDetailsButton => QuotaHost.PinDetailsButton;
+    public int CompactColumns => QuotaHost.CompactColumns;
     public bool DetailsVisible => details.DetailsVisible;
     public PetViewModel Model { get; } = new();
     public Preferences Settings { get; private set; }
@@ -68,7 +73,6 @@ public partial class MainWindow : Window
     private bool loaded, exiting;
     public event Action? ExitRequested;
     internal void RequestExit() => ExitRequested?.Invoke();
-    internal void UpdateDockPreference(QuotaDock dock) => Settings = Settings with { QuotaPosition = dock };
 
     public MainWindow(PreferencesStore store, bool verification = false, IStartupRegistration? startup = null)
     {
@@ -80,6 +84,8 @@ public partial class MainWindow : Window
         Settings = store.Load();
         Characters = new CharacterLibrary(store.CharacterDirectory);
         InitializeComponent();
+        if (verification) { Opacity = 0; Left = Top = -10000; }
+        QuotaHost = new QuotaWindow(this, verification);
         dragging = new PetDragController(this, verification);
         details = new DetailsController(this, verification, () => dragging.Dragged, () => exiting);
         characterPresenter = new CharacterPresenter(this, verification);
@@ -96,14 +102,15 @@ public partial class MainWindow : Window
         DetailsViewport.Width = 348 * Settings.Scale;
         DetailsViewport.Height = 256 * Settings.Scale;
         ApplyDockLayout(CurrentLayout, null, constrain: true);
+        QuotaHost.MoveTo(new(Settings.QuotaLeft ?? 0, Settings.QuotaTop ?? 0));
         Topmost = Settings.AlwaysOnTop;
         countdown.Tick += (_, _) => Model.Tick();
         Loaded += OnLoaded;
         IsVisibleChanged += (_, _) =>
         {
             Animate(IsVisible && !verification);
-            if (!IsVisible) { cloudPointerInside = false; details.ResetHover(); StopDetailsTimers(); ShowDetails(false); }
-            else ShowDetails(Settings.Details == DetailsMode.Always);
+            if (!IsVisible) { QuotaHost.Hide(); cloudPointerInside = false; details.ResetHover(); StopDetailsTimers(); ShowDetails(false); }
+            else if (loaded) { QuotaHost.ShowAt(QuotaHost.Position); ShowDetails(Settings.Details == DetailsMode.Always); }
         };
         DpiChanged += (_, _) => Dispatcher.BeginInvoke(() =>
         {
@@ -116,15 +123,19 @@ public partial class MainWindow : Window
             }
         });
         Scene.ContextMenu = DesktopMenuBuilder.Create(this);
-        DetailsScene.ContextMenu = DesktopMenuBuilder.Create(this);
         ShowDetails(Settings.Details == DetailsMode.Always);
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         if (loaded) return;
-        NativePlacement.Apply(this, Settings.Left, Settings.Top);
+        var dpi = VisualTreeHelper.GetDpi(this);
+        Settings = SplitWindowLayout.Migrate(Settings, dpi.DpiScaleX, dpi.DpiScaleY);
+        if (verification) NativePlacement.MoveUnclamped(this, -10000, -10000);
+        else NativePlacement.Apply(this, Settings.Left, Settings.Top);
         loaded = true;
+        if (Settings.QuotaLeft is double qx && Settings.QuotaTop is double qy) QuotaHost.ShowAt(new(qx, qy));
+        else { QuotaHost.ShowAt(QuotaNearPet()); }
         SavePlacement();
         countdown.Start();
         ShowDetails(Settings.Details == DetailsMode.Always);
@@ -222,16 +233,18 @@ public partial class MainWindow : Window
         if (dragging.IsDragging) EndQuotaDrag(cancel: true);
         var anchor = PetScreenOrigin();
         Settings = (character ? Settings with { CharacterScale = value } : Settings with { QuotaScale = value }).Validated();
-        ApplyDockLayout(CurrentLayout, anchor, constrain: true);
+        if (character) ApplyDockLayout(CurrentLayout, anchor, constrain: true);
+        else QuotaHost.ResizeCard(Settings.QuotaPosition, Settings.EffectiveQuotaScale);
         SavePlacement();
     }
 
     public void SetQuotaPosition(QuotaDock dock)
     {
         if (dragging.IsDragging) EndQuotaDrag(cancel: true);
-        var anchor = PetScreenOrigin();
         Settings = (Settings with { QuotaPosition = dock }).Validated();
-        ApplyDockLayout(CurrentLayout, anchor, constrain: true);
+        QuotaHost.ResizeCard(Settings.QuotaPosition, Settings.EffectiveQuotaScale);
+        ApplyDetailsPlacement();
+        QuotaHost.MoveTo(QuotaNearPet());
         SavePlacement();
     }
 
@@ -246,13 +259,9 @@ public partial class MainWindow : Window
         Width = layout.Size.Width;
         Height = layout.Size.Height;
         Place(PetStage, layout.Pet);
-        Place(QuotaCard, layout.Quota);
-        QuotaSurface.Width = layout.Columns == 2 ? 224 : 116;
-        QuotaSurface.Height = layout.Columns == 2 ? 40 : 68;
-        CompactColumns = layout.Columns;
-        SpeechBubble.Margin = new Thickness(Settings.QuotaPosition == QuotaDock.Right ? 0 : -26, 4, 0, 0);
-        DetailsPopup.Placement = Settings.QuotaPosition switch
-        { QuotaDock.Left => PlacementMode.Left, QuotaDock.Right => PlacementMode.Right, _ => PlacementMode.Top };
+        QuotaHost.ResizeCard(Settings.QuotaPosition, Settings.EffectiveQuotaScale);
+        SpeechBubble.Margin = new Thickness(0, 4, 0, 0);
+        ApplyDetailsPlacement();
         UpdateLayout();
         if (anchor is Point physical)
         {
@@ -264,6 +273,15 @@ public partial class MainWindow : Window
         }
         RepositionDetails();
     }
+    internal Point QuotaNearPet()
+    {
+        var pet = NativePlacement.Get(this);
+        var dpi = VisualTreeHelper.GetDpi(this);
+        var offset = SplitWindowLayout.QuotaOffset(Settings, dpi.DpiScaleX, dpi.DpiScaleY);
+        return new(pet.Left + offset.X, pet.Top + offset.Y);
+    }
+    private void ApplyDetailsPlacement() => DetailsPopup.Placement = Settings.QuotaPosition switch
+    { QuotaDock.Left => PlacementMode.Left, QuotaDock.Right => PlacementMode.Right, _ => PlacementMode.Top };
     internal static void Place(FrameworkElement element, Rect bounds)
     {
         Canvas.SetLeft(element, bounds.X);
@@ -276,6 +294,7 @@ public partial class MainWindow : Window
     {
         Topmost = !Topmost;
         Settings = Settings with { AlwaysOnTop = Topmost };
+        QuotaHost.Topmost = Topmost;
         NativePlacement.SetPopupTopmost(DetailsViewport, Topmost);
         SavePlacement();
     }
@@ -288,7 +307,8 @@ public partial class MainWindow : Window
         if (loaded)
         {
             var current = NativePlacement.Get(this);
-            NativePlacement.Apply(this, current.Left, current.Top);
+            if (verification) NativePlacement.MoveUnclamped(this, -10000, -10000);
+            else NativePlacement.Apply(this, current.Left, current.Top);
         }
         Activate();
     }
@@ -299,6 +319,7 @@ public partial class MainWindow : Window
     {
         CancelCloud();
         NativePlacement.Apply(this, null, null);
+        QuotaHost.MoveTo(QuotaNearPet());
         RepositionDetails();
         SavePlacement();
     }
@@ -318,31 +339,29 @@ public partial class MainWindow : Window
 
     internal void SavePlacement()
     {
-        if (dragging.IsDragging) return; // Never persist the temporary drag workspace.
+        if (dragging.IsDragging) return; // Persist quota coordinates only after the gesture commits.
         if (loaded)
         {
             var point = NativePlacement.Get(this);
             Settings = Settings with { Left = point.Left, Top = point.Top };
         }
+        Settings = Settings with { QuotaLeft = QuotaHost.Position.X, QuotaTop = QuotaHost.Position.Y };
         if (!store.Save(Settings)) Model.CharacterMessage = "设置暂时无法保存";
     }
 
-    private void OnHide(object sender, RoutedEventArgs e) => HidePet();
-    private void OnRefresh(object sender, RoutedEventArgs e) => RefreshQuota();
-    private void OnPinDetails(object sender, RoutedEventArgs e) => details.TogglePinned();
-    private void OnCollapseDetails(object sender, RoutedEventArgs e) => details.Collapse();
+    internal void CollapseDetails() => details.Collapse();
     public void SetDetailsMode(DetailsMode mode)
     {
         Settings = (Settings with { Details = mode }).Validated();
         details.ApplyMode();
         SavePlacement();
     }
-    private void OnHoverEnter(object sender, MouseEventArgs e) => PointerChanged(true);
+    private void OnHoverEnter(object sender, MouseEventArgs e) => cloudPointerInside = true;
     private void OnPetEnter(object sender, MouseEventArgs e) => characterPresenter.PointerChanged(true);
     private void OnPetLeave(object sender, MouseEventArgs e) => characterPresenter.PointerChanged(false);
     internal void CharacterPointerChanged(bool inside) => characterPresenter.PointerChanged(inside);
     internal void AdvanceAmbient(TimeSpan elapsed) => characterPresenter.AdvanceAmbient(elapsed);
-    private void OnHoverLeave(object sender, MouseEventArgs e) => PointerChanged(Scene.IsMouseOver || DetailsViewport.IsMouseOver);
+    private void OnHoverLeave(object sender, MouseEventArgs e) => cloudPointerInside = Scene.IsMouseOver;
     internal void PointerChanged(bool inside) { cloudPointerInside = inside; details.PointerChanged(inside); }
     internal void CompleteHoverOpen() => details.CompleteHoverOpen();
     internal void CompleteHoverClose() => details.CompleteHoverClose();
@@ -350,8 +369,7 @@ public partial class MainWindow : Window
     internal void EndDetailsMenu() => details.EndDetailsMenu();
     internal void StopDetailsTimers() => details.StopDetailsTimers();
     internal void ShowDetails(bool visible) => details.ShowDetails(visible);
-    private void OnDetailsOpened(object? sender, EventArgs e) => details.OnDetailsOpened();
-    private void RepositionDetails() => details.RepositionDetails();
+    internal void RepositionDetails() { if (details is not null) details.RepositionDetails(); }
 
     private void OnMouseDown(object sender, MouseButtonEventArgs e) => dragging.OnMouseDown(e);
     private void OnMouseMove(object sender, MouseEventArgs e) => dragging.OnMouseMove(e);
@@ -366,8 +384,6 @@ public partial class MainWindow : Window
     internal void BeginQuotaDrag(Point grabOffset) => dragging.BeginQuotaDrag(grabOffset);
     internal void UpdateQuotaDrag(Point pointer) => dragging.UpdateQuotaDrag(pointer);
     internal void EndQuotaDrag(bool cancel) => dragging.EndQuotaDrag(cancel);
-    private void OnDockCaptureLost(object sender, MouseEventArgs e) => dragging.OnDockCaptureLost();
-    private void OnDockKeyDown(object sender, KeyEventArgs e) => dragging.OnDockKeyDown(e);
 
     internal void StartCharacterBlink() => characterPresenter.StartCharacterBlink();
     internal void StartAnimationClock() => characterPresenter.StartAnimationClock();
@@ -394,6 +410,7 @@ public partial class MainWindow : Window
         StopDetailsTimers();
         ShowDetails(false);
         Animate(false);
+        QuotaHost.CloseForExit();
         stop.Cancel();
         if (syncTask is not null) await syncTask;
         stop.Dispose();

@@ -162,13 +162,7 @@ internal static class ThroneMotionVerification
         }
         void Capture(int duration)
         {
-            var visual = (FrameworkElement)window.Content;
-            visual.Measure(new Size(window.Width, window.Height));
-            visual.Arrange(new Rect(0, 0, window.Width, window.Height));
-            visual.UpdateLayout();
-            var bitmap = new RenderTargetBitmap((int)Math.Ceiling(window.Width * 1.5),
-                (int)Math.Ceiling(window.Height * 1.5), 144, 144, PixelFormats.Pbgra32);
-            bitmap.Render(visual);
+            var bitmap = WindowPreview.Capture(window, 144);
             var metadata = new BitmapMetadata("gif");
             metadata.SetQuery("/grctlext/Delay", (ushort)Math.Max(4, duration / 10));
             metadata.SetQuery("/grctlext/Disposal", (byte)2);
@@ -177,7 +171,7 @@ internal static class ThroneMotionVerification
         }
     }
 
-    private static byte[] WithAnimationMetadata(byte[] data, IReadOnlyList<int> delays)
+    internal static byte[] WithAnimationMetadata(byte[] data, IReadOnlyList<int> delays)
     {
         var offset = 13 + ((data[10] & 128) == 0 ? 0 : 3 * (1 << ((data[10] & 7) + 1)));
         using var output = new MemoryStream();

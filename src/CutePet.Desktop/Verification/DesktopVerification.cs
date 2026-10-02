@@ -69,7 +69,7 @@ internal static class DesktopVerification
             var lockedSize = new Size(window.Width, window.Height);
             window.BeginQuotaDrag(new Point(16, 16));
             Check(!window.CanDrag && store.Load().PositionLocked
-                && window.DockTarget.Visibility == Visibility.Collapsed && new Size(window.Width, window.Height) == lockedSize,
+                && !window.QuotaHost.Dragging && new Size(window.Width, window.Height) == lockedSize,
                 "locked position blocks quota and character drag without changing layout");
             window.SetDetailsMode(DetailsMode.Hover);
             window.PointerChanged(true);
@@ -81,10 +81,10 @@ internal static class DesktopVerification
             lockRestored.Close();
             window.TogglePositionLock();
             window.BeginQuotaDrag(new Point(16, 16));
-            Check(window.DockTarget.Visibility == Visibility.Visible && window.CanDrag, "unlock restores dragging");
+            Check(window.QuotaHost.Dragging && window.CanDrag, "unlock restores dragging");
             window.TogglePositionLock();
-            Check(window.DockTarget.Visibility == Visibility.Collapsed && new Size(window.Width, window.Height) == lockedSize,
-                "locking during a quota drag cancels the temporary workspace");
+            Check(!window.QuotaHost.Dragging && new Size(window.Width, window.Height) == lockedSize,
+                "locking during a quota drag cancels its independent placement gesture");
             window.TogglePositionLock();
             window.PointerChanged(false);
             window.CompleteHoverClose();
@@ -199,39 +199,37 @@ internal static class DesktopVerification
                 Check(store.Load().QuotaPosition == dock && frame.Contains(layout.Pet) && frame.Contains(layout.Quota),
                     $"{dock} docking fits its host and persists");
                 Render(window, directory, "dock-" + dock.ToString().ToLowerInvariant(), 144);
+                var originalCard = window.QuotaHost.Position;
+                var petSize = new Size(window.Width, window.Height);
                 window.BeginQuotaDrag(new Point(16, 16));
-                var workspace = DockLayout.DragWorkspace(dock);
-                var target = DockLayout.Target(dock, workspace.Pet.TopLeft);
-                // Position the grabbed card's center on the actual drop target center.
-                window.UpdateQuotaDrag(new Point(target.X + target.Width / 2 - window.QuotaCard.Width / 2 + 16,
-                    target.Y + target.Height / 2 - window.QuotaCard.Height / 2 + 16));
+                window.UpdateQuotaDrag(new Point(originalCard.X + 96 + 16, originalCard.Y + 48 + 16));
                 window.EndQuotaDrag(cancel: false);
-                Check(window.Settings.QuotaPosition == dock && window.Width == layout.Size.Width,
-                    $"{dock} drop returns to a compact saved layout");
+                Check(window.Settings.QuotaPosition == dock && new Size(window.Width, window.Height) == petSize
+                    && store.Load().QuotaLeft == window.QuotaHost.Position.X,
+                    $"{dock} free quota drag persists without resizing or redocking the pet");
             }
             window.SetQuotaPosition(QuotaDock.Bottom);
+            var originalQuota = window.QuotaHost.Position;
             window.BeginQuotaDrag(new Point(16, 16));
-            var dragWorkspace = DockLayout.DragWorkspace(QuotaDock.Bottom);
-            var leftTarget = DockLayout.Target(QuotaDock.Left, dragWorkspace.Pet.TopLeft);
-            window.UpdateQuotaDrag(new Point(leftTarget.X + leftTarget.Width / 2 - window.QuotaCard.Width / 2 + 16,
-                leftTarget.Y + leftTarget.Height / 2 - window.QuotaCard.Height / 2 + 16));
-            Render(window, directory, "dock-drag-preview", 144);
+            window.UpdateQuotaDrag(new Point(400, 300));
+            Render(window, directory, "quota-drag-preview", 144);
             window.PointerChanged(true);
             window.CompleteHoverOpen();
-            Check(!window.DetailsVisible && store.Load().QuotaPosition == QuotaDock.Bottom,
-                "dragging suspends details and does not save a preview");
+            Check(!window.DetailsVisible && store.Load().QuotaLeft == originalQuota.X,
+                "quota drag suspends details and does not persist intermediate positions");
             window.EndQuotaDrag(cancel: true);
-            Check(window.Settings.QuotaPosition == QuotaDock.Bottom && window.LayoutSize == DockLayout.For(QuotaDock.Bottom).Size,
-                "cancelled drag restores the previous docking layout");
+            Check(window.QuotaHost.Position == originalQuota && window.Settings.QuotaPosition == QuotaDock.Bottom,
+                "cancelled independent drag restores the quota position");
             window.BeginQuotaDrag(new Point(16, 16));
-            window.UpdateQuotaDrag(new Point(leftTarget.X + leftTarget.Width / 2 - window.QuotaCard.Width / 2 + 16,
-                leftTarget.Y + leftTarget.Height / 2 - window.QuotaCard.Height / 2 + 16));
+            var quotaDpi = VisualTreeHelper.GetDpi(window.QuotaHost);
+            window.UpdateQuotaDrag(new Point(400 + 16 * quotaDpi.DpiScaleX, 300 + 16 * quotaDpi.DpiScaleY));
             window.EndQuotaDrag(cancel: false);
-            Check(window.Settings.QuotaPosition == QuotaDock.Left && store.Load().QuotaPosition == QuotaDock.Left,
-                "dragging from bottom to left commits the selected side");
+            Check(window.QuotaHost.Position == new Point(400, 300) && store.Load().QuotaLeft == 400 && store.Load().QuotaTop == 300,
+                "quota drag saves independent physical desktop coordinates");
+            window.SetQuotaPosition(QuotaDock.Left);
             var dockRestored = new MainWindow(store, verification: true);
-            Check(dockRestored.Settings.QuotaPosition == QuotaDock.Left && dockRestored.Width == window.Width,
-                "docking preference restores in a new host");
+            Check(dockRestored.Settings.QuotaPosition == QuotaDock.Left && dockRestored.QuotaHost.Position == window.QuotaHost.Position,
+                "independent quota position restores in a new host");
             await dockRestored.StopAsync();
             dockRestored.Close();
             var previousSettings = window.Settings;
@@ -339,7 +337,7 @@ internal static class DesktopVerification
             window.ToggleCharacterRest();
             window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
             window.BeginQuotaDrag(new Point(16, 16));
-            Check(!window.CharacterRestPose, "dragging wakes the seated character and clears furniture");
+            Check(window.CharacterRestPose, "dragging the independent quota preserves the seated character");
             window.EndQuotaDrag(cancel: true);
             window.ToggleCharacterRest();
             window.Model.Apply(Snapshot(8, 48), demo: true);
@@ -489,14 +487,12 @@ internal static class DesktopVerification
                         $"independent sizes {characterScale}/{quotaScale} fit {dock} and its drag targets");
                     Render(window, directory, $"sizes-{characterScale:0.0}-{quotaScale:0.0}-{dock}", 144);
                     window.BeginQuotaDrag(new Point(16, 16));
-                    var targetDock = dock == QuotaDock.Left ? QuotaDock.Top : QuotaDock.Left;
-                    var target = DockLayout.Target(targetDock, workspace.Pet.TopLeft, characterScale, quotaScale);
-                    window.UpdateQuotaDrag(new Point(target.X + target.Width / 2 - window.QuotaCard.Width / 2 + 16,
-                        target.Y + target.Height / 2 - window.QuotaCard.Height / 2 + 16));
+                    var cardPosition = window.QuotaHost.Position;
+                    window.UpdateQuotaDrag(new Point(cardPosition.X + 40 + 16, cardPosition.Y + 24 + 16));
                     window.EndQuotaDrag(cancel: false);
-                    Check(window.Settings.QuotaPosition == targetDock
+                    Check(window.Settings.QuotaPosition == dock
                         && window.Settings.EffectiveCharacterScale == characterScale && window.Settings.EffectiveQuotaScale == quotaScale,
-                        $"scaled drag {characterScale}/{quotaScale} from {dock} keeps independent sizes");
+                        $"free quota drag {characterScale}/{quotaScale} keeps sizes and orientation {dock}");
                 }
             }
             Check(new Size(window.DetailsViewport.Width, window.DetailsViewport.Height) == detailSize,
@@ -575,6 +571,7 @@ internal static class DesktopVerification
                 low => window.Model.Apply(Snapshot(low ? 8 : 72, 48), demo: true), () => store.Load().AutoCloud);
             ThroneMotionVerification.Run(window, directory, Check);
             SeatedMotionVerification.Run(window, Check);
+            await SplitWindowVerification.RunAsync(window, directory, Check);
 
             if (live)
             {
@@ -625,8 +622,8 @@ internal static class DesktopVerification
     {
         var now = DateTimeOffset.UtcNow;
         return new(now, "demo", true, new[] { new QuotaBucket("demo", "演示", "demo", null,
-            new[] { new QuotaWindow("primary", 100 - primary, primary, 300, expired ? now.AddSeconds(-1) : now.AddHours(3)),
-                new QuotaWindow("secondary", 100 - secondary, secondary, 10080, expired ? now.AddSeconds(-1) : now.AddDays(4)) }) });
+            new[] { new CutePet.Core.QuotaWindow("primary", 100 - primary, primary, 300, expired ? now.AddSeconds(-1) : now.AddHours(3)),
+                new CutePet.Core.QuotaWindow("secondary", 100 - secondary, secondary, 10080, expired ? now.AddSeconds(-1) : now.AddDays(4)) }) });
     }
 
     private static void Render(MainWindow window, string directory, string name, double dpi, bool details = false)
@@ -637,9 +634,7 @@ internal static class DesktopVerification
         visual.Measure(new Size(width, height));
         visual.Arrange(new Rect(0, 0, width, height));
         visual.UpdateLayout();
-        var bitmap = new RenderTargetBitmap((int)Math.Ceiling(width * dpi / 96),
-            (int)Math.Ceiling(height * dpi / 96), dpi, dpi, PixelFormats.Pbgra32);
-        bitmap.Render(visual);
+        var bitmap = details ? WindowPreview.Surface(visual, width, height, dpi) : WindowPreview.Capture(window, dpi);
         var encoder = new PngBitmapEncoder();
         encoder.Frames.Add(BitmapFrame.Create(bitmap));
         using var file = File.Create(Path.Combine(directory, name + ".png"));

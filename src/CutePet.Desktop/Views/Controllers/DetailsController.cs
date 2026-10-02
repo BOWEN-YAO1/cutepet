@@ -65,14 +65,14 @@ internal sealed class DetailsController
     internal void EndDetailsMenu()
     {
         menusOpen = Math.Max(0, menusOpen - 1);
-        PointerChanged(window.Scene.IsMouseOver || window.DetailsViewport.IsMouseOver);
+        PointerChanged(window.QuotaHost.QuotaScene.IsMouseOver || window.DetailsViewport.IsMouseOver);
     }
     internal void StopDetailsTimers() { openDetails.Stop(); closeDetails.Stop(); }
     internal void ShowDetails(bool visible)
     {
         DetailsVisible = visible;
         window.PinDetailsButton.Content = Settings.Details == DetailsMode.Always ? "取消固定" : "固定";
-        window.DetailsPopup.IsOpen = visible && window.IsVisible && !verification;
+        window.DetailsPopup.IsOpen = visible && window.QuotaHost.IsVisible && !verification;
     }
     internal void OnDetailsOpened() => NativePlacement.SetPopupTopmost(window.DetailsViewport, window.Topmost);
     internal void RepositionDetails()
