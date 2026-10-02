@@ -107,7 +107,7 @@ internal static class ThroneMotionVerification
             "host click reverses the partially lowered pose without an image jump");
         window.WakeCharacterImmediately();
         Record(window, directory);
-        var preview = new GifBitmapDecoder(new Uri(Path.Combine(directory, "throne-motion.gif")),
+        var preview = new GifBitmapDecoder(new Uri(Path.GetFullPath(Path.Combine(directory, "throne-motion.gif"))),
             BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
         check(preview.Frames.Count == 19, "animated preview records the actual host's complete rest cycle");
         check((ushort)((BitmapMetadata)preview.Frames[0].Metadata).GetQuery("/grctlext/Delay") == 40,
