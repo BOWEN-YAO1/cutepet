@@ -20,7 +20,7 @@ internal sealed class CloudMotionController
     { this.window = window; this.verification = verification; }
     internal bool Start(bool roam = false)
     {
-        if (Active || window.SelectedCharacter.CloudImage is null || window.Settings.PositionLocked
+        if (Active || window.ScreenEdgeActive || window.SelectedCharacter.CloudImage is null || window.Settings.PositionLocked
             || window.CharacterRestPose || window.Model.IsLow && !window.Model.IsStale) return false;
         var dpi = VisualTreeHelper.GetDpi(window);
         var plan = NativePlacement.PlanDrift(window, 96 * window.Settings.EffectiveCharacterScale * dpi.DpiScaleX, direction);
@@ -48,7 +48,7 @@ internal sealed class CloudMotionController
     }
     internal void Advance(TimeSpan elapsed)
     {
-        if (window.SelectedCharacter.CloudImage is null || window.Settings.PositionLocked
+        if (window.ScreenEdgeActive || window.SelectedCharacter.CloudImage is null || window.Settings.PositionLocked
             || window.CharacterRestPose || window.Model.IsLow && !window.Model.IsStale)
         { Cancel(); return; }
         if (Active && Route is not null)

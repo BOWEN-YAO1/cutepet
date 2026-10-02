@@ -58,7 +58,8 @@ public partial class CharacterManagerWindow : Window
         Preview.Source = animation.Image;
         var labels = new[] { ("idle", "待机"), ("blink", "眨眼"), ("greeting", "打招呼"), ("low", "低额度"),
             ("look", "张望"), ("hover", "悬停"), ("happy", "开心"), ("conjure", "召唤王座"), ("sit", "坐下休息"), ("stand", "起身收起"), ("summon-cloud", "召唤小云"),
-            ("sit-blink", "坐姿眨眼"), ("sit-greeting", "坐姿挥手"), ("sit-happy", "坐姿微笑") };
+            ("sit-blink", "坐姿眨眼"), ("sit-greeting", "坐姿挥手"), ("sit-happy", "坐姿微笑"),
+            ("edge-idle", "贴边探头"), ("edge-peek", "探头微笑") };
         CharacterInfo.Text = $"{(pack.BuiltIn ? "内置角色" : "自定义角色")} · {pack.Name}\n动作："
             + string.Join("、", labels.Where(pair => pack.Actions.ContainsKey(pair.Item1)).Select(pair => pair.Item2));
         RightsInfo.Text = $"作者：{(string.IsNullOrWhiteSpace(pack.Manifest.Author) ? "未填写" : pack.Manifest.Author)}\n"

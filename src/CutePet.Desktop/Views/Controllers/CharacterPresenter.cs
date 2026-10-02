@@ -39,6 +39,7 @@ internal sealed class CharacterPresenter
     }
     internal void ApplyPack()
     {
+        window.CancelScreenEdge();
         window.CancelCloud();
         characterAnimation.Configure(window.SelectedCharacter);
         ResetAmbient();
@@ -64,7 +65,8 @@ internal sealed class CharacterPresenter
     internal void StartAnimationClock() { animationClock.Restart(); frameTimer.Start(); }
     internal void AdvanceCharacterAnimation(TimeSpan elapsed)
     {
-        if (!window.CloudActive || window.CanCloudMove) characterAnimation.Advance(elapsed);
+        if ((!window.CloudActive || window.CanCloudMove) && (!window.ScreenEdgeActive || window.CanPlayAmbient)) characterAnimation.Advance(elapsed);
+        window.AdvanceScreenEdge(elapsed);
         window.AdvanceCloud(elapsed);
         RefreshCharacterFrame();
         if (window.IsVisible && !verification) AdvanceAmbient(elapsed);
@@ -84,6 +86,20 @@ internal sealed class CharacterPresenter
         var ms = Math.Max(0, elapsed.TotalMilliseconds);
         if (window.CloudActive) return;
         if (!window.CanPlayAmbient || characterAnimation.Low) { idleForRest = 0; return; }
+        if (window.ScreenEdgeActive)
+        {
+            if (hovered && !hoverPlayed)
+            {
+                hoverElapsed += ms;
+                if (hoverElapsed >= 400) { window.PeekScreenEdge(); hoverPlayed = true; }
+            }
+            if (!hovered)
+            {
+                lookElapsed += ms;
+                if (lookElapsed >= nextLook) { window.PeekScreenEdge(); lookElapsed = 0; nextLook = NextLook(); }
+            }
+            return;
+        }
         if (characterAnimation.RestPose)
         {
             if (automaticRest && characterAnimation.Action == "sit")
@@ -128,6 +144,7 @@ internal sealed class CharacterPresenter
     }
     internal void PlayInteraction()
     {
+        if (window.ScreenEdgeActive) { window.PeekScreenEdge(); return; }
         window.CancelCloud();
         characterAnimation.ReactToClick(Random.Shared.Next(2));
         hoverPlayed = hovered;
@@ -140,6 +157,7 @@ internal sealed class CharacterPresenter
     }
     internal void PlayGreeting()
     {
+        if (window.ScreenEdgeActive) { window.PeekScreenEdge(); return; }
         window.CancelCloud();
         characterAnimation.Greet();
         RefreshCharacterFrame();
@@ -147,6 +165,7 @@ internal sealed class CharacterPresenter
     }
     internal void ToggleRest()
     {
+        if (window.ScreenEdgeActive) WakeImmediately();
         window.CancelCloud();
         ResetAmbient();
         if (characterAnimation.Resting) characterAnimation.StandUp();
@@ -156,6 +175,7 @@ internal sealed class CharacterPresenter
     }
     internal void WakeImmediately()
     {
+        window.CancelScreenEdge();
         window.CancelCloud();
         characterAnimation.Reset();
         ResetAmbient();
@@ -176,6 +196,7 @@ internal sealed class CharacterPresenter
     }
     internal void RefreshCharacterFrame()
     {
+        if (window.Model.IsLow && !window.Model.IsStale) window.CancelScreenEdge();
         if (window.Model.IsLow && !window.Model.IsStale) window.CancelCloud();
         characterAnimation.Low = window.Model.IsLow && !window.Model.IsStale;
         if (window.CharacterArt.Source != characterAnimation.Image) window.CharacterArt.Source = characterAnimation.Image;
@@ -185,7 +206,7 @@ internal sealed class CharacterPresenter
     private void ApplyFloating()
     {
         var enabled = window.IsVisible && !verification && window.SelectedCharacter.Manifest.Float
-            && !characterAnimation.RestPose && !window.CloudActive;
+            && !characterAnimation.RestPose && !window.CloudActive && !window.ScreenEdgeActive;
         if (floating == enabled) return;
         floating = enabled;
         window.Bob.BeginAnimation(TranslateTransform.YProperty, null);
@@ -204,6 +225,7 @@ internal sealed class CharacterPresenter
         }
         else
         {
+            window.CancelScreenEdge();
             window.CancelCloud();
             blink.Stop();
             frameTimer.Stop();
@@ -225,5 +247,13 @@ internal sealed class CharacterPresenter
     }
     internal void CancelCloudSpell()
     { if (characterAnimation.Action == "summon-cloud") characterAnimation.ResetTransient(); }
+    internal void AttachEdge()
+    {
+        characterAnimation.AttachEdge();
+        ResetAmbient();
+        window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
+        RefreshCharacterFrame();
+    }
+    internal void PeekEdge() { characterAnimation.PeekEdge(); RefreshCharacterFrame(); }
 
 }

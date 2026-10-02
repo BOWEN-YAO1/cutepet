@@ -17,7 +17,7 @@ internal static class CharacterPackVerification
         Directory.CreateDirectory(area);
         var library = new CharacterLibrary(Path.Combine(area, "installed"));
         var cat = library.Find("cat");
-        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 13 && cat.Actions.Count == 4,
+        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 15 && cat.Actions.Count == 4,
             "both built-in characters load from independent manifests and PNG clips");
         foreach (var builtIn in library.Packs)
         {
@@ -99,6 +99,33 @@ internal static class CharacterPackVerification
         player.ReactToClick(1);
         check(player.Action == "greeting", "old four-action packs retain their greeting on either click choice");
         var tianyi = library.Find("tianyi");
+        using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
+            check(edgeArchive.GetEntry("edge-v1.png") is not null && edgeArchive.GetEntry("edge-smile-v1.png") is not null,
+                "Tianyi export carries both new screen-edge artwork frames");
+        var edgeFiles = new Dictionary<string, byte[]>();
+        using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
+            foreach (var entry in edgeArchive.Entries.Where(entry => entry.FullName.EndsWith(".png", StringComparison.OrdinalIgnoreCase)))
+            { using var input = entry.Open(); using var bytes = new MemoryStream(); input.CopyTo(bytes); edgeFiles.Add(entry.FullName, bytes.ToArray()); }
+        var edgeRoundTrip = other.Import(Zip("edge-roundtrip", tianyi.Manifest with { Id = "edge-roundtrip" }, edgeFiles));
+        check(edgeRoundTrip.Actions.ContainsKey("edge-idle") && edgeRoundTrip.Actions.ContainsKey("edge-peek")
+            && edgeRoundTrip.Manifest.EdgeAnchorX == 0.06, "edge poses and anchor survive actual package export and import");
+        other.Remove(edgeRoundTrip);
+        var edgeOnly = animated with { Id = "edge-only", Actions = new() {
+            ["idle"] = Clip(true, ("idle.png", 100)), ["edge-idle"] = Clip(true, ("idle.png", 100)) } };
+        var edgeCustom = library.Import(Zip("edge-only", edgeOnly, new() { ["idle.png"] = imageBytes }));
+        player.Configure(edgeCustom); player.AttachEdge(); player.ReactToClick(0); player.Advance(TimeSpan.FromSeconds(10));
+        check(player.Action == "edge-idle", "custom edge base works without optional peek action");
+        Reject(() => library.Import(Zip("edge-orphan", animated with { Id = "edge-orphan", Actions = new() {
+            ["idle"] = Clip(true, ("idle.png", 100)), ["edge-peek"] = Clip(false, ("idle.png", 100)) } },
+            new() { ["idle.png"] = imageBytes })), "edge response requires its own edge base");
+        Reject(() => library.Import(Zip("edge-loop", edgeOnly with { Id = "edge-loop", Actions = new() {
+            ["idle"] = Clip(true, ("idle.png", 100)), ["edge-idle"] = Clip(false, ("idle.png", 100)) } },
+            new() { ["idle.png"] = imageBytes })), "edge base must loop");
+        Reject(() => library.Import(Zip("peek-loop", edgeOnly with { Id = "peek-loop", Actions = new() {
+            ["idle"] = Clip(true, ("idle.png", 100)), ["edge-idle"] = Clip(true, ("idle.png", 100)),
+            ["edge-peek"] = Clip(true, ("idle.png", 100)) } }, new() { ["idle.png"] = imageBytes })), "peek response cannot loop forever");
+        Reject(() => library.Import(Zip("edge-anchor", edgeOnly with { Id = "edge-anchor", EdgeAnchorX = 0.6 },
+            new() { ["idle.png"] = imageBytes })), "edge anchor cannot hide more than half the artwork canvas");
         check(tianyi.CloudImage is { IsFrozen: true } && cat.CloudImage is null,
             "cloud is a cached optional package layer independent of the character canvas");
         using (var cloudArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))

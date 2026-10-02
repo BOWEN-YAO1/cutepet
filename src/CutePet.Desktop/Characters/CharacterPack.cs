@@ -18,6 +18,7 @@ public sealed record CharacterManifest
     public int BlinkIntervalMs { get; init; } = 4000;
     public int RestAfterMs { get; init; }
     public int RestDurationMs { get; init; } = 20000;
+    public double EdgeAnchorX { get; init; }
     public CharacterCloud? Cloud { get; init; }
     public Dictionary<string, CharacterAction> Actions { get; init; } = new();
 }

@@ -122,3 +122,8 @@ Views/Controllers 是与 WPF 控件关联的交互模块；角色播放器和布
 ## 0.15.0 桌面乘云巡游
 
 新增当前显示器内的二维随机巡游、按距离调整时长、自由乘云活动开关和召回到额度旁。人物移动时额度固定，旧 AutoCloud 设置保留；框架与角色素材不变。不自动跨屏；真实桌面、多屏与长期使用仍待验收。470 项窗口 / 功能检查通过，当前行为见 [桌面巡游说明](desktop-roaming.md)。
+
+
+## 0.16.0 屏幕边缘互动
+
+天依支持拖至左右屏幕边缘贴边、点击 / 悬停探头，额度保持独立固定。新增角色包动作 edge-idle / edge-peek、可选 edgeAnchorX 和持久化开关 EdgeInteraction。Layout/ScreenEdgeLayout.cs 计算吸附位置，Views/Controllers/EdgeMotionController.cs 控制贴边与轻微探出，CharacterAnimation / CharacterPresenter 接入角色包动作与生命周期。旧角色包兼容。范围、素材、内存限额、退出规则和验收见 [屏幕边缘互动](screen-edge.md)。

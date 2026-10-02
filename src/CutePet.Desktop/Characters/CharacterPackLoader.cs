@@ -10,7 +10,7 @@ namespace CutePet.Desktop;
 
 internal static class CharacterPackLoader
 {
-    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "sit-blink", "sit-greeting", "sit-happy" };
+    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true, WriteIndented = true };
     public static bool ValidId(string? id) => id is not null && Regex.IsMatch(id, "\\A[a-z][a-z0-9-]{0,63}\\z");
@@ -33,7 +33,8 @@ internal static class CharacterPackLoader
             || manifest.DisplayWidth < 40 || manifest.DisplayWidth > 210 || manifest.DisplayHeight < 40 || manifest.DisplayHeight > 148
             || manifest.BlinkIntervalMs < 1000 || manifest.BlinkIntervalMs > 60000
             || (manifest.RestAfterMs != 0 && (manifest.RestAfterMs < 5000 || manifest.RestAfterMs > 300000))
-            || manifest.RestDurationMs < 1000 || manifest.RestDurationMs > 300000)
+            || manifest.RestDurationMs < 1000 || manifest.RestDurationMs > 300000
+            || !double.IsFinite(manifest.EdgeAnchorX) || manifest.EdgeAnchorX < 0 || manifest.EdgeAnchorX > 0.5)
             throw new InvalidDataException("角色显示大小或眨眼间隔超出允许范围。");
         if (manifest.Actions is null || !manifest.Actions.ContainsKey("idle") || manifest.Actions.Count > ActionNames.Length
             || manifest.Actions.Keys.Any(key => !ActionNames.Contains(key)))
@@ -44,6 +45,8 @@ internal static class CharacterPackLoader
             throw new InvalidDataException("云层图片路径或显示大小不合法。");
         if (manifest.Actions.ContainsKey("summon-cloud") && manifest.Cloud is null)
             throw new InvalidDataException("召唤云动作需要配套 cloud 图层。");
+        if (manifest.Actions.ContainsKey("edge-peek") && !manifest.Actions.ContainsKey("edge-idle"))
+            throw new InvalidDataException("探头回应需要配套 edge-idle 贴边姿势。");
         if (!manifest.Actions.ContainsKey("sit") && (manifest.RestAfterMs != 0 || manifest.Actions.ContainsKey("conjure") || manifest.Actions.ContainsKey("stand")
             || manifest.Actions.Keys.Any(key => key.StartsWith("sit-", StringComparison.Ordinal))))
             throw new InvalidDataException("召唤、起身、坐姿回应或自动休息需要配套 sit 动作。");
@@ -55,8 +58,8 @@ internal static class CharacterPackLoader
         foreach (var (name, action) in manifest.Actions)
         {
             if (action is null || action.Frames is null || action.Frames.Count == 0
-                || (frameCount += action.Frames.Count) > 120 || action.Loop != (name is "idle" or "low" or "sit"))
-                throw new InvalidDataException("待机、低额度和坐姿必须循环；其他动作必须有限播放，最多 120 帧。");
+                || (frameCount += action.Frames.Count) > 120 || action.Loop != (name is "idle" or "low" or "sit" or "edge-idle"))
+                throw new InvalidDataException("待机、低额度、坐姿和贴边姿势必须循环；其他动作必须有限播放，最多 120 帧。");
             var loaded = new List<LoadedFrame>();
             foreach (var frame in action.Frames)
             {
@@ -71,8 +74,8 @@ internal static class CharacterPackLoader
                     var decoder = new PngBitmapDecoder(bytes, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
                     var decoded = decoder.Frames[0];
                     if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
-                        || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 33_554_432)
-                        throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，总解码像素最大 33,554,432。");
+                        || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 36_700_160)
+                        throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，总解码像素最大 36,700,160。");
                     width ??= decoded.PixelWidth;
                     height ??= decoded.PixelHeight;
                     if (decoded.PixelWidth != width || decoded.PixelHeight != height)
@@ -98,7 +101,7 @@ internal static class CharacterPackLoader
                 var decoder = new PngBitmapDecoder(bytes, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
                 var decoded = decoder.Frames[0];
                 if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
-                    || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 33_554_432)
+                    || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 36_700_160)
                     throw new InvalidDataException("云层图片超过角色包解码大小限制。");
                 decoded.Freeze();
                 cloudImage = decoded;

@@ -258,3 +258,8 @@ M1 核心读取链路已通过。M2 已有透明窗口、占位小猫、额度�
 ## 0.12.0 王座动作衔接
 
 2026-10-02：新增 sit-prepare-v2.png、sit-lower-v2.png、sit-near-seat-v2.png 三张过渡帧，召唤 / 坐下 8 帧、起身 9 帧，按当前帧进度反向起身。格式继续为 1，像素限额调整到 33,554,432；旧包保留兼容。新图由内置 image_gen.imagegen 编辑，原图保留，完整提示词位于 REST-SMOOTH-PROMPTS.md 与 SOURCE.md。动作及验证边界详见 docs/rest-smooth.md，原角色权利说明继续适用。
+
+
+## 0.16.0 屏幕边缘互动
+
+天依支持拖至左右屏幕边缘贴边、点击 / 悬停探头，额度保持独立固定。新增角色包动作 edge-idle / edge-peek、可选 edgeAnchorX 和持久化开关 EdgeInteraction。Layout/ScreenEdgeLayout.cs 计算吸附位置，Views/Controllers/EdgeMotionController.cs 控制贴边与轻微探出，CharacterAnimation / CharacterPresenter 接入角色包动作与生命周期。旧角色包兼容。范围、素材、内存限额、退出规则和验收见 [屏幕边缘互动](screen-edge.md)。

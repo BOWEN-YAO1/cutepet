@@ -26,3 +26,7 @@
 ## 0.13.0 坐姿互动
 
 2026-10-02：新增 sit-blink-v1.png、sit-happy-v1.png、sit-wave-v1.png 三张坐姿动作图，来自内置 image_gen.imagegen 对 sit-v1.png 的编辑，保留原图。公共播放器区分坐姿和站姿回应；CharacterPresenter 保留自动休息并触发坐姿微笑。天依共 13 种动作、20 张人物图和 1 张云层，像素限额保持不变。完整提示词在 SEATED-PROMPTS.md / SOURCE.md，原角色权利说明继续适用。行为和 348 项窗口 / 功能验证见 docs/seated-actions.md。
+
+## 0.16.0 屏幕边缘互动
+
+2026-10-02：新增 edge-v1.png 和 edge-smile-v1.png，均由内置 image_gen 工具编辑项目现有同人图生成，原图保留。新素材为 1024×1535 透明 PNG，原样纳入角色包；右侧仅在运行时镜像。完整提示词位于 EDGE-PROMPTS.md / SOURCE.md，原角色权利说明继续适用。行为和验证边界见 docs/screen-edge.md。

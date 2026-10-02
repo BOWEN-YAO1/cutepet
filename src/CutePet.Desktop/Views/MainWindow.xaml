@@ -15,7 +15,10 @@
             <Image.RenderTransform><TranslateTransform x:Name="CloudBob" /></Image.RenderTransform>
           </Image>
           <Image x:Name="CharacterArt" Width="178" Height="148" Stretch="Uniform" VerticalAlignment="Bottom"
-                 RenderOptions.BitmapScalingMode="HighQuality" />
+                 RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality">
+            <Image.RenderTransform><TransformGroup><ScaleTransform x:Name="EdgeMirror" ScaleX="1" />
+              <TranslateTransform x:Name="EdgeShift" /></TransformGroup></Image.RenderTransform>
+          </Image>
         </Grid>
         <Border x:Name="SpeechBubble" Background="#FFF9ED" CornerRadius="10" BorderBrush="#D8E5DB" BorderThickness="1"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-26,4,0,0" Padding="10,6" MaxWidth="110"

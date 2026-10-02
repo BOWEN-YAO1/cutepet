@@ -47,6 +47,7 @@ internal sealed class TrayController : IDisposable
         var cloud = Add("乘云去逛逛", () => { window.RestorePet(); window.RoamDesktop(); });
         var autoCloud = Add("自由乘云活动", window.ToggleAutoCloud);
         Add("召回到额度旁", () => { window.RestorePet(); window.RecallPet(); });
+        var edge = Add("屏幕边缘互动", window.ToggleEdgeInteraction);
         var characterSize = AddSizeMenu("角色大小", window.SetCharacterScale);
         var quotaSize = AddSizeMenu("额度数字大小", window.SetQuotaScale);
         menu.Opening += (_, _) =>
@@ -64,6 +65,8 @@ internal sealed class TrayController : IDisposable
                 && !window.CharacterRestPose && !window.CloudActive && !(window.Model.IsLow && !window.Model.IsStale);
             autoCloud.Enabled = window.SelectedCharacter.CloudImage is not null;
             autoCloud.Checked = window.Settings.AutoCloud;
+            edge.Enabled = window.SelectedCharacter.Actions.ContainsKey("edge-idle");
+            edge.Checked = window.Settings.EdgeInteraction;
             foreach (Forms.ToolStripMenuItem item in details.DropDownItems)
                 item.Checked = (DetailsMode)item.Tag! == window.Settings.Details;
             foreach (Forms.ToolStripMenuItem item in position.DropDownItems)

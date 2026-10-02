@@ -38,6 +38,28 @@ public partial class MainWindow : Window
     private readonly PetDragController dragging;
     private readonly CharacterPresenter characterPresenter;
     private readonly CloudMotionController cloudMotion;
+    private readonly EdgeMotionController edgeMotion;
+    internal bool ScreenEdgeActive => edgeMotion.Active;
+    internal EdgeAttachment? ScreenEdgeAttachment => edgeMotion.Attachment;
+    internal double ScreenEdgePeekOffset => edgeMotion.PeekOffset;
+    internal void StartEdgePose() => characterPresenter.AttachEdge();
+    internal void StartEdgePeek() => characterPresenter.PeekEdge();
+    internal void PeekScreenEdge() => edgeMotion.Peek();
+    internal void CancelScreenEdge() => edgeMotion.Cancel();
+    internal void AdvanceScreenEdge(TimeSpan elapsed) => edgeMotion.Advance(elapsed);
+    public void ToggleEdgeInteraction()
+    {
+        Settings = Settings with { EdgeInteraction = !Settings.EdgeInteraction };
+        if (!Settings.EdgeInteraction && ScreenEdgeActive) WakeCharacterImmediately();
+        SavePlacement();
+    }
+    internal bool CompletePetDrag(Rect area, Size size, Point released, double dpi)
+    {
+        var attached = edgeMotion.Attach(area, size, released, dpi);
+        if (!attached && !verification) NativePlacement.Apply(this, released.X, released.Y);
+        SavePlacement();
+        return attached;
+    }
     private bool cloudPointerInside;
     internal bool CloudActive => cloudMotion.Active;
     internal bool CharacterIdle => characterPresenter.Idle;
@@ -48,8 +70,8 @@ public partial class MainWindow : Window
     internal Point? LastRecallPosition { get; private set; }
     internal bool CanCloudMove => CanPlayAmbient && !cloudPointerInside && !DetailsVisible
         && characterManager?.IsVisible != true && (verification || !NativePlacement.PointerNear(this, 28));
-    public void SummonCloud() => cloudMotion.Start();
-    public void RoamDesktop() => cloudMotion.Start(roam: true);
+    public void SummonCloud() { if (ScreenEdgeActive) WakeCharacterImmediately(); cloudMotion.Start(); }
+    public void RoamDesktop() { if (ScreenEdgeActive) WakeCharacterImmediately(); cloudMotion.Start(roam: true); }
     public void RecallPet()
     {
         WakeCharacterImmediately();
@@ -105,6 +127,7 @@ public partial class MainWindow : Window
         details = new DetailsController(this, verification, () => dragging.Dragged, () => exiting);
         characterPresenter = new CharacterPresenter(this, verification);
         cloudMotion = new CloudMotionController(this, verification);
+        edgeMotion = new EdgeMotionController(this, verification);
         DataContext = Model;
         DetailsViewport.DataContext = Model;
         Model.PropertyChanged += (_, _) => RefreshCharacterFrame();
@@ -129,11 +152,13 @@ public partial class MainWindow : Window
         };
         DpiChanged += (_, _) => Dispatcher.BeginInvoke(() =>
         {
+            var bounds = NativePlacement.RoamingBounds(this);
+            if (ScreenEdgeAttachment is { } edge && (edge.Area != bounds.Area || edge.PetSize != bounds.Size)) WakeCharacterImmediately();
             CancelCloud();
             if (loaded)
             {
                 var current = NativePlacement.Get(this);
-                if (!dragging.IsDragging) { NativePlacement.Apply(this, current.Left, current.Top); SavePlacement(); }
+                if (!dragging.Dragged) { NativePlacement.Apply(this, current.Left, current.Top); SavePlacement(); }
                 RepositionDetails();
             }
         });
@@ -268,6 +293,7 @@ public partial class MainWindow : Window
 
     internal void ApplyDockLayout(DockLayout layout, Point? anchor, bool constrain)
     {
+        if (ScreenEdgeActive) WakeCharacterImmediately();
         CancelCloud();
         Scene.Width = layout.Size.Width;
         Scene.Height = layout.Size.Height;
@@ -332,6 +358,7 @@ public partial class MainWindow : Window
 
     public void ResetPosition()
     {
+        if (ScreenEdgeActive) WakeCharacterImmediately();
         CancelCloud();
         NativePlacement.Apply(this, null, null);
         QuotaHost.MoveTo(QuotaNearPet());

@@ -34,3 +34,8 @@ Characters/DesktopRoaming.cs 规划受边界约束的随机目的地、距离与
 desktop-roaming.gif 将实际 WPF 人物和额度内容树按规划坐标缩放到当前屏幕示意区域，41 帧、每帧 150 毫秒，约 6.15 秒循环；为加速预览，不是实际运行速度或用户桌面录屏。原始路线、屏幕与运行时长记录在 desktop-roaming-plan.txt。验证使用隔离设置、屏幕外 / 零透明度窗口，不运行模型任务、修改账号或操作用户桌宠。
 
 真实鼠标捕获、长时间使用、任务栏变化、拔插显示器和多屏 DPI 切换仍需要人工桌面验收。
+
+
+## 0.16.0 屏幕边缘互动
+
+天依支持拖至左右屏幕边缘贴边、点击 / 悬停探头，额度保持独立固定。新增角色包动作 edge-idle / edge-peek、可选 edgeAnchorX 和持久化开关 EdgeInteraction。Layout/ScreenEdgeLayout.cs 计算吸附位置，Views/Controllers/EdgeMotionController.cs 控制贴边与轻微探出，CharacterAnimation / CharacterPresenter 接入角色包动作与生命周期。旧角色包兼容。范围、素材、内存限额、退出规则和验收见 [屏幕边缘互动](screen-edge.md)。

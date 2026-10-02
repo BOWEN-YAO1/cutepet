@@ -27,9 +27,9 @@ internal sealed class PetDragController
         finally
         {
             mouseStart = null;
-            var current = NativePlacement.Get(window);
-            NativePlacement.Apply(window, current.Left, current.Top);
-            window.SavePlacement();
+            var bounds = NativePlacement.RoamingBounds(window);
+            window.CompletePetDrag(bounds.Area, bounds.Size, bounds.Origin,
+                System.Windows.Media.VisualTreeHelper.GetDpi(window).DpiScaleX);
             dragged = false;
         }
     }

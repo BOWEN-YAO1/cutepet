@@ -28,6 +28,8 @@ internal static class DesktopMenuBuilder
         var autoCloud = Add("自由乘云活动", window.ToggleAutoCloud);
         autoCloud.IsCheckable = true;
         Add("召回到额度旁", window.RecallPet);
+        var edge = Add("屏幕边缘互动", window.ToggleEdgeInteraction);
+        edge.IsCheckable = true;
         var position = new MenuItem { Header = "额度条位置" };
         foreach (var dock in Enum.GetValues<QuotaDock>())
         {
@@ -66,6 +68,8 @@ internal static class DesktopMenuBuilder
                 && !window.CharacterRestPose && !window.CloudActive && !(window.Model.IsLow && !window.Model.IsStale);
             autoCloud.IsEnabled = window.SelectedCharacter.CloudImage is not null;
             autoCloud.IsChecked = window.Settings.AutoCloud;
+            edge.IsEnabled = window.SelectedCharacter.Actions.ContainsKey("edge-idle");
+            edge.IsChecked = window.Settings.EdgeInteraction;
             foreach (MenuItem item in characterSize.Items)
                 item.IsChecked = Math.Abs(window.Settings.EffectiveCharacterScale - (double)item.Tag) < 0.01;
             foreach (MenuItem item in quotaSize.Items)

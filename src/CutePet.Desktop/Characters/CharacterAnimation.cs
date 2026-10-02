@@ -3,7 +3,7 @@ using System.Windows.Media.Imaging;
 
 namespace CutePet.Desktop;
 
-internal enum CharacterFrame { Idle, Closed, Wave, Low, Look, Hover, Happy, Conjure, Sit, Rise, SeatedBlink, SeatedWave, SeatedHappy }
+internal enum CharacterFrame { Idle, Closed, Wave, Low, Look, Hover, Happy, Conjure, Sit, Rise, SeatedBlink, SeatedWave, SeatedHappy, EdgeIdle, EdgePeek }
 
 // Shared triggers; the selected package supplies clips and frame timings.
 internal sealed class CharacterAnimation
@@ -13,6 +13,7 @@ internal sealed class CharacterAnimation
     private double transientElapsed, baseElapsed;
     private bool low;
     private bool resting;
+    private bool onEdge;
     private string? afterStanding;
     private bool standAfterConjure;
     public bool Resting => resting;
@@ -27,12 +28,13 @@ internal sealed class CharacterAnimation
             baseElapsed = 0;
             if (!low) return;
             resting = false;
+            onEdge = false;
             afterStanding = null;
             standAfterConjure = false;
-            if (transient is "blink" or "look" or "hover" or "conjure" or "stand" or "summon-cloud" or "sit-blink" or "sit-greeting" or "sit-happy") ResetTransient();
+            if (transient is "blink" or "look" or "hover" or "conjure" or "stand" or "summon-cloud" or "sit-blink" or "sit-greeting" or "sit-happy" or "edge-peek") ResetTransient();
         }
     }
-    public string Action => transient ?? (Low && pack.Actions.ContainsKey("low") ? "low" : resting ? "sit" : "idle");
+    public string Action => transient ?? (Low && pack.Actions.ContainsKey("low") ? "low" : onEdge ? "edge-idle" : resting ? "sit" : "idle");
     public BitmapSource Image => pack.Actions[Action].At(transient is null ? baseElapsed : transientElapsed);
     public CharacterFrame Frame => Action switch
     { "low" => CharacterFrame.Low, "blink" => CharacterFrame.Closed,
@@ -40,12 +42,16 @@ internal sealed class CharacterAnimation
         "look" => CharacterFrame.Look, "hover" => CharacterFrame.Hover, "happy" => CharacterFrame.Happy,
         "conjure" => CharacterFrame.Conjure, "sit" => CharacterFrame.Sit, "stand" => CharacterFrame.Rise,
         "sit-blink" => CharacterFrame.SeatedBlink, "sit-greeting" => CharacterFrame.SeatedWave, "sit-happy" => CharacterFrame.SeatedHappy,
+        "edge-idle" => CharacterFrame.EdgeIdle, "edge-peek" => CharacterFrame.EdgePeek,
         _ => CharacterFrame.Idle };
     public void Configure(CharacterPack selected) { pack = selected; low = false; baseElapsed = 0; Reset(); }
-    public void Blink() { if (transient is null && !Low) Start(resting ? "sit-blink" : "blink"); }
+    public void Blink() { if (transient is null && !Low && !onEdge) Start(resting ? "sit-blink" : "blink"); }
+    internal void AttachEdge() { Reset(); onEdge = pack.Actions.ContainsKey("edge-idle"); baseElapsed = 0; }
+    internal void PeekEdge() { if (onEdge && !Low && transient is null) Start("edge-peek"); }
     public void Greet() => Respond("greeting");
     private void Respond(string action)
     {
+        if (onEdge) { PeekEdge(); return; }
         if (resting && (transient is null or "sit-blink" or "sit-greeting" or "sit-happy")
             && pack.Actions.ContainsKey("sit-" + action))
         { Start("sit-" + action); return; }
@@ -59,7 +65,7 @@ internal sealed class CharacterAnimation
     }
     public bool SitDown()
     {
-        if (Low || RestPose || !pack.Actions.ContainsKey("sit")) return false;
+        if (Low || onEdge || RestPose || !pack.Actions.ContainsKey("sit")) return false;
         Reset();
         resting = true;
         baseElapsed = 0;
@@ -96,6 +102,7 @@ internal sealed class CharacterAnimation
     }
     public void ReactToClick(int choice)
     {
+        if (onEdge) { PeekEdge(); return; }
         if (resting && (transient is null or "sit-blink" or "sit-greeting" or "sit-happy"))
         {
             var seatedGreeting = pack.Actions.ContainsKey("sit-greeting");
@@ -110,6 +117,7 @@ internal sealed class CharacterAnimation
     }
     public bool TryAmbient(string action)
     {
+        if (onEdge) return false;
         if (action == "sit-happy")
         {
             if (Low || !resting || transient is not null || !pack.Actions.ContainsKey(action)) return false;
@@ -126,7 +134,8 @@ internal sealed class CharacterAnimation
         Reset();
         Low = action == "low";
         resting = (action is "sit" or "conjure" or "sit-blink" or "sit-greeting" or "sit-happy") && pack.Actions.ContainsKey("sit");
-        if (action is not ("idle" or "low" or "sit")) Start(action);
+        onEdge = (action is "edge-idle" or "edge-peek") && pack.Actions.ContainsKey("edge-idle");
+        if (action is not ("idle" or "low" or "sit" or "edge-idle")) Start(action);
     }
     private void Start(string action)
     {
@@ -158,5 +167,5 @@ internal sealed class CharacterAnimation
     public void ResetTransient() { transient = null; transientElapsed = 0; }
     private void StartPendingResponse()
     { if (afterStanding is string response) { afterStanding = null; Start(response); } }
-    public void Reset() { resting = false; standAfterConjure = false; afterStanding = null; ResetTransient(); }
+    public void Reset() { resting = onEdge = false; standAfterConjure = false; afterStanding = null; ResetTransient(); }
 }

@@ -245,6 +245,32 @@
           "durationMs": 150
         }
       ]
+    },
+    "edge-idle": {
+      "loop": true,
+      "frames": [
+        {
+          "image": "edge-v1.png",
+          "durationMs": 1000
+        }
+      ]
+    },
+    "edge-peek": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "edge-v1.png",
+          "durationMs": 300
+        },
+        {
+          "image": "edge-smile-v1.png",
+          "durationMs": 400
+        },
+        {
+          "image": "edge-v1.png",
+          "durationMs": 300
+        }
+      ]
     }
   },
   "restAfterMs": 30000,
@@ -253,5 +279,6 @@
     "image": "cloud-v1.png",
     "displayWidth": 140,
     "displayHeight": 32
-  }
+  },
+  "edgeAnchorX": 0.06
 }

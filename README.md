@@ -2,7 +2,7 @@
 
 一个计划面向 Windows 的桌面宠物，用角色动画和小面板显示 Codex 剩余额度与重置时间，并在使用后自动同步官方数据。
 
-> 已实现独立额度读取模块和 Windows 桌宠窗口：角色选择与动画、独立大小、四方向额度条、悬停详情、位置锁定、开机启动开关、角色包与自定义角色管理及托盘。当前开发原型为 0.15.0，完整桌面验收仍待完成。
+> 已实现独立额度读取模块和 Windows 桌宠窗口：角色选择与动画、独立大小、四方向额度条、悬停详情、位置锁定、开机启动开关、角色包与自定义角色管理及托盘。当前开发原型为 0.16.0，完整桌面验收仍待完成。
 
 ## 桌宠启动
 
@@ -31,7 +31,7 @@ dotnet run --project src/CutePet.Desktop --no-build
 
 ## 项目结构
 
-源码位于 src/，角色包示例位于 examples/，说明位于 docs/，协议测试位于 tests/。桌宠内部按 Views / Quota / Characters / Settings / Layout / Platform / Verification 分类，内置角色包位于 Characters/Packs/。目录职责和功能修改入口见 [项目结构说明](docs/project-structure.md)。0.15.0 增加当前屏幕内二维巡游与召回，沿用人物与额度独立窗口，保留王座中间姿势与按进度反向起身，保留角色包独立云层与乘云移动，继续移除歪头动作，兼容原有角色包与个人设置。新增触发与验收方式见 [动作增强说明](docs/tianyi-animation.md)。
+源码位于 src/，角色包示例位于 examples/，说明位于 docs/，协议测试位于 tests/。桌宠内部按 Views / Quota / Characters / Settings / Layout / Platform / Verification 分类，内置角色包位于 Characters/Packs/。目录职责和功能修改入口见 [项目结构说明](docs/project-structure.md)。0.16.0 增加屏幕左右边缘贴边探头，保留当前屏幕内二维巡游与召回，沿用人物与额度独立窗口，保留王座中间姿势与按进度反向起身，保留角色包独立云层与乘云移动，继续移除歪头动作，兼容原有角色包与个人设置。新增触发与验收方式见 [动作增强说明](docs/tianyi-animation.md)。
 
 ## 额度读取原型
 
@@ -70,7 +70,8 @@ CLI 不在 PATH 时，添加 `--codex "完整路径\codex.exe"`。当前 Windows
 - 已实现：独立坐姿眨眼、微笑与点击挥手，坐姿回应后保持王座。详见 [坐姿互动说明](docs/seated-actions.md)。
 - 已实现：人物与额度独立窗口、各自位置与拖动、乘云时额度固定。详见 [独立窗口说明](docs/independent-windows.md)。
 - 已实现：当前显示器内随机乘云巡游、自由活动开关与召回。详见 [桌面巡游说明](docs/desktop-roaming.md)。
-- 待完成：自动跨屏巡游、边缘互动、更流畅的连续动作帧、人工桌面验收与 GitHub Releases 发布。
+- 已实现：天依屏幕左右边缘贴边、点击 / 悬停探头、开关及角色包扩展。详见 [屏幕边缘互动](docs/screen-edge.md)。
+- 待完成：上下屏幕边缘与应用窗口边框互动、自动跨屏巡游、更流畅的连续动作帧、人工桌面验收与 GitHub Releases 发布。
 
 “自动扣除”指同步官方扣除后的结果，不自行估算或修改账号额度。独立读取和本机正常使用后的同步已验证；其他设备的推送、重置和真实账号切换仍待验证。
 

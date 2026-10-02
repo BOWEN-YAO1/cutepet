@@ -13,7 +13,8 @@ public sealed record Preferences(double? Left = null, double? Top = null, double
     QuotaDock QuotaPosition = QuotaDock.Left, PetCharacter Character = PetCharacter.Cat,
     double? CharacterScale = null, double? QuotaScale = null,
     bool PositionLocked = false, bool StartWithWindows = false, string? CharacterPackId = null, bool AutoRest = true,
-    bool AutoCloud = true, double? QuotaLeft = null, double? QuotaTop = null, bool IndependentWindows = false)
+    bool AutoCloud = true, double? QuotaLeft = null, double? QuotaTop = null, bool IndependentWindows = false,
+    bool EdgeInteraction = true)
 {
     // Older settings used Scale for the entire widget. Missing independent values inherit that size.
     [JsonIgnore] public double EffectiveCharacterScale => CharacterScale ?? Scale;
