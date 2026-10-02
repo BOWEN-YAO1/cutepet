@@ -35,4 +35,31 @@ internal static class WindowPreview
         bitmap.Render(visual);
         return bitmap;
     }
+    internal static RenderTargetBitmap CaptureRoaming(MainWindow window, Point position, Rect area)
+    {
+        const double width = 800, height = 480;
+        var scale = Math.Min((width - 24) / area.Width, (height - 40) / area.Height);
+        var card = window.QuotaHost;
+        var petDpi = VisualTreeHelper.GetDpi(window);
+        var cardDpi = VisualTreeHelper.GetDpi(card);
+        var scene = new DrawingVisual();
+        using (var draw = scene.RenderOpen())
+        {
+            draw.DrawRectangle(new SolidColorBrush(Color.FromRgb(239, 245, 244)), null, new Rect(0, 0, width, height));
+            draw.DrawRectangle(null, new Pen(new SolidColorBrush(Color.FromRgb(192, 209, 201)), 1),
+                new Rect(12, 12, area.Width * scale, area.Height * scale));
+            draw.DrawImage(Surface((FrameworkElement)card.Content, card.Width, card.Height, 96),
+                new Rect(12 + (card.Position.X - area.Left) * scale, 12 + (card.Position.Y - area.Top) * scale,
+                    card.Width * cardDpi.DpiScaleX * scale, card.Height * cardDpi.DpiScaleY * scale));
+            draw.DrawImage(Surface((FrameworkElement)window.Content, window.Width, window.Height, 96),
+                new Rect(12 + (position.X - area.Left) * scale, 12 + (position.Y - area.Top) * scale,
+                    window.Width * petDpi.DpiScaleX * scale, window.Height * petDpi.DpiScaleY * scale));
+            draw.DrawText(new FormattedText("当前屏幕 · 巡游预览（加速）", System.Globalization.CultureInfo.GetCultureInfo("zh-CN"),
+                FlowDirection.LeftToRight, new Typeface("Microsoft YaHei"), 12, new SolidColorBrush(Color.FromRgb(75, 102, 88)), 1),
+                new Point(12, height - 25));
+        }
+        var result = new RenderTargetBitmap((int)width, (int)height, 96, 96, PixelFormats.Pbgra32);
+        result.Render(scene);
+        return result;
+    }
 }

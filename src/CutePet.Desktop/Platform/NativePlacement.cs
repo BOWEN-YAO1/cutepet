@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Media;
 using Forms = System.Windows.Forms;
 
 namespace CutePet.Desktop;
@@ -75,6 +76,18 @@ internal static class NativePlacement
         var point = Forms.Cursor.Position;
         return point.X >= bounds.Left - margin && point.X <= bounds.Right + margin
             && point.Y >= bounds.Top - margin && point.Y <= bounds.Bottom + margin;
+    }
+    internal static (Rect Area, Size Size, Point Origin) RoamingBounds(Window window)
+    {
+        var handle = new WindowInteropHelper(window).Handle;
+        var screen = handle == IntPtr.Zero ? Forms.Screen.PrimaryScreen! : Forms.Screen.FromHandle(handle);
+        var area = screen.WorkingArea;
+        var dpi = VisualTreeHelper.GetDpi(window);
+        var size = new Size(window.Width * dpi.DpiScaleX, window.Height * dpi.DpiScaleY);
+        var origin = new Point();
+        if (handle != IntPtr.Zero && GetWindowRect(handle, out var bounds))
+        { size = new(bounds.Right - bounds.Left, bounds.Bottom - bounds.Top); origin = new(bounds.Left, bounds.Top); }
+        return (new Rect(area.Left, area.Top, area.Width, area.Height), size, origin);
     }
 
     public static void SetPopupTopmost(FrameworkElement content, bool topmost)

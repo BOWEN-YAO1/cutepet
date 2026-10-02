@@ -42,9 +42,24 @@ public partial class MainWindow : Window
     internal bool CloudActive => cloudMotion.Active;
     internal bool CharacterIdle => characterPresenter.Idle;
     internal double CloudRequestedX => cloudMotion.RequestedX;
+    internal double CloudRequestedY => cloudMotion.RequestedY;
+    internal RoamingRoute? CloudRoute => cloudMotion.Route;
+    internal double CloudTripDuration => cloudMotion.TripDuration;
+    internal Point? LastRecallPosition { get; private set; }
     internal bool CanCloudMove => CanPlayAmbient && !cloudPointerInside && !DetailsVisible
         && characterManager?.IsVisible != true && (verification || !NativePlacement.PointerNear(this, 28));
     public void SummonCloud() => cloudMotion.Start();
+    public void RoamDesktop() => cloudMotion.Start(roam: true);
+    public void RecallPet()
+    {
+        WakeCharacterImmediately();
+        var pet = NativePlacement.RoamingBounds(this);
+        var quota = NativePlacement.RoamingBounds(QuotaHost);
+        var destination = DesktopRoaming.Recall(quota.Area, pet.Size, new Rect(QuotaHost.Position, quota.Size));
+        LastRecallPosition = destination;
+        if (!verification) NativePlacement.Apply(this, destination.X, destination.Y);
+        SavePlacement();
+    }
     public void ToggleAutoCloud()
     {
         Settings = Settings with { AutoCloud = !Settings.AutoCloud };

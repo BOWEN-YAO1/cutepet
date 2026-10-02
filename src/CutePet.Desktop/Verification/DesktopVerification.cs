@@ -572,6 +572,7 @@ internal static class DesktopVerification
             ThroneMotionVerification.Run(window, directory, Check);
             SeatedMotionVerification.Run(window, Check);
             await SplitWindowVerification.RunAsync(window, directory, Check);
+            DesktopRoamingVerification.Run(window, directory, Check);
 
             if (live)
             {

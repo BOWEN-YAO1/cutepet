@@ -44,8 +44,9 @@ internal sealed class TrayController : IDisposable
         Add("管理 / 导入角色…", window.ManageCharacters);
         var rest = Add("召唤王座 / 坐下休息", () => { window.RestorePet(); window.ToggleCharacterRest(); });
         var autoRest = Add("自动坐下休息", window.ToggleAutoRest);
-        var cloud = Add("召唤小云 / 飘一会儿", () => { window.RestorePet(); window.SummonCloud(); });
-        var autoCloud = Add("自动乘云飘动", window.ToggleAutoCloud);
+        var cloud = Add("乘云去逛逛", () => { window.RestorePet(); window.RoamDesktop(); });
+        var autoCloud = Add("自由乘云活动", window.ToggleAutoCloud);
+        Add("召回到额度旁", () => { window.RestorePet(); window.RecallPet(); });
         var characterSize = AddSizeMenu("角色大小", window.SetCharacterScale);
         var quotaSize = AddSizeMenu("额度数字大小", window.SetQuotaScale);
         menu.Opening += (_, _) =>

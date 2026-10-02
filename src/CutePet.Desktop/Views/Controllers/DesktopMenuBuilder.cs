@@ -24,9 +24,10 @@ internal static class DesktopMenuBuilder
         var rest = Add("召唤王座 / 坐下休息", window.ToggleCharacterRest);
         var autoRest = Add("自动坐下休息", window.ToggleAutoRest);
         autoRest.IsCheckable = true;
-        var cloud = Add("召唤小云 / 飘一会儿", window.SummonCloud);
-        var autoCloud = Add("自动乘云飘动", window.ToggleAutoCloud);
+        var cloud = Add("乘云去逛逛", window.RoamDesktop);
+        var autoCloud = Add("自由乘云活动", window.ToggleAutoCloud);
         autoCloud.IsCheckable = true;
+        Add("召回到额度旁", window.RecallPet);
         var position = new MenuItem { Header = "额度条位置" };
         foreach (var dock in Enum.GetValues<QuotaDock>())
         {
