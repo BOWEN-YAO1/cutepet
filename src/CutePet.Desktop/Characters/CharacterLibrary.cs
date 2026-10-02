@@ -130,7 +130,9 @@ internal sealed class CharacterLibrary
         {
             var config = archive.CreateEntry("character.json");
             using (var stream = config.Open()) JsonSerializer.Serialize(stream, pack.Manifest, CharacterPackLoader.Json);
-            foreach (var name in pack.Manifest.Actions.Values.SelectMany(action => action.Frames).Select(frame => frame.Image).Distinct(StringComparer.OrdinalIgnoreCase))
+            var imageNames = pack.Manifest.Actions.Values.SelectMany(action => action.Frames).Select(frame => frame.Image);
+            if (pack.Manifest.Cloud is { } cloud) imageNames = imageNames.Append(cloud.Image);
+            foreach (var name in imageNames.Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 using var source = pack.BuiltIn ? Application.GetResourceStream(new Uri(
                     "pack://application:,,,/CutePet;component/Characters/Packs/" + pack.Id + "/" + name))!.Stream : OpenSafe(pack.Directory!, name);

@@ -10,7 +10,7 @@ namespace CutePet.Desktop;
 
 internal static class CharacterPackLoader
 {
-    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand" };
+    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true, WriteIndented = true };
     public static bool ValidId(string? id) => id is not null && Regex.IsMatch(id, "\\A[a-z][a-z0-9-]{0,63}\\z");
@@ -37,7 +37,13 @@ internal static class CharacterPackLoader
             throw new InvalidDataException("角色显示大小或眨眼间隔超出允许范围。");
         if (manifest.Actions is null || !manifest.Actions.ContainsKey("idle") || manifest.Actions.Count > ActionNames.Length
             || manifest.Actions.Keys.Any(key => !ActionNames.Contains(key)))
-            throw new InvalidDataException("必须提供 idle 动作；支持 idle、blink、greeting、low、look、hover、happy、conjure、sit、stand。");
+            throw new InvalidDataException("必须提供 idle 动作；支持 idle、blink、greeting、low、look、hover、happy、conjure、sit、stand、summon-cloud。");
+        if (manifest.Cloud is { } cloud && (cloud.Image is null || !SafeFile(cloud.Image)
+            || !double.IsFinite(cloud.DisplayWidth) || !double.IsFinite(cloud.DisplayHeight)
+            || cloud.DisplayWidth < 40 || cloud.DisplayWidth > 190 || cloud.DisplayHeight < 12 || cloud.DisplayHeight > 40))
+            throw new InvalidDataException("云层图片路径或显示大小不合法。");
+        if (manifest.Actions.ContainsKey("summon-cloud") && manifest.Cloud is null)
+            throw new InvalidDataException("召唤云动作需要配套 cloud 图层。");
         if (!manifest.Actions.ContainsKey("sit") && (manifest.RestAfterMs != 0 || manifest.Actions.ContainsKey("conjure") || manifest.Actions.ContainsKey("stand")))
             throw new InvalidDataException("召唤、起身或自动休息需要配套 sit 动作。");
         var images = new Dictionary<string, BitmapSource>(StringComparer.OrdinalIgnoreCase);
@@ -79,7 +85,25 @@ internal static class CharacterPackLoader
             if (clip.Duration > 30000) throw new InvalidDataException("一个动作最多持续 30 秒。");
             actions.Add(name, clip);
         }
-        return new(manifest, builtIn, actions, directory);
+        BitmapSource? cloudImage = null;
+        if (manifest.Cloud is { } layer)
+        {
+            if (!images.TryGetValue(layer.Image, out cloudImage))
+            {
+                using var stream = openImage(layer.Image);
+                using var bytes = new MemoryStream();
+                CopyLimited(stream, bytes, 8 * 1024 * 1024);
+                bytes.Position = 0;
+                var decoder = new PngBitmapDecoder(bytes, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                var decoded = decoder.Frames[0];
+                if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
+                    || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 25_165_824)
+                    throw new InvalidDataException("云层图片超过角色包解码大小限制。");
+                decoded.Freeze();
+                cloudImage = decoded;
+            }
+        }
+        return new(manifest, builtIn, actions, directory, cloudImage);
     }
     internal static void CopyLimited(Stream source, Stream destination, long limit)
     {

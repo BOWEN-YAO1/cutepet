@@ -13,3 +13,7 @@
 0.9.0 新增的天依六张动作图由内置 image_gen.imagegen 编辑已有项目同人图生成，原始四张图保留；与原图采用相同角色权利说明。完整提示词与画布修正记录位于天依包 SOURCE.md / PROMPTS.md，随源码分发，SOURCE.md 随角色包导出。
 
 0.10.0 王座和五张休息动作帧由内置 image_gen.imagegen 编辑项目现有同人图生成，王座为新增 AI 设计；人物仍适用上述原角色权利说明。完整提示词在天依 THRONE-PROMPTS.md / SOURCE.md，原有素材未覆盖。
+
+## 0.11.0 乘云飘动
+
+2026-10-02：新增天依独立云层（cloud-v1.png）、施法召唤和短距离横向飘动、自动开关与交互暂停。角色素材保留原有脸、服装和动作；小猫保留原行为。云由内置 image_gen.imagegen 生成，1774×887 原始透明 PNG，完整提示词位于角色包 CLOUD-PROMPTS.md 及 SOURCE.md。运动与验证边界详见 docs/cloud-drift.md；属于非官方同人设计，原角色权利说明继续适用。

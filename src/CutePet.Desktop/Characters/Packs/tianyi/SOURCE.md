@@ -166,3 +166,20 @@ Use case: identity-preserve. Image 1 is the edit target, the existing transparen
 ```text
 Use case: identity-preserve. Image 1 is the edit target, the existing transparent Luo Tianyi character with an ivory/cyan/jade throne behind her. Produce exactly ONE desktop-pet animation frame on exactly the same 1024x1535 canvas. Preserve throne design, all throne pixel positions, size and legs. Preserve character identity, gray hair, green eyes, hairstyle, ornaments, blue-white modest costume, dark heeled boots and anime art style. Entire character and throne must remain visible inside the canvas. Genuine transparent alpha background including openings in hair and furniture. No scenery, floor, cast shadow, text, rune lettering, new props, crown or watermark. Change ONLY character pose to fully seated comfortably on the throne's existing cushion: hips supported by seat, torso upright, hands resting lightly on the existing two armrests, knees together, boots and heel soles resting naturally near the bottom center of the canvas. Modest dress covers upper legs; calm gentle smile, both eyes open. Retain exact original full-body character scale and huge chibi head proportions; lower head naturally with the seated torso, do not enlarge or shrink the character. Hair falls around the arms and chair naturally without hiding the boots. The throne stays in precisely the original position, unchanged.
 ```
+
+
+# 小云素材提示词（0.11.0）
+
+模式：内置 `image_gen.imagegen`，新图生成，`transparent_background: true`。
+资产：`cloud-v1.png`；工具实际输出 1774×887（提示词请求 1024×512），保留原始透明 PNG，没有裁切或缩放文件。
+云是本项目的同人桌宠设计，并非官方角色设定。
+
+```text
+Use case: stylized-concept
+Asset type: transparent independent cloud layer for a small Windows desktop pet.
+Primary request: one small floating magical cloud that a chibi character can stand on, no character present.
+Style/medium: polished hand-painted anime game sprite with soft tidy outlines, matching an elegant blue-white-jade Chinese fantasy chibi costume.
+Composition: exactly 1024x512 landscape transparent canvas; a single low, wide cloud centered, occupying about 90% width and 65% height. Flat gently curved upper surface to support two feet, several rounded white lobes and delicate cyan curled wisps below; readable at 140x32 screen pixels.
+Palette: white and pale icy cyan, very subtle jade sparkle, blue shaded underside. Calm and light, no smoke or storm.
+Constraints: genuinely transparent background and clean alpha edges. One cloud only; no people, shoes, throne, ground shadow, scenery, frame, text or watermark. Do not add scattered particles far outside the cloud.
+```

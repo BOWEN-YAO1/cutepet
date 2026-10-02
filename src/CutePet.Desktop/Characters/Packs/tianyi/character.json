@@ -161,8 +161,26 @@
           "durationMs": 100
         }
       ]
+    },
+    "summon-cloud": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "magic-v1.png",
+          "durationMs": 500
+        },
+        {
+          "image": "idle.png",
+          "durationMs": 200
+        }
+      ]
     }
   },
   "restAfterMs": 30000,
-  "restDurationMs": 20000
+  "restDurationMs": 20000,
+  "cloud": {
+    "image": "cloud-v1.png",
+    "displayWidth": 140,
+    "displayHeight": 32
+  }
 }

@@ -181,3 +181,7 @@ dotnet publish src/CutePet.Desktop -c Release --self-contained false -o artifact
 ## 0.10.0 王座休息
 
 新增五张透明素材与 conjure / sit / stand，天依共 14 张图、9 种动作。公共播放器处理坐姿基础状态、起身后的最近一次回应和清理；CharacterPresenter 处理 30 秒自动坐下、20 秒自动起身及浮动暂停。菜单支持手动休息和自动开关，开关写入 Preferences.AutoRest。旧包继续兼容。当前完整验证见 [王座休息说明](throne-rest.md)，此前版本的动作数与验证数为历史记录。
+
+## 0.11.0 乘云飘动
+
+2026-10-02：新增天依独立云层（cloud-v1.png）、施法召唤和短距离横向飘动、自动开关与交互暂停。角色素材保留原有脸、服装和动作；小猫保留原行为。云由内置 image_gen.imagegen 生成，1774×887 原始透明 PNG，完整提示词位于角色包 CLOUD-PROMPTS.md 及 SOURCE.md。运动与验证边界详见 docs/cloud-drift.md；属于非官方同人设计，原角色权利说明继续适用。

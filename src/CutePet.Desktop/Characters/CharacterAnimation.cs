@@ -27,7 +27,7 @@ internal sealed class CharacterAnimation
             if (!low) return;
             resting = false;
             afterStanding = null;
-            if (transient is "blink" or "look" or "hover" or "conjure" or "stand") ResetTransient();
+            if (transient is "blink" or "look" or "hover" or "conjure" or "stand" or "summon-cloud") ResetTransient();
         }
     }
     public string Action => transient ?? (Low && pack.Actions.ContainsKey("low") ? "low" : resting ? "sit" : "idle");

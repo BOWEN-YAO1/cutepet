@@ -24,6 +24,9 @@ internal static class DesktopMenuBuilder
         var rest = Add("召唤王座 / 坐下休息", window.ToggleCharacterRest);
         var autoRest = Add("自动坐下休息", window.ToggleAutoRest);
         autoRest.IsCheckable = true;
+        var cloud = Add("召唤小云 / 飘一会儿", window.SummonCloud);
+        var autoCloud = Add("自动乘云飘动", window.ToggleAutoCloud);
+        autoCloud.IsCheckable = true;
         var position = new MenuItem { Header = "额度条位置" };
         foreach (var dock in Enum.GetValues<QuotaDock>())
         {
@@ -58,6 +61,10 @@ internal static class DesktopMenuBuilder
                 || window.CharacterResting;
             autoRest.IsEnabled = window.SelectedCharacter.Manifest.RestAfterMs > 0;
             autoRest.IsChecked = window.Settings.AutoRest;
+            cloud.IsEnabled = window.SelectedCharacter.CloudImage is not null && !window.Settings.PositionLocked
+                && !window.CharacterRestPose && !window.CloudActive && !(window.Model.IsLow && !window.Model.IsStale);
+            autoCloud.IsEnabled = window.SelectedCharacter.CloudImage is not null;
+            autoCloud.IsChecked = window.Settings.AutoCloud;
             foreach (MenuItem item in characterSize.Items)
                 item.IsChecked = Math.Abs(window.Settings.EffectiveCharacterScale - (double)item.Tag) < 0.01;
             foreach (MenuItem item in quotaSize.Items)

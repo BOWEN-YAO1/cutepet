@@ -12,6 +12,7 @@ public partial class CharacterManagerWindow : Window
 {
     private readonly MainWindow host;
     private readonly CharacterAnimation animation = new();
+    private readonly CloudFlight cloudPreview = new();
     private readonly Stopwatch clock = new();
     private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(40) };
     private CharacterPack? Selected => CharacterList.SelectedItem as CharacterPack;
@@ -29,6 +30,8 @@ public partial class CharacterManagerWindow : Window
             var elapsed = clock.Elapsed;
             clock.Restart();
             animation.Advance(elapsed);
+            cloudPreview.Advance(elapsed);
+            CloudPreview.Opacity = cloudPreview.Opacity;
             Preview.Source = animation.Image;
         };
         IsVisibleChanged += (_, _) =>
@@ -47,9 +50,14 @@ public partial class CharacterManagerWindow : Window
     {
         if (Selected is not CharacterPack pack) return;
         animation.Configure(pack);
+        cloudPreview.Cancel();
+        CloudPreview.Opacity = 0;
+        CloudPreview.Source = pack.CloudImage;
+        CloudPreview.Width = pack.Manifest.Cloud?.DisplayWidth ?? 140;
+        CloudPreview.Height = pack.Manifest.Cloud?.DisplayHeight ?? 32;
         Preview.Source = animation.Image;
         var labels = new[] { ("idle", "待机"), ("blink", "眨眼"), ("greeting", "打招呼"), ("low", "低额度"),
-            ("look", "张望"), ("hover", "悬停"), ("happy", "开心"), ("conjure", "召唤王座"), ("sit", "坐下休息"), ("stand", "起身收起") };
+            ("look", "张望"), ("hover", "悬停"), ("happy", "开心"), ("conjure", "召唤王座"), ("sit", "坐下休息"), ("stand", "起身收起"), ("summon-cloud", "召唤小云") };
         CharacterInfo.Text = $"{(pack.BuiltIn ? "内置角色" : "自定义角色")} · {pack.Name}\n动作："
             + string.Join("、", labels.Where(pair => pack.Actions.ContainsKey(pair.Item1)).Select(pair => pair.Item2));
         RightsInfo.Text = $"作者：{(string.IsNullOrWhiteSpace(pack.Manifest.Author) ? "未填写" : pack.Manifest.Author)}\n"
@@ -67,7 +75,13 @@ public partial class CharacterManagerWindow : Window
         StatusText.Text = $"已使用「{pack.Name}」，重启后会保留。";
     }
     private void OnPreview(object sender, RoutedEventArgs e)
-    { if (PreviewAction.SelectedValue is string action) animation.Preview(action); Preview.Source = animation.Image; }
+    {
+        cloudPreview.Cancel();
+        if (PreviewAction.SelectedValue is string action)
+        { animation.Preview(action); if (action == "summon-cloud") cloudPreview.Start(Selected!.Actions[action].Duration); }
+        CloudPreview.Opacity = 0;
+        Preview.Source = animation.Image;
+    }
     private void OnImport(object sender, RoutedEventArgs e)
     {
         var picker = new Microsoft.Win32.OpenFileDialog { Title = "导入自定义角色",

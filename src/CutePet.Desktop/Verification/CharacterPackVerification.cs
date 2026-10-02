@@ -17,7 +17,7 @@ internal static class CharacterPackVerification
         Directory.CreateDirectory(area);
         var library = new CharacterLibrary(Path.Combine(area, "installed"));
         var cat = library.Find("cat");
-        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 9 && cat.Actions.Count == 4,
+        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 10 && cat.Actions.Count == 4,
             "both built-in characters load from independent manifests and PNG clips");
         foreach (var builtIn in library.Packs)
         {
@@ -99,6 +99,10 @@ internal static class CharacterPackVerification
         player.ReactToClick(1);
         check(player.Action == "greeting", "old four-action packs retain their greeting on either click choice");
         var tianyi = library.Find("tianyi");
+        check(tianyi.CloudImage is { IsFrozen: true } && cat.CloudImage is null,
+            "cloud is a cached optional package layer independent of the character canvas");
+        using (var cloudArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
+            check(cloudArchive.GetEntry("cloud-v1.png") is not null, "built-in export includes the cloud layer");
         player.Configure(tianyi);
         check(player.TryAmbient("look"), "Tianyi can start its package-defined look clip");
         player.Advance(TimeSpan.FromMilliseconds(600));
@@ -258,6 +262,27 @@ internal static class CharacterPackVerification
             System.Windows.Media.PixelFormats.Bgra32, null, new byte[] { 0, 0, 0, 0 }, 4)));
         using var canvasBytes = new MemoryStream();
         wrongCanvas.Save(canvasBytes);
+        var cloudManifest = new CharacterManifest { Id = "cloud-custom", Name = "Cloud test",
+            Cloud = new() { Image = "cloud.png" }, Actions = new() { ["idle"] = Clip(true, ("idle.png", 100)) } };
+        var cloudPack = library.Import(Zip("cloud-custom", cloudManifest,
+            new() { ["idle.png"] = imageBytes, ["cloud.png"] = canvasBytes.ToArray() }));
+        check(cloudPack.CloudImage is { PixelWidth: 1, IsFrozen: true }, "cloud layers may use their own canvas without changing character frames");
+        var cloudExport = Path.Combine(area, "cloud-roundtrip.zip");
+        library.Export(cloudPack, cloudExport);
+        check(new CharacterLibrary(Path.Combine(area, "cloud-roundtrip")).Import(cloudExport).CloudImage is not null,
+            "custom cloud configuration and its image survive ZIP export and import");
+        Reject(() => library.Import(Zip("cloud-missing", cloudManifest with { Id = "cloud-missing" },
+            new() { ["idle.png"] = imageBytes })), "missing cloud layer rejects the whole import");
+        Reject(() => library.Import(Zip("cloud-path", cloudManifest with { Id = "cloud-path", Cloud = new() { Image = "../cloud.png" } },
+            new() { ["idle.png"] = imageBytes })), "cloud paths obey the same traversal protection");
+        Reject(() => library.Import(Zip("cloud-size", cloudManifest with { Id = "cloud-size", Cloud = new() { Image = "cloud.png", DisplayWidth = 999 } },
+            new() { ["idle.png"] = imageBytes, ["cloud.png"] = imageBytes })), "cloud display sizes are bounded");
+        Reject(() => library.Import(Zip("cloud-orphan", cloudManifest with { Id = "cloud-orphan", Cloud = null, Actions = new() {
+            ["idle"] = Clip(true, ("idle.png", 100)), ["summon-cloud"] = Clip(false, ("idle.png", 100)) } },
+            new() { ["idle.png"] = imageBytes })), "cloud summon actions require an optional cloud layer");
+        Reject(() => library.Import(Zip("cloud-pixels", cloudManifest with { Id = "cloud-pixels", Cloud = new() { Image = "large-6.png" },
+            Actions = new() { ["idle"] = Clip(true, Enumerable.Range(0, 6).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
+            "cloud pixels count toward the same total decoded memory limit");
         Reject(() => library.Import(Zip("canvas", animated with { Id = "canvas" }, new() {
             ["idle.png"] = imageBytes, ["second.png"] = canvasBytes.ToArray() })), "inconsistent frame canvases are rejected");
         check(!Directory.EnumerateDirectories(library.Root, ".import-*").Any(), "all malformed imports leave no installed or staging residue");

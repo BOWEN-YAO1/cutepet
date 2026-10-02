@@ -32,6 +32,24 @@ public partial class MainWindow : Window
     private readonly DetailsController details;
     private readonly PetDragController dragging;
     private readonly CharacterPresenter characterPresenter;
+    private readonly CloudMotionController cloudMotion;
+    private bool cloudPointerInside;
+    internal bool CloudActive => cloudMotion.Active;
+    internal bool CharacterIdle => characterPresenter.Idle;
+    internal double CloudRequestedX => cloudMotion.RequestedX;
+    internal bool CanCloudMove => CanPlayAmbient && !cloudPointerInside && !DetailsVisible
+        && characterManager?.IsVisible != true && (verification || !NativePlacement.PointerNear(this, 28));
+    public void SummonCloud() => cloudMotion.Start();
+    public void ToggleAutoCloud()
+    {
+        Settings = Settings with { AutoCloud = !Settings.AutoCloud };
+        if (!Settings.AutoCloud) cloudMotion.Cancel();
+        SavePlacement();
+    }
+    internal void AdvanceCloud(TimeSpan elapsed) => cloudMotion.Advance(elapsed);
+    internal void CancelCloud() => cloudMotion.Cancel();
+    internal void StartCloudSpell() => characterPresenter.StartCloudSpell();
+    internal void CancelCloudSpell() => characterPresenter.CancelCloudSpell();
     internal CharacterFrame CurrentCharacterFrame => characterPresenter.CurrentFrame;
     internal bool CharacterResting => characterPresenter.Resting;
     internal bool CharacterRestPose => characterPresenter.RestPose;
@@ -65,6 +83,7 @@ public partial class MainWindow : Window
         dragging = new PetDragController(this, verification);
         details = new DetailsController(this, verification, () => dragging.Dragged, () => exiting);
         characterPresenter = new CharacterPresenter(this, verification);
+        cloudMotion = new CloudMotionController(this, verification);
         DataContext = Model;
         DetailsViewport.DataContext = Model;
         Model.PropertyChanged += (_, _) => RefreshCharacterFrame();
@@ -83,11 +102,12 @@ public partial class MainWindow : Window
         IsVisibleChanged += (_, _) =>
         {
             Animate(IsVisible && !verification);
-            if (!IsVisible) { details.ResetHover(); StopDetailsTimers(); ShowDetails(false); }
+            if (!IsVisible) { cloudPointerInside = false; details.ResetHover(); StopDetailsTimers(); ShowDetails(false); }
             else ShowDetails(Settings.Details == DetailsMode.Always);
         };
         DpiChanged += (_, _) => Dispatcher.BeginInvoke(() =>
         {
+            CancelCloud();
             if (loaded)
             {
                 var current = NativePlacement.Get(this);
@@ -129,6 +149,7 @@ public partial class MainWindow : Window
 
     public void TogglePositionLock()
     {
+        CancelCloud();
         if (dragging.IsDragging) EndQuotaDrag(cancel: true);
         dragging.CancelPointer();
         Settings = Settings with { PositionLocked = !Settings.PositionLocked };
@@ -219,6 +240,7 @@ public partial class MainWindow : Window
 
     internal void ApplyDockLayout(DockLayout layout, Point? anchor, bool constrain)
     {
+        CancelCloud();
         Scene.Width = layout.Size.Width;
         Scene.Height = layout.Size.Height;
         Width = layout.Size.Width;
@@ -275,6 +297,7 @@ public partial class MainWindow : Window
 
     public void ResetPosition()
     {
+        CancelCloud();
         NativePlacement.Apply(this, null, null);
         RepositionDetails();
         SavePlacement();
@@ -314,13 +337,13 @@ public partial class MainWindow : Window
         details.ApplyMode();
         SavePlacement();
     }
-    private void OnHoverEnter(object sender, MouseEventArgs e) => details.PointerChanged(true);
+    private void OnHoverEnter(object sender, MouseEventArgs e) => PointerChanged(true);
     private void OnPetEnter(object sender, MouseEventArgs e) => characterPresenter.PointerChanged(true);
     private void OnPetLeave(object sender, MouseEventArgs e) => characterPresenter.PointerChanged(false);
     internal void CharacterPointerChanged(bool inside) => characterPresenter.PointerChanged(inside);
     internal void AdvanceAmbient(TimeSpan elapsed) => characterPresenter.AdvanceAmbient(elapsed);
-    private void OnHoverLeave(object sender, MouseEventArgs e) => details.PointerChanged(Scene.IsMouseOver || DetailsViewport.IsMouseOver);
-    internal void PointerChanged(bool inside) => details.PointerChanged(inside);
+    private void OnHoverLeave(object sender, MouseEventArgs e) => PointerChanged(Scene.IsMouseOver || DetailsViewport.IsMouseOver);
+    internal void PointerChanged(bool inside) { cloudPointerInside = inside; details.PointerChanged(inside); }
     internal void CompleteHoverOpen() => details.CompleteHoverOpen();
     internal void CompleteHoverClose() => details.CompleteHoverClose();
     internal void BeginDetailsMenu() => details.BeginDetailsMenu();

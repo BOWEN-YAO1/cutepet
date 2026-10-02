@@ -18,7 +18,14 @@ public sealed record CharacterManifest
     public int BlinkIntervalMs { get; init; } = 4000;
     public int RestAfterMs { get; init; }
     public int RestDurationMs { get; init; } = 20000;
+    public CharacterCloud? Cloud { get; init; }
     public Dictionary<string, CharacterAction> Actions { get; init; } = new();
+}
+public sealed record CharacterCloud
+{
+    public string Image { get; init; } = "";
+    public double DisplayWidth { get; init; } = 140;
+    public double DisplayHeight { get; init; } = 32;
 }
 public sealed record CharacterAction
 {
@@ -42,7 +49,7 @@ internal sealed record LoadedAction(bool Loop, IReadOnlyList<LoadedFrame> Frames
     }
 }
 internal sealed record CharacterPack(CharacterManifest Manifest, bool BuiltIn,
-    IReadOnlyDictionary<string, LoadedAction> Actions, string? Directory = null)
+    IReadOnlyDictionary<string, LoadedAction> Actions, string? Directory = null, BitmapSource? CloudImage = null)
 {
     public string Id => Manifest.Id;
     public string Name => Manifest.Name;

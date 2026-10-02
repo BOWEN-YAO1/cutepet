@@ -55,6 +55,8 @@ internal static class DesktopVerification
                 "invalid coordinates and scale recover");
             store.Save(new Preferences());
             window = new MainWindow(store, verification: true);
+            Check(window.Settings.AutoCloud && store.Load().AutoCloud, "legacy settings enable the cloud option");
+            window.ToggleAutoCloud(); // Keep existing animation regression clocks isolated from movement.
             CharacterPackVerification.Run(directory, Check);
             Check(window.AllowsTransparency && window.WindowStyle == WindowStyle.None && !window.ShowInTaskbar,
                 "transparent borderless desktop host");
@@ -516,7 +518,7 @@ internal static class DesktopVerification
             Check(manager.Preview.Source == window.SelectedCharacter.Actions["greeting"].Frames[0].Image,
                 "manager greeting preview uses the selected package's real frames");
             manager.CharacterList.SelectedItem = window.Characters.Find("tianyi");
-            Check(manager.PreviewAction.Items.Count == 9, "manager exposes nine Tianyi actions without the withdrawn tilt");
+            Check(manager.PreviewAction.Items.Count == 10, "manager exposes ten Tianyi actions without the withdrawn tilt");
             manager.PreviewAction.SelectedValue = "happy";
             manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
             Check(manager.Preview.Source == window.Characters.Find("tianyi").Actions["happy"].Frames[0].Image,
@@ -554,6 +556,9 @@ internal static class DesktopVerification
                 second.RequestShow();
                 Check(await Task.WhenAny(signal.Task, Task.Delay(3000)) == signal.Task, "duplicate launch signals existing host");
             }
+
+            await CloudVerification.RunAsync(window, Check, name => Render(window, directory, name, 192),
+                low => window.Model.Apply(Snapshot(low ? 8 : 72, 48), demo: true), () => store.Load().AutoCloud);
 
             if (live)
             {

@@ -18,7 +18,10 @@
       <Grid Grid.Column="1" Margin="20,0,0,0">
         <Grid.RowDefinitions><RowDefinition Height="150"/><RowDefinition Height="Auto"/><RowDefinition Height="*" MinHeight="62"/></Grid.RowDefinitions>
         <Border Background="#EBF1E9" CornerRadius="12">
-          <Image x:Name="Preview" Margin="8" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+          <Grid>
+            <Image x:Name="CloudPreview" Width="140" Height="32" VerticalAlignment="Bottom" Margin="0,0,0,1" Opacity="0" Stretch="Uniform"/>
+            <Image x:Name="Preview" Margin="8,8,8,16" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+          </Grid>
         </Border>
         <TextBlock x:Name="CharacterInfo" Grid.Row="1" TextWrapping="Wrap" Foreground="#465C50" FontSize="12" Margin="0,10,0,0"/>
         <TextBlock x:Name="RightsInfo" Grid.Row="2" TextWrapping="Wrap" Foreground="#74877B" FontSize="11" Margin="0,8,0,0" MaxHeight="62" TextTrimming="CharacterEllipsis"/>

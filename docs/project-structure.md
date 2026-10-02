@@ -1,4 +1,4 @@
-# 项目结构与修改入口（0.10.0）
+# 项目结构与修改入口（0.11.0）
 
 日期：2026-10-02。0.8.1 整理目录，并将主窗口中的交互状态和播放计时分配给独立模块。保留 0.8 的角色包格式、设置目录、程序入口与已实现功能。
 
@@ -36,6 +36,7 @@ CutePet.Desktop/
 │       ├── PetDragController.cs        鼠标手势、拖动状态与停靠预览
 │       ├── DetailsController.cs        悬停计时、菜单保持与详情弹窗
 │       ├── CharacterPresenter.cs       图片显示、动画计时与 WPF 变换
+│       ├── CloudMotionController.cs    乘云行程、界面暂停与位置保存
 │       └── DesktopMenuBuilder.cs       桌宠右键菜单组成与选中状态
 ├── Quota/
 │   ├── QuotaSession.cs                 读取刷新、通知、重试及生命周期
@@ -46,6 +47,7 @@ CutePet.Desktop/
 │   ├── CharacterPack.cs               包的配置、动作与已加载帧模型
 │   ├── CharacterPackLoader.cs         配置和图片校验、解码与缓存
 │   ├── CharacterAnimation.cs          按包内时长推进的共享播放器
+│   ├── CloudFlight.cs                 乘云阶段与屏幕边界目标计算
 │   └── Packs/
 │       ├── cat/                       内置小猫包
 │       └── tianyi/                    内置洛天依同人包
@@ -60,6 +62,7 @@ CutePet.Desktop/
 │   └── NativePlacement.cs             屏幕、DPI、位置约束和弹窗置顶
 └── Verification/
     ├── DesktopVerification.cs         真实 WPF 离屏功能验证
+    ├── CloudVerification.cs           乘云时钟、边界和交互验证
     └── CharacterPackVerification.cs   角色包端到端及错误边界验证
 ```
 

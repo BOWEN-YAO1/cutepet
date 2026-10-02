@@ -10,9 +10,13 @@
               IsHitTestVisible="False" Visibility="Collapsed" />
       <Viewbox x:Name="PetStage" Width="230" Height="178" Canvas.Left="110" Canvas.Top="2" Stretch="Uniform" MouseEnter="OnPetEnter" MouseLeave="OnPetLeave">
        <Grid Width="230" Height="178">
-        <Ellipse Fill="#2029443B" Width="108" Height="13" VerticalAlignment="Bottom" Margin="0,0,0,1" />
+        <Ellipse x:Name="GroundShadow" Fill="#2029443B" Width="108" Height="13" VerticalAlignment="Bottom" Margin="0,0,0,1" />
         <Grid x:Name="PetArt" RenderTransformOrigin="0.5,0.85" Margin="0,16,0,14">
-          <Grid.RenderTransform><TransformGroup><TranslateTransform x:Name="Bob" /><RotateTransform x:Name="GreetingTilt" /></TransformGroup></Grid.RenderTransform>
+          <Grid.RenderTransform><TransformGroup><TranslateTransform x:Name="Bob" /><TranslateTransform x:Name="CloudLift" /><RotateTransform x:Name="GreetingTilt" /></TransformGroup></Grid.RenderTransform>
+          <Image x:Name="CloudArt" Width="140" Height="32" Stretch="Uniform" VerticalAlignment="Bottom"
+                 Margin="0,0,0,-16" Opacity="0" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality">
+            <Image.RenderTransform><TranslateTransform x:Name="CloudBob" /></Image.RenderTransform>
+          </Image>
           <Image x:Name="CharacterArt" Width="178" Height="148" Stretch="Uniform" VerticalAlignment="Bottom"
                  RenderOptions.BitmapScalingMode="HighQuality" />
         </Grid>

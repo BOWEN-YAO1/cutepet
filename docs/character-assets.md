@@ -67,3 +67,7 @@ Use case: identity-preserve. Edit target: supplied transparent Luo Tianyi fan-ar
 ## 0.10.0 王座休息素材
 
 新增施法、王座显现、完整王座、下坐过渡与坐姿五张透明图，使用内置 imagegen 编辑，保留服装、鞋子及原有动作。完整提示词见 [THRONE-PROMPTS.md](../src/CutePet.Desktop/Characters/Packs/tianyi/THRONE-PROMPTS.md)，也嵌入包内 SOURCE.md 随导出分发。当前共 14 张图、9 种动作。流程与验收见 [王座休息说明](throne-rest.md)。
+
+## 0.11.0 乘云飘动
+
+2026-10-02：新增天依独立云层（cloud-v1.png）、施法召唤和短距离横向飘动、自动开关与交互暂停。角色素材保留原有脸、服装和动作；小猫保留原行为。云由内置 image_gen.imagegen 生成，1774×887 原始透明 PNG，完整提示词位于角色包 CLOUD-PROMPTS.md 及 SOURCE.md。运动与验证边界详见 docs/cloud-drift.md；属于非官方同人设计，原角色权利说明继续适用。

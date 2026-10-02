@@ -56,6 +56,27 @@ internal static class NativePlacement
             SetWindowPos(handle, IntPtr.Zero, (int)Math.Round(left), (int)Math.Round(top), 0, 0, 0x0001 | 0x0004 | 0x0010);
     }
 
+    internal static (double Start, double Target, double Top) PlanDrift(Window window, double distance, int direction)
+    {
+        var handle = new WindowInteropHelper(window).Handle;
+        if (handle == IntPtr.Zero || !GetWindowRect(handle, out var bounds)) return (0, direction * distance, 0);
+        var area = Forms.Screen.FromHandle(handle).WorkingArea;
+        var width = bounds.Right - bounds.Left;
+        var height = bounds.Bottom - bounds.Top;
+        var start = Math.Clamp(bounds.Left, area.Left, Math.Max(area.Left, area.Right - width));
+        return (start, CloudFlight.Target(start, width, area.Left, area.Right, distance, direction),
+            Math.Clamp(bounds.Top, area.Top, Math.Max(area.Top, area.Bottom - height)));
+    }
+
+    internal static bool PointerNear(Window window, int margin)
+    {
+        var handle = new WindowInteropHelper(window).Handle;
+        if (handle == IntPtr.Zero || !GetWindowRect(handle, out var bounds)) return true;
+        var point = Forms.Cursor.Position;
+        return point.X >= bounds.Left - margin && point.X <= bounds.Right + margin
+            && point.Y >= bounds.Top - margin && point.Y <= bounds.Bottom + margin;
+    }
+
     public static void SetPopupTopmost(FrameworkElement content, bool topmost)
     {
         if (PresentationSource.FromVisual(content) is HwndSource source)

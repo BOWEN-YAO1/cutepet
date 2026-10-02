@@ -44,6 +44,8 @@ internal sealed class TrayController : IDisposable
         Add("管理 / 导入角色…", window.ManageCharacters);
         var rest = Add("召唤王座 / 坐下休息", () => { window.RestorePet(); window.ToggleCharacterRest(); });
         var autoRest = Add("自动坐下休息", window.ToggleAutoRest);
+        var cloud = Add("召唤小云 / 飘一会儿", () => { window.RestorePet(); window.SummonCloud(); });
+        var autoCloud = Add("自动乘云飘动", window.ToggleAutoCloud);
         var characterSize = AddSizeMenu("角色大小", window.SetCharacterScale);
         var quotaSize = AddSizeMenu("额度数字大小", window.SetQuotaScale);
         menu.Opening += (_, _) =>
@@ -57,6 +59,10 @@ internal sealed class TrayController : IDisposable
                 && !(window.Model.IsLow && !window.Model.IsStale) || window.CharacterResting;
             autoRest.Enabled = window.SelectedCharacter.Manifest.RestAfterMs > 0;
             autoRest.Checked = window.Settings.AutoRest;
+            cloud.Enabled = window.SelectedCharacter.CloudImage is not null && !window.Settings.PositionLocked
+                && !window.CharacterRestPose && !window.CloudActive && !(window.Model.IsLow && !window.Model.IsStale);
+            autoCloud.Enabled = window.SelectedCharacter.CloudImage is not null;
+            autoCloud.Checked = window.Settings.AutoCloud;
             foreach (Forms.ToolStripMenuItem item in details.DropDownItems)
                 item.Checked = (DetailsMode)item.Tag! == window.Settings.Details;
             foreach (Forms.ToolStripMenuItem item in position.DropDownItems)
