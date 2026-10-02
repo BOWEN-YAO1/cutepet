@@ -102,6 +102,67 @@
           "durationMs": 180
         }
       ]
+    },
+    "conjure": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "magic-v1.png",
+          "durationMs": 450
+        },
+        {
+          "image": "throne-form-v1.png",
+          "durationMs": 350
+        },
+        {
+          "image": "throne-standing-v1.png",
+          "durationMs": 250
+        },
+        {
+          "image": "sit-mid-v1.png",
+          "durationMs": 250
+        },
+        {
+          "image": "sit-v1.png",
+          "durationMs": 200
+        }
+      ]
+    },
+    "sit": {
+      "loop": true,
+      "frames": [
+        {
+          "image": "sit-v1.png",
+          "durationMs": 1000
+        }
+      ]
+    },
+    "stand": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "sit-mid-v1.png",
+          "durationMs": 250
+        },
+        {
+          "image": "throne-standing-v1.png",
+          "durationMs": 250
+        },
+        {
+          "image": "throne-form-v1.png",
+          "durationMs": 220
+        },
+        {
+          "image": "magic-v1.png",
+          "durationMs": 180
+        },
+        {
+          "image": "idle.png",
+          "durationMs": 100
+        }
+      ]
     }
-  }
+  },
+  "restAfterMs": 30000,
+  "restDurationMs": 20000
 }

@@ -16,6 +16,8 @@ public sealed record CharacterManifest
     public double DisplayHeight { get; init; } = 148;
     public bool Float { get; init; } = true;
     public int BlinkIntervalMs { get; init; } = 4000;
+    public int RestAfterMs { get; init; }
+    public int RestDurationMs { get; init; } = 20000;
     public Dictionary<string, CharacterAction> Actions { get; init; } = new();
 }
 public sealed record CharacterAction

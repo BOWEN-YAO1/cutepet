@@ -12,7 +12,7 @@ public sealed record Preferences(double? Left = null, double? Top = null, double
     bool AlwaysOnTop = true, string? CodexPath = null, DetailsMode Details = DetailsMode.Hover,
     QuotaDock QuotaPosition = QuotaDock.Left, PetCharacter Character = PetCharacter.Cat,
     double? CharacterScale = null, double? QuotaScale = null,
-    bool PositionLocked = false, bool StartWithWindows = false, string? CharacterPackId = null)
+    bool PositionLocked = false, bool StartWithWindows = false, string? CharacterPackId = null, bool AutoRest = true)
 {
     // Older settings used Scale for the entire widget. Missing independent values inherit that size.
     [JsonIgnore] public double EffectiveCharacterScale => CharacterScale ?? Scale;

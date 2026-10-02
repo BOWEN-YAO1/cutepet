@@ -27,7 +27,7 @@
     <WrapPanel Grid.Row="2" Margin="0,16,0,0">
       <Button Content="导入 PNG / 角色包…" Padding="12,7" Margin="0,0,8,0" Click="OnImport"/>
       <Button x:Name="UseButton" Content="使用此角色" Padding="12,7" Margin="0,0,8,0" Click="OnUse"/>
-      <ComboBox x:Name="PreviewAction" Width="86" Margin="0,0,4,0" VerticalContentAlignment="Center" DisplayMemberPath="Label" SelectedValuePath="Key"/>
+      <ComboBox x:Name="PreviewAction" Width="100" Margin="0,0,4,0" VerticalContentAlignment="Center" DisplayMemberPath="Label" SelectedValuePath="Key"/>
       <Button x:Name="PreviewButton" Content="播放动作" Padding="12,7" Margin="0,0,8,0" Click="OnPreview"/>
       <Button x:Name="ExportButton" Content="导出…" Padding="12,7" Margin="0,0,8,0" Click="OnExport"/>
       <Button x:Name="RemoveButton" Content="移除" Padding="12,7" Click="OnRemove"/>

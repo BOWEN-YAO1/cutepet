@@ -33,6 +33,16 @@ public partial class MainWindow : Window
     private readonly PetDragController dragging;
     private readonly CharacterPresenter characterPresenter;
     internal CharacterFrame CurrentCharacterFrame => characterPresenter.CurrentFrame;
+    internal bool CharacterResting => characterPresenter.Resting;
+    internal bool CharacterRestPose => characterPresenter.RestPose;
+    public void ToggleCharacterRest() => characterPresenter.ToggleRest();
+    internal void WakeCharacterImmediately() => characterPresenter.WakeImmediately();
+    public void ToggleAutoRest()
+    {
+        Settings = Settings with { AutoRest = !Settings.AutoRest };
+        if (!Settings.AutoRest && CharacterResting) characterPresenter.ToggleRest();
+        SavePlacement();
+    }
     internal bool CanPlayAmbient => !exiting && !dragging.Dragged && !dragging.IsDragging && !details.MenuOpen
         && Mouse.LeftButton != MouseButtonState.Pressed;
     private QuotaSession? session;
@@ -340,6 +350,7 @@ public partial class MainWindow : Window
     internal void StartAnimationClock() => characterPresenter.StartAnimationClock();
     internal void AdvanceCharacterAnimation(TimeSpan elapsed) => characterPresenter.AdvanceCharacterAnimation(elapsed);
     internal void PlayGreeting() => characterPresenter.PlayGreeting();
+    internal void PlayCharacterInteraction() => characterPresenter.PlayInteraction();
     private void RefreshCharacterFrame() => characterPresenter.RefreshCharacterFrame();
     private void Animate(bool active) => characterPresenter.Animate(active);
 

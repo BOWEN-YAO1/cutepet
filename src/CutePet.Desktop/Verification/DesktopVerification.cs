@@ -290,6 +290,68 @@ internal static class DesktopVerification
             window.HidePet();
             window.AdvanceAmbient(TimeSpan.FromMilliseconds(500));
             Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "hide resets the pointer dwell and ambient schedule");
+            Check(window.Settings.AutoRest && store.Load().AutoRest, "legacy settings enable automatic rest with the new default");
+            window.ToggleCharacterRest();
+            Check(window.CurrentCharacterFrame == CharacterFrame.Conjure && window.CharacterResting, "manual rest starts the embedded magic frames");
+            Render(window, directory, "animation-conjure", 144);
+            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(600));
+            Render(window, directory, "animation-throne-form", 144);
+            window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(1));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Sit && window.CharacterResting,
+                "manual conjure completes at a seated throne pose");
+            Render(window, directory, "animation-sit", 144);
+            window.StartCharacterBlink();
+            window.AdvanceAmbient(TimeSpan.FromSeconds(60));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Sit, "manual sitting persists and ignores standing blink or look");
+            window.PlayCharacterInteraction();
+            Check(window.CurrentCharacterFrame == CharacterFrame.Rise, "host click rises before the random greeting response");
+            Render(window, directory, "animation-rise", 144);
+            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(1100));
+            Check(window.CurrentCharacterFrame is CharacterFrame.Happy or CharacterFrame.Wave,
+                "host click starts its response only after the rise completes");
+            window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+            window.AdvanceAmbient(TimeSpan.FromSeconds(30));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Conjure, "automatic rest starts after the package idle interval");
+            window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+            window.AdvanceAmbient(TimeSpan.FromSeconds(20));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Rise, "automatic rest rises after its configured seated duration");
+            window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+            window.ToggleAutoRest();
+            window.AdvanceAmbient(TimeSpan.FromSeconds(60));
+            Check(!window.Settings.AutoRest && !store.Load().AutoRest && !window.CharacterRestPose,
+                "automatic rest switch persists and prevents new seated cycles");
+            window.WakeCharacterImmediately();
+            window.ToggleCharacterRest();
+            window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+            window.ToggleCharacterRest();
+            Check(window.CurrentCharacterFrame == CharacterFrame.Rise, "manual rest switch can rise with automatic rest disabled");
+            window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+            window.ToggleAutoRest();
+            window.ToggleCharacterRest();
+            window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+            window.BeginQuotaDrag(new Point(16, 16));
+            Check(!window.CharacterRestPose, "dragging wakes the seated character and clears furniture");
+            window.EndQuotaDrag(cancel: true);
+            window.ToggleCharacterRest();
+            window.Model.Apply(Snapshot(8, 48), demo: true);
+            Check(window.CurrentCharacterFrame == CharacterFrame.Low && !window.CharacterRestPose,
+                "fresh low quota clears host sitting without a standing pose jump");
+            window.Model.Apply(Snapshot(72, 48), demo: true);
+            window.ToggleCharacterRest();
+            window.HidePet();
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle && !window.CharacterRestPose, "hiding clears conjure and sitting state");
+            window.ToggleCharacterRest();
+            window.SetCharacter(PetCharacter.Cat);
+            Check(!window.CharacterRestPose && window.CurrentCharacterFrame == CharacterFrame.Idle, "switching character clears the previous throne");
+            window.SetCharacter(PetCharacter.Tianyi);
+            window.ToggleCharacterRest();
+            window.StartAnimationClock();
+            await Task.Delay(1800);
+            Check(window.CurrentCharacterFrame == CharacterFrame.Sit,
+                "actual WPF frame timer completes conjure into the seated base");
+            window.HidePet();
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle && !window.CharacterRestPose,
+                "hiding stops the actual seated clock and clears the throne");
             window.PlayGreeting();
             Check(window.CurrentCharacterFrame == CharacterFrame.Wave, "click greeting starts the wave frame");
             Render(window, directory, "animation-wave", 144);
@@ -454,11 +516,15 @@ internal static class DesktopVerification
             Check(manager.Preview.Source == window.SelectedCharacter.Actions["greeting"].Frames[0].Image,
                 "manager greeting preview uses the selected package's real frames");
             manager.CharacterList.SelectedItem = window.Characters.Find("tianyi");
-            Check(manager.PreviewAction.Items.Count == 6, "manager exposes six Tianyi actions without the withdrawn tilt");
+            Check(manager.PreviewAction.Items.Count == 9, "manager exposes nine Tianyi actions without the withdrawn tilt");
             manager.PreviewAction.SelectedValue = "happy";
             manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
             Check(manager.Preview.Source == window.Characters.Find("tianyi").Actions["happy"].Frames[0].Image,
                 "manager action selector previews the new happy clip");
+            manager.PreviewAction.SelectedValue = "sit";
+            manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
+            Check(manager.Preview.Source == window.Characters.Find("tianyi").Actions["sit"].Frames[0].Image,
+                "manager can preview seated art without a quota connection");
             RenderManager(manager, directory);
             manager.CharacterList.SelectedItem = window.Characters.Find("cat");
             Check(!manager.RemoveButton.IsEnabled && manager.Preview.Source == window.Characters.Find("cat").Idle.Frames[0].Image,

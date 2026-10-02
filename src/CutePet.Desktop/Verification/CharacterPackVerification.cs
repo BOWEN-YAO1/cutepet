@@ -17,7 +17,7 @@ internal static class CharacterPackVerification
         Directory.CreateDirectory(area);
         var library = new CharacterLibrary(Path.Combine(area, "installed"));
         var cat = library.Find("cat");
-        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 6 && cat.Actions.Count == 4,
+        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 9 && cat.Actions.Count == 4,
             "both built-in characters load from independent manifests and PNG clips");
         foreach (var builtIn in library.Packs)
         {
@@ -158,6 +158,78 @@ internal static class CharacterPackVerification
             Reject(() => library.Import(Zip("loop-" + optional, animated with { Id = "loop-" + optional, Actions = new() {
                 ["idle"] = Clip(true, ("idle.png", 100)), [optional] = Clip(true, ("idle.png", 100)) } },
                 new() { ["idle.png"] = imageBytes })), "optional " + optional + " clips cannot loop indefinitely");
+
+        player.Configure(tianyi);
+        check(player.SitDown() && player.Action == "conjure", "sit request begins the package's magic sequence");
+        player.Advance(TimeSpan.FromMilliseconds(600));
+        check(player.Image == tianyi.Actions["conjure"].Frames[1].Image, "throne materialization follows the configured frame sequence");
+        player.Advance(TimeSpan.FromSeconds(1));
+        check(player.Action == "sit" && player.Resting, "conjure finishes in a persistent seated pose");
+        var seated = player.Image;
+        player.Blink();
+        check(player.Image == seated && !player.TryAmbient("look") && !player.TryAmbient("hover"),
+            "seated pose cannot be interrupted by standing blink or ambient clips");
+        player.ReactToClick(1);
+        check(player.Action == "stand" && !player.Resting, "click rises before responding rather than replacing the seated pose");
+        player.ReactToClick(0);
+        player.ReactToClick(1);
+        player.Advance(TimeSpan.FromMilliseconds(1100));
+        check(player.Action == "happy", "only the latest response is retained during a rise");
+        player.Advance(TimeSpan.FromSeconds(2));
+        check(player.Action == "idle" && !player.RestPose, "rise and response finish without a queue or residual throne");
+        player.SitDown();
+        player.Low = true;
+        check(player.Action == "low" && !player.Resting && !player.SitDown(), "low quota cancels conjure and prevents another rest");
+        player.Low = false;
+        player.Preview("sit");
+        player.Low = true;
+        check(player.Action == "low" && !player.RestPose, "low quota also clears a fully seated pose");
+        player.Low = false;
+        player.Preview("conjure");
+        player.Advance(TimeSpan.FromSeconds(2));
+        check(player.Action == "sit", "manager conjure preview reaches the seated base without an account");
+        player.Reset();
+        check(player.Action == "idle" && !player.RestPose, "lifetime reset clears seated state and pending response");
+        player.Configure(cat);
+        check(!player.SitDown() && player.Action == "idle", "older cat packages safely ignore unsupported sitting");
+        var sitOnly = animated with { Id = "sit-only", Actions = new() {
+            ["idle"] = Clip(true, ("idle.png", 100)), ["sit"] = Clip(true, ("second.png", 100)) } };
+        var sittingPack = library.Import(Zip("sit-only", sitOnly, new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes }));
+        player.Configure(sittingPack);
+        check(player.SitDown() && player.Action == "sit", "custom sit-only package works without transition clips");
+        player.ReactToClick(0);
+        check(player.Action == "idle", "click safely wakes a sit-only package without greeting or stand clips");
+        var sitExport = Path.Combine(area, "sit-export.zip");
+        library.Export(sittingPack, sitExport);
+        check(new CharacterLibrary(Path.Combine(area, "sit-roundtrip")).Import(sitExport).Actions["sit"].Loop,
+            "seated loop survives custom ZIP export and reimport");
+        foreach (var transition in new[] { "conjure", "stand" })
+            Reject(() => library.Import(Zip("orphan-" + transition, animated with { Id = "orphan-" + transition,
+                Actions = new() { ["idle"] = Clip(true, ("idle.png", 100)), [transition] = Clip(false, ("idle.png", 100)) } },
+                new() { ["idle.png"] = imageBytes })), "rest transition " + transition + " requires a seated base");
+        Reject(() => library.Import(Zip("rest-no-sit", animated with { Id = "rest-no-sit", RestAfterMs = 30000 },
+            new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes })), "automatic rest requires a seated clip");
+        Reject(() => library.Import(Zip("rest-fast", sitOnly with { Id = "rest-fast", RestAfterMs = 1 },
+            new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes })), "automatic rest interval rejects excessive frequency");
+        Reject(() => library.Import(Zip("rest-zero", sitOnly with { Id = "rest-zero", RestDurationMs = 0 },
+            new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes })), "automatic seated duration must be bounded and positive");
+        Reject(() => library.Import(Zip("sit-finite", sitOnly with { Id = "sit-finite", Actions = new() {
+            ["idle"] = Clip(true, ("idle.png", 100)), ["sit"] = Clip(false, ("second.png", 100)) } },
+            new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes })), "sit must remain a looping base pose");
+        foreach (var transition in new[] { "conjure", "stand" })
+            Reject(() => library.Import(Zip("loop-" + transition, sitOnly with { Id = "loop-" + transition, Actions = new() {
+                ["idle"] = Clip(true, ("idle.png", 100)), ["sit"] = Clip(true, ("second.png", 100)),
+                [transition] = Clip(true, ("second.png", 100)) } }, new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes })),
+                "rest transition " + transition + " cannot loop indefinitely");
+        var largeEncoder = new PngBitmapEncoder();
+        largeEncoder.Frames.Add(BitmapFrame.Create(BitmapSource.Create(2048, 2048, 96, 96,
+            System.Windows.Media.PixelFormats.Bgra32, null, new byte[2048 * 2048 * 4], 2048 * 4)));
+        using var largeBytes = new MemoryStream();
+        largeEncoder.Save(largeBytes);
+        var largeFiles = Enumerable.Range(0, 7).ToDictionary(i => "large-" + i + ".png", _ => largeBytes.ToArray());
+        Reject(() => library.Import(Zip("total-pixels", animated with { Id = "total-pixels", Actions = new() {
+            ["idle"] = Clip(true, Enumerable.Range(0, 7).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
+            "total decoded pixels remain bounded with the expanded rest package limit");
 
         Reject(() => library.Import(Zip("traversal", animated with { Id = "traversal" }, new() { ["../outside.png"] = imageBytes })),
             "ZIP traversal paths are rejected before installation");

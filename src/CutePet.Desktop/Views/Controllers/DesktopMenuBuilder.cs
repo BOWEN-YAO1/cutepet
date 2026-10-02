@@ -21,6 +21,9 @@ internal static class DesktopMenuBuilder
         var characters = new MenuItem { Header = "角色选择" };
         menu.Items.Add(characters);
         Add("管理 / 导入角色…", window.ManageCharacters);
+        var rest = Add("召唤王座 / 坐下休息", window.ToggleCharacterRest);
+        var autoRest = Add("自动坐下休息", window.ToggleAutoRest);
+        autoRest.IsCheckable = true;
         var position = new MenuItem { Header = "额度条位置" };
         foreach (var dock in Enum.GetValues<QuotaDock>())
         {
@@ -49,6 +52,12 @@ internal static class DesktopMenuBuilder
             window.RefreshStartupState();
             positionLock.IsChecked = window.Settings.PositionLocked;
             autoStart.IsChecked = window.Settings.StartWithWindows;
+            rest.Header = window.CharacterResting ? "起身并收起王座" : "召唤王座 / 坐下休息";
+            rest.IsEnabled = window.SelectedCharacter.Actions.ContainsKey("sit") && !window.CharacterRestPose
+                && !(window.Model.IsLow && !window.Model.IsStale)
+                || window.CharacterResting;
+            autoRest.IsEnabled = window.SelectedCharacter.Manifest.RestAfterMs > 0;
+            autoRest.IsChecked = window.Settings.AutoRest;
             foreach (MenuItem item in characterSize.Items)
                 item.IsChecked = Math.Abs(window.Settings.EffectiveCharacterScale - (double)item.Tag) < 0.01;
             foreach (MenuItem item in quotaSize.Items)

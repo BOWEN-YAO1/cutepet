@@ -18,6 +18,10 @@ internal sealed class CharacterPresenter
     private readonly CharacterAnimation characterAnimation = new();
     private bool hovered, hoverPlayed;
     private double hoverElapsed, lookElapsed, nextLook = NextLook();
+    private double idleForRest, seatedElapsed;
+    private bool automaticRest, floating;
+    internal bool Resting => characterAnimation.Resting;
+    internal bool RestPose => characterAnimation.RestPose;
     private static double NextLook() => Random.Shared.Next(8000, 16001);
     internal CharacterFrame CurrentFrame => characterAnimation.Frame;
     public CharacterPresenter(MainWindow window, bool verification)
@@ -65,13 +69,37 @@ internal sealed class CharacterPresenter
         hovered = inside;
         hoverElapsed = 0;
         hoverPlayed = false;
+        idleForRest = 0;
     }
     private void ResetAmbient()
-    { hovered = hoverPlayed = false; hoverElapsed = lookElapsed = 0; nextLook = NextLook(); }
+    { hovered = hoverPlayed = automaticRest = false; hoverElapsed = lookElapsed = idleForRest = seatedElapsed = 0; nextLook = NextLook(); }
     internal void AdvanceAmbient(TimeSpan elapsed)
     {
-        if (!window.CanPlayAmbient || characterAnimation.Low) return;
         var ms = Math.Max(0, elapsed.TotalMilliseconds);
+        if (!window.CanPlayAmbient || characterAnimation.Low) { idleForRest = 0; return; }
+        if (characterAnimation.RestPose)
+        {
+            if (automaticRest && characterAnimation.Action == "sit")
+            {
+                seatedElapsed += ms;
+                if (seatedElapsed >= window.SelectedCharacter.Manifest.RestDurationMs)
+                { characterAnimation.StandUp(); automaticRest = false; idleForRest = seatedElapsed = 0; }
+            }
+            RefreshCharacterFrame();
+            return;
+        }
+        if (!hovered && window.Settings.AutoRest && window.SelectedCharacter.Manifest.RestAfterMs > 0)
+        {
+            idleForRest += ms;
+            if (idleForRest >= window.SelectedCharacter.Manifest.RestAfterMs && characterAnimation.Action == "idle"
+                && characterAnimation.SitDown())
+            {
+                automaticRest = true;
+                seatedElapsed = idleForRest = 0;
+                RefreshCharacterFrame();
+                return;
+            }
+        }
         if (hovered && !hoverPlayed)
         {
             hoverElapsed += ms;
@@ -91,6 +119,8 @@ internal sealed class CharacterPresenter
         hoverPlayed = hovered;
         lookElapsed = 0;
         nextLook = NextLook();
+        idleForRest = seatedElapsed = 0;
+        automaticRest = false;
         RefreshCharacterFrame();
         PlayTilt();
     }
@@ -99,6 +129,21 @@ internal sealed class CharacterPresenter
         characterAnimation.Greet();
         RefreshCharacterFrame();
         PlayTilt();
+    }
+    internal void ToggleRest()
+    {
+        ResetAmbient();
+        if (characterAnimation.Resting) characterAnimation.StandUp();
+        else characterAnimation.SitDown();
+        window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
+        RefreshCharacterFrame();
+    }
+    internal void WakeImmediately()
+    {
+        characterAnimation.Reset();
+        ResetAmbient();
+        window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
+        RefreshCharacterFrame();
     }
     private void PlayTilt()
     {
@@ -116,12 +161,16 @@ internal sealed class CharacterPresenter
     {
         characterAnimation.Low = window.Model.IsLow && !window.Model.IsStale;
         if (window.CharacterArt.Source != characterAnimation.Image) window.CharacterArt.Source = characterAnimation.Image;
+        ApplyFloating();
     }
 
     private void ApplyFloating()
     {
+        var enabled = window.IsVisible && !verification && window.SelectedCharacter.Manifest.Float && !characterAnimation.RestPose;
+        if (floating == enabled) return;
+        floating = enabled;
         window.Bob.BeginAnimation(TranslateTransform.YProperty, null);
-        if (window.IsVisible && !verification && window.SelectedCharacter.Manifest.Float)
+        if (enabled)
             window.Bob.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, -4, TimeSpan.FromSeconds(2.2))
             { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever, EasingFunction = new SineEase() });
     }
@@ -139,11 +188,12 @@ internal sealed class CharacterPresenter
             blink.Stop();
             frameTimer.Stop();
             animationClock.Reset();
-            characterAnimation.ResetTransient();
+            characterAnimation.Reset();
             ResetAmbient();
             window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
             RefreshCharacterFrame();
             window.Bob.BeginAnimation(TranslateTransform.YProperty, null);
+            floating = false;
         }
     }
 

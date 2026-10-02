@@ -63,3 +63,7 @@ Use case: identity-preserve. Edit target: supplied transparent Luo Tianyi fan-ar
 ## 0.9.1 撤掉歪头动作
 
 根据使用反馈，从天依配置中移除 hover 动作，删除 tilt-v2.png。当前素材九张、动作六种；悬停仍能展开额度详情，角色保持站姿。公共自定义角色 hover 格式继续支持。下方或 PROMPTS.md 中的歪头提示词为历史记录，原图可在 0.9.0 提交 9b0c448 的源码中追溯。
+
+## 0.10.0 王座休息素材
+
+新增施法、王座显现、完整王座、下坐过渡与坐姿五张透明图，使用内置 imagegen 编辑，保留服装、鞋子及原有动作。完整提示词见 [THRONE-PROMPTS.md](../src/CutePet.Desktop/Characters/Packs/tianyi/THRONE-PROMPTS.md)，也嵌入包内 SOURCE.md 随导出分发。当前共 14 张图、9 种动作。流程与验收见 [王座休息说明](throne-rest.md)。

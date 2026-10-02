@@ -58,6 +58,7 @@ internal sealed class PetDragController
             return;
         }
         dragged = true;
+        window.WakeCharacterImmediately();
         window.StopDetailsTimers();
         window.ShowDetails(false);
         try { window.DragMove(); } catch (InvalidOperationException) { }
@@ -87,6 +88,7 @@ internal sealed class PetDragController
         originalDock = draftDock = Settings.QuotaPosition;
         quotaGrabOffset = grabOffset;
         quotaDragging = dragged = true;
+        window.WakeCharacterImmediately();
         mouseStart = null;
         window.StopDetailsTimers();
         window.ShowDetails(false);
