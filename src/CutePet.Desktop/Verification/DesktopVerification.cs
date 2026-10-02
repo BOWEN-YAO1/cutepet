@@ -303,14 +303,21 @@ internal static class DesktopVerification
                 "manual conjure completes at a seated throne pose");
             Render(window, directory, "animation-sit", 144);
             window.StartCharacterBlink();
+            Check(window.CurrentCharacterFrame == CharacterFrame.SeatedBlink && window.CharacterResting,
+                "host uses a seated blink without losing the throne");
+            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(300));
+            window.CharacterPointerChanged(true);
             window.AdvanceAmbient(TimeSpan.FromSeconds(60));
             Check(window.CurrentCharacterFrame == CharacterFrame.Sit, "manual sitting persists and ignores standing blink or look");
             window.PlayCharacterInteraction();
-            Check(window.CurrentCharacterFrame == CharacterFrame.Rise, "host click rises before the random greeting response");
+            Check(window.CurrentCharacterFrame is CharacterFrame.SeatedHappy or CharacterFrame.SeatedWave && window.CharacterResting,
+                "host click replies while seated");
+            window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Sit && window.CharacterResting,
+                "host seated reply returns to the same resting base");
+            window.ToggleCharacterRest();
+            Check(window.CurrentCharacterFrame == CharacterFrame.Rise, "manual rise remains available after seated interactions");
             Render(window, directory, "animation-rise", 144);
-            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(1100));
-            Check(window.CurrentCharacterFrame is CharacterFrame.Happy or CharacterFrame.Wave,
-                "host click starts its response only after the rise completes");
             window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
             window.AdvanceAmbient(TimeSpan.FromSeconds(30));
             Check(window.CurrentCharacterFrame == CharacterFrame.Conjure, "automatic rest starts after the package idle interval");
@@ -518,7 +525,7 @@ internal static class DesktopVerification
             Check(manager.Preview.Source == window.SelectedCharacter.Actions["greeting"].Frames[0].Image,
                 "manager greeting preview uses the selected package's real frames");
             manager.CharacterList.SelectedItem = window.Characters.Find("tianyi");
-            Check(manager.PreviewAction.Items.Count == 10, "manager exposes ten Tianyi actions without the withdrawn tilt");
+            Check(manager.PreviewAction.Items.Count == 13, "manager exposes thirteen Tianyi actions including seated responses");
             manager.PreviewAction.SelectedValue = "happy";
             manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
             Check(manager.Preview.Source == window.Characters.Find("tianyi").Actions["happy"].Frames[0].Image,
@@ -527,6 +534,13 @@ internal static class DesktopVerification
             manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
             Check(manager.Preview.Source == window.Characters.Find("tianyi").Actions["sit"].Frames[0].Image,
                 "manager can preview seated art without a quota connection");
+            foreach (var action in new[] { "sit-blink", "sit-greeting", "sit-happy" })
+            {
+                manager.PreviewAction.SelectedValue = action;
+                manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
+                Check(manager.Preview.Source == window.Characters.Find("tianyi").Actions[action].Frames[0].Image,
+                    "manager previews the actual seated action " + action);
+            }
             RenderManager(manager, directory);
             manager.CharacterList.SelectedItem = window.Characters.Find("cat");
             Check(!manager.RemoveButton.IsEnabled && manager.Preview.Source == window.Characters.Find("cat").Idle.Frames[0].Image,
@@ -560,6 +574,7 @@ internal static class DesktopVerification
             await CloudVerification.RunAsync(window, Check, name => Render(window, directory, name, 192),
                 low => window.Model.Apply(Snapshot(low ? 8 : 72, 48), demo: true), () => store.Load().AutoCloud);
             ThroneMotionVerification.Run(window, directory, Check);
+            SeatedMotionVerification.Run(window, Check);
 
             if (live)
             {

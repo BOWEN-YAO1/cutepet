@@ -17,7 +17,7 @@ internal static class CharacterPackVerification
         Directory.CreateDirectory(area);
         var library = new CharacterLibrary(Path.Combine(area, "installed"));
         var cat = library.Find("cat");
-        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 10 && cat.Actions.Count == 4,
+        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 13 && cat.Actions.Count == 4,
             "both built-in characters load from independent manifests and PNG clips");
         foreach (var builtIn in library.Packs)
         {
@@ -163,7 +163,9 @@ internal static class CharacterPackVerification
                 ["idle"] = Clip(true, ("idle.png", 100)), [optional] = Clip(true, ("idle.png", 100)) } },
                 new() { ["idle.png"] = imageBytes })), "optional " + optional + " clips cannot loop indefinitely");
 
-        player.Configure(tianyi);
+        var legacyTianyi = tianyi with { Actions = tianyi.Actions.Where(pair => !pair.Key.StartsWith("sit-", StringComparison.Ordinal))
+            .ToDictionary(pair => pair.Key, pair => pair.Value) };
+        player.Configure(legacyTianyi);
         check(player.SitDown() && player.Action == "conjure", "sit request begins the package's magic sequence");
         player.Advance(TimeSpan.FromMilliseconds(600));
         check(player.Image == tianyi.Actions["conjure"].Frames[1].Image, "throne materialization follows the configured frame sequence");
@@ -207,7 +209,7 @@ internal static class CharacterPackVerification
         library.Export(sittingPack, sitExport);
         check(new CharacterLibrary(Path.Combine(area, "sit-roundtrip")).Import(sitExport).Actions["sit"].Loop,
             "seated loop survives custom ZIP export and reimport");
-        foreach (var transition in new[] { "conjure", "stand" })
+        foreach (var transition in new[] { "conjure", "stand", "sit-blink", "sit-greeting", "sit-happy" })
             Reject(() => library.Import(Zip("orphan-" + transition, animated with { Id = "orphan-" + transition,
                 Actions = new() { ["idle"] = Clip(true, ("idle.png", 100)), [transition] = Clip(false, ("idle.png", 100)) } },
                 new() { ["idle.png"] = imageBytes })), "rest transition " + transition + " requires a seated base");
@@ -220,7 +222,7 @@ internal static class CharacterPackVerification
         Reject(() => library.Import(Zip("sit-finite", sitOnly with { Id = "sit-finite", Actions = new() {
             ["idle"] = Clip(true, ("idle.png", 100)), ["sit"] = Clip(false, ("second.png", 100)) } },
             new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes })), "sit must remain a looping base pose");
-        foreach (var transition in new[] { "conjure", "stand" })
+        foreach (var transition in new[] { "conjure", "stand", "sit-blink", "sit-greeting", "sit-happy" })
             Reject(() => library.Import(Zip("loop-" + transition, sitOnly with { Id = "loop-" + transition, Actions = new() {
                 ["idle"] = Clip(true, ("idle.png", 100)), ["sit"] = Clip(true, ("second.png", 100)),
                 [transition] = Clip(true, ("second.png", 100)) } }, new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes })),

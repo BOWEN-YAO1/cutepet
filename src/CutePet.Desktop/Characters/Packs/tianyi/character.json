@@ -202,6 +202,49 @@
           "durationMs": 200
         }
       ]
+    },
+    "sit-blink": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "sit-blink-v1.png",
+          "durationMs": 160
+        },
+        {
+          "image": "sit-v1.png",
+          "durationMs": 140
+        }
+      ]
+    },
+    "sit-greeting": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "sit-v1.png",
+          "durationMs": 120
+        },
+        {
+          "image": "sit-wave-v1.png",
+          "durationMs": 600
+        },
+        {
+          "image": "sit-v1.png",
+          "durationMs": 180
+        }
+      ]
+    },
+    "sit-happy": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "sit-happy-v1.png",
+          "durationMs": 650
+        },
+        {
+          "image": "sit-v1.png",
+          "durationMs": 150
+        }
+      ]
     }
   },
   "restAfterMs": 30000,

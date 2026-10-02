@@ -10,7 +10,7 @@ namespace CutePet.Desktop;
 
 internal static class CharacterPackLoader
 {
-    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud" };
+    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "sit-blink", "sit-greeting", "sit-happy" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true, WriteIndented = true };
     public static bool ValidId(string? id) => id is not null && Regex.IsMatch(id, "\\A[a-z][a-z0-9-]{0,63}\\z");
@@ -37,15 +37,16 @@ internal static class CharacterPackLoader
             throw new InvalidDataException("角色显示大小或眨眼间隔超出允许范围。");
         if (manifest.Actions is null || !manifest.Actions.ContainsKey("idle") || manifest.Actions.Count > ActionNames.Length
             || manifest.Actions.Keys.Any(key => !ActionNames.Contains(key)))
-            throw new InvalidDataException("必须提供 idle 动作；支持 idle、blink、greeting、low、look、hover、happy、conjure、sit、stand、summon-cloud。");
+            throw new InvalidDataException("必须提供 idle 动作；支持 " + string.Join("、", ActionNames) + "。");
         if (manifest.Cloud is { } cloud && (cloud.Image is null || !SafeFile(cloud.Image)
             || !double.IsFinite(cloud.DisplayWidth) || !double.IsFinite(cloud.DisplayHeight)
             || cloud.DisplayWidth < 40 || cloud.DisplayWidth > 190 || cloud.DisplayHeight < 12 || cloud.DisplayHeight > 40))
             throw new InvalidDataException("云层图片路径或显示大小不合法。");
         if (manifest.Actions.ContainsKey("summon-cloud") && manifest.Cloud is null)
             throw new InvalidDataException("召唤云动作需要配套 cloud 图层。");
-        if (!manifest.Actions.ContainsKey("sit") && (manifest.RestAfterMs != 0 || manifest.Actions.ContainsKey("conjure") || manifest.Actions.ContainsKey("stand")))
-            throw new InvalidDataException("召唤、起身或自动休息需要配套 sit 动作。");
+        if (!manifest.Actions.ContainsKey("sit") && (manifest.RestAfterMs != 0 || manifest.Actions.ContainsKey("conjure") || manifest.Actions.ContainsKey("stand")
+            || manifest.Actions.Keys.Any(key => key.StartsWith("sit-", StringComparison.Ordinal))))
+            throw new InvalidDataException("召唤、起身、坐姿回应或自动休息需要配套 sit 动作。");
         var images = new Dictionary<string, BitmapSource>(StringComparer.OrdinalIgnoreCase);
         var actions = new Dictionary<string, LoadedAction>();
         long pixels = 0;

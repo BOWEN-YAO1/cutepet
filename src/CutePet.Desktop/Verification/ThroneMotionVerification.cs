@@ -112,9 +112,13 @@ internal static class ThroneMotionVerification
         check(preview.Frames.Count == 19, "animated preview records the actual host's complete rest cycle");
         check((ushort)((BitmapMetadata)preview.Frames[0].Metadata).GetQuery("/grctlext/Delay") == 40,
             "animated preview preserves the intended frame delays");
+        Record(window, directory, seated: true);
+        var seatedPreview = new GifBitmapDecoder(new Uri(Path.GetFullPath(Path.Combine(directory, "seated-motion.gif"))),
+            BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+        check(seatedPreview.Frames.Count == 10, "seated preview records blink, smile and wave from the real host");
     }
 
-    private static void Record(MainWindow window, string directory)
+    private static void Record(MainWindow window, string directory, bool seated = false)
     {
         var encoder = new GifBitmapEncoder();
         var delays = new List<int>();
@@ -122,20 +126,40 @@ internal static class ThroneMotionVerification
         window.Scene.Background = new SolidColorBrush(Color.FromRgb(239, 245, 244));
         try
         {
-            Capture(400);
-            window.ToggleCharacterRest();
-            foreach (var frame in window.SelectedCharacter.Actions["conjure"].Frames)
-            { Capture(frame.DurationMs); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(frame.DurationMs)); }
-            Capture(1500);
-            window.ToggleCharacterRest();
-            foreach (var frame in window.SelectedCharacter.Actions["stand"].Frames)
-            { Capture(frame.DurationMs); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(frame.DurationMs)); }
+            if (seated)
+            {
+                window.ToggleCharacterRest();
+                window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+                Capture(1000);
+                window.StartCharacterBlink();
+                Clip("sit-blink");
+                Capture(1000);
+                window.AdvanceAmbient(TimeSpan.FromSeconds(16));
+                Clip("sit-happy");
+                Capture(1000);
+                window.PlayGreeting();
+                Clip("sit-greeting");
+            }
+            else
+            {
+                Capture(400);
+                window.ToggleCharacterRest();
+                Clip("conjure");
+                Capture(1500);
+                window.ToggleCharacterRest();
+                Clip("stand");
+            }
             using var encoded = new MemoryStream();
             encoder.Save(encoded);
             // WIC's GIF encoder omits per-frame delays. Write animation metadata without changing pixels.
-            File.WriteAllBytes(Path.Combine(directory, "throne-motion.gif"), WithAnimationMetadata(encoded.ToArray(), delays));
+            File.WriteAllBytes(Path.Combine(directory, seated ? "seated-motion.gif" : "throne-motion.gif"), WithAnimationMetadata(encoded.ToArray(), delays));
         }
         finally { window.Scene.Background = oldBackground; window.WakeCharacterImmediately(); }
+        void Clip(string action)
+        {
+            foreach (var frame in window.SelectedCharacter.Actions[action].Frames)
+            { Capture(frame.DurationMs); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(frame.DurationMs)); }
+        }
         void Capture(int duration)
         {
             var visual = (FrameworkElement)window.Content;

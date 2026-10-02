@@ -92,6 +92,12 @@ internal sealed class CharacterPresenter
                 if (seatedElapsed >= window.SelectedCharacter.Manifest.RestDurationMs)
                 { characterAnimation.StandUp(); automaticRest = false; idleForRest = seatedElapsed = 0; }
             }
+            if (!hovered && characterAnimation.Action == "sit")
+            {
+                lookElapsed += ms;
+                if (lookElapsed >= nextLook && characterAnimation.TryAmbient("sit-happy"))
+                { lookElapsed = 0; nextLook = NextLook(); }
+            }
             RefreshCharacterFrame();
             return;
         }
@@ -128,7 +134,7 @@ internal sealed class CharacterPresenter
         lookElapsed = 0;
         nextLook = NextLook();
         idleForRest = seatedElapsed = 0;
-        automaticRest = false;
+        if (!characterAnimation.Resting) automaticRest = false;
         RefreshCharacterFrame();
         PlayTilt();
     }

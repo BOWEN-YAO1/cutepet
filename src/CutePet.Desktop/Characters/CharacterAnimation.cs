@@ -3,7 +3,7 @@ using System.Windows.Media.Imaging;
 
 namespace CutePet.Desktop;
 
-internal enum CharacterFrame { Idle, Closed, Wave, Low, Look, Hover, Happy, Conjure, Sit, Rise }
+internal enum CharacterFrame { Idle, Closed, Wave, Low, Look, Hover, Happy, Conjure, Sit, Rise, SeatedBlink, SeatedWave, SeatedHappy }
 
 // Shared triggers; the selected package supplies clips and frame timings.
 internal sealed class CharacterAnimation
@@ -29,7 +29,7 @@ internal sealed class CharacterAnimation
             resting = false;
             afterStanding = null;
             standAfterConjure = false;
-            if (transient is "blink" or "look" or "hover" or "conjure" or "stand" or "summon-cloud") ResetTransient();
+            if (transient is "blink" or "look" or "hover" or "conjure" or "stand" or "summon-cloud" or "sit-blink" or "sit-greeting" or "sit-happy") ResetTransient();
         }
     }
     public string Action => transient ?? (Low && pack.Actions.ContainsKey("low") ? "low" : resting ? "sit" : "idle");
@@ -39,12 +39,16 @@ internal sealed class CharacterAnimation
         "greeting" => ReferenceEquals(Image, pack.Idle.Frames[0].Image) ? CharacterFrame.Idle : CharacterFrame.Wave,
         "look" => CharacterFrame.Look, "hover" => CharacterFrame.Hover, "happy" => CharacterFrame.Happy,
         "conjure" => CharacterFrame.Conjure, "sit" => CharacterFrame.Sit, "stand" => CharacterFrame.Rise,
+        "sit-blink" => CharacterFrame.SeatedBlink, "sit-greeting" => CharacterFrame.SeatedWave, "sit-happy" => CharacterFrame.SeatedHappy,
         _ => CharacterFrame.Idle };
     public void Configure(CharacterPack selected) { pack = selected; low = false; baseElapsed = 0; Reset(); }
-    public void Blink() { if (transient is null && !Low && !RestPose) Start("blink"); }
+    public void Blink() { if (transient is null && !Low) Start(resting ? "sit-blink" : "blink"); }
     public void Greet() => Respond("greeting");
     private void Respond(string action)
     {
+        if (resting && (transient is null or "sit-blink" or "sit-greeting" or "sit-happy")
+            && pack.Actions.ContainsKey("sit-" + action))
+        { Start("sit-" + action); return; }
         if (RestPose)
         {
             StandUp();
@@ -92,6 +96,13 @@ internal sealed class CharacterAnimation
     }
     public void ReactToClick(int choice)
     {
+        if (resting && (transient is null or "sit-blink" or "sit-greeting" or "sit-happy"))
+        {
+            var seatedGreeting = pack.Actions.ContainsKey("sit-greeting");
+            var seatedHappy = pack.Actions.ContainsKey("sit-happy");
+            if (seatedGreeting || seatedHappy)
+            { Start(seatedHappy && (!seatedGreeting || (choice & 1) == 1) ? "sit-happy" : "sit-greeting"); return; }
+        }
         var greeting = pack.Actions.ContainsKey("greeting");
         var happy = pack.Actions.ContainsKey("happy");
         if (greeting || happy) Respond(happy && (!greeting || (choice & 1) == 1) ? "happy" : "greeting");
@@ -99,6 +110,12 @@ internal sealed class CharacterAnimation
     }
     public bool TryAmbient(string action)
     {
+        if (action == "sit-happy")
+        {
+            if (Low || !resting || transient is not null || !pack.Actions.ContainsKey(action)) return false;
+            Start(action);
+            return true;
+        }
         if (Low || RestPose || action is not ("look" or "hover") || !pack.Actions.ContainsKey(action)) return false;
         if (transient is not null && !(action == "hover" && transient is "look" or "blink")) return false;
         Start(action);
@@ -108,7 +125,7 @@ internal sealed class CharacterAnimation
     {
         Reset();
         Low = action == "low";
-        resting = action is "sit" or "conjure" && pack.Actions.ContainsKey("sit");
+        resting = (action is "sit" or "conjure" or "sit-blink" or "sit-greeting" or "sit-happy") && pack.Actions.ContainsKey("sit");
         if (action is not ("idle" or "low" or "sit")) Start(action);
     }
     private void Start(string action)
