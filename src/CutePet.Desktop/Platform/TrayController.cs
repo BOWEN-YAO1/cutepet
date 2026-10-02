@@ -42,6 +42,8 @@ internal sealed class TrayController : IDisposable
         var characters = new Forms.ToolStripMenuItem("角色选择");
         menu.Items.Add(characters);
         Add("管理 / 导入角色…", window.ManageCharacters);
+        var rest = Add("召唤王座 / 坐下休息", () => { window.RestorePet(); window.ToggleCharacterRest(); });
+        var autoRest = Add("自动坐下休息", window.ToggleAutoRest);
         var characterSize = AddSizeMenu("角色大小", window.SetCharacterScale);
         var quotaSize = AddSizeMenu("额度数字大小", window.SetQuotaScale);
         menu.Opening += (_, _) =>
@@ -50,6 +52,11 @@ internal sealed class TrayController : IDisposable
             window.RefreshStartupState();
             positionLock.Checked = window.Settings.PositionLocked;
             autoStart.Checked = window.Settings.StartWithWindows;
+            rest.Text = window.CharacterResting ? "起身并收起王座" : "召唤王座 / 坐下休息";
+            rest.Enabled = window.SelectedCharacter.Actions.ContainsKey("sit") && !window.CharacterRestPose
+                && !(window.Model.IsLow && !window.Model.IsStale) || window.CharacterResting;
+            autoRest.Enabled = window.SelectedCharacter.Manifest.RestAfterMs > 0;
+            autoRest.Checked = window.Settings.AutoRest;
             foreach (Forms.ToolStripMenuItem item in details.DropDownItems)
                 item.Checked = (DetailsMode)item.Tag! == window.Settings.Details;
             foreach (Forms.ToolStripMenuItem item in position.DropDownItems)
