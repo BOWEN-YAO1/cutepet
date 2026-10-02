@@ -1,4 +1,4 @@
-# 角色素材与接入（0.8.0）
+# 角色素材与接入（0.8.1）
 
 角色选择：右键或托盘 → 角色选择 → 小猫 / 洛天依（同人）。选择立即生效，保存在个人 settings.json 中。旧配置继续采用小猫。
 
@@ -6,7 +6,7 @@
 
 ## 素材来源
 
-- 文件：src/CutePet.Desktop/Characters/tianyi/idle.png。
+- 文件：src/CutePet.Desktop/Characters/Packs/tianyi/idle.png。
 - 日期：2026-10-01。
 - 工具：内置 image_gen.imagegen，默认工具模式，transparent_background=true。未使用 CLI / API key 回退。
 - 人物设计参考：洛天依灰发、绿瞳及辫发形象，参考 [官方 VOCALOID 产品介绍](https://www.vocaloid.com/products/show/v5l_tianyi)。生成时没有下载或传入官方立绘。
@@ -20,17 +20,17 @@ Use case: stylized-concept. Asset type: transparent PNG character sprite for a t
 
 ## 接入方式
 
-角色资源分别位于 `src/CutePet.Desktop/Characters/cat/` 和 `Characters/tianyi/`，每包包含 character.json、PNG 帧及素材权利说明。CharacterPackLoader 校验并解码素材，CharacterLibrary 管理内置和本地包，CharacterAnimation 共享触发规则并按包内帧时间播放。Preferences 使用稳定 CharacterPackId，旧 Character 枚举只用于迁移。
+角色资源分别位于 `src/CutePet.Desktop/Characters/Packs/cat/` 和 `Characters/Packs/tianyi/`，每包包含 character.json、PNG 帧及素材权利说明。CharacterPackLoader 校验并解码素材，CharacterLibrary 管理内置和本地包，CharacterAnimation 共享触发规则并按包内帧时间播放。Preferences 使用稳定 CharacterPackId，旧 Character 枚举只用于迁移。
 
-MainWindow 的 40 毫秒计时器驱动图片帧，WPF 变换提供轻微浮动与点击轻摇；隐藏时停止并复位。低额度表情仅由新鲜且有效的数据驱动。两处菜单都从角色库生成，可从管理窗口导入 PNG / ZIP、预览、导出和移除角色。格式与边界见 [角色包说明](character-packs.md)。内置挥手仍只有两个姿态，这次重构没有新增动作素材或骨骼播放器。
+Views/Controllers/CharacterPresenter 的 40 毫秒计时器驱动图片帧，WPF 变换提供轻微浮动与点击轻摇；隐藏时停止并复位。低额度表情仅由新鲜且有效的数据驱动。两处菜单都从角色库生成，可从管理窗口导入 PNG / ZIP、预览、导出和移除角色。格式与边界见 [角色包说明](character-packs.md)。内置挥手仍只有两个姿态，这次重构没有新增动作素材或骨骼播放器。
 
 ## 验证
 
-0.8.0 的 154 项检查中含全部角色默认值、缓存、透明背景与尺寸一致性检查，以及眨眼结束、挥手交替、结束回到低额度状态、旧数据不驱动疲惫表情、隐藏和换角色复位。离屏渲染含闭眼、挥手和疲惫图；预览为模拟额度。状态检查推进与实际计时器共用函数，并运行真实 WPF 帧计时器验证动作结束与隐藏后停止；不移动真实鼠标，不声称实际桌面动画观感已验收。
+0.8.1 的 154 项回归检查中含全部角色默认值、缓存、透明背景与尺寸一致性检查，以及眨眼结束、挥手交替、结束回到低额度状态、旧数据不驱动疲惫表情、隐藏和换角色复位。离屏渲染含闭眼、挥手和疲惫图；预览为模拟额度。状态检查推进与实际计时器共用函数，并运行真实 WPF 帧计时器验证动作结束与隐藏后停止；不移动真实鼠标，不声称实际桌面动画观感已验收。
 
 ## 2026-10-02 动画帧编辑记录
 
-使用内置 image_gen.imagegen 的编辑模式，referenced_image_paths 指向本项目的原始同人图，transparent_background=true。未使用 CLI / API key 回退，原始图未覆盖。原文件在 0.8.0 整理到 src/CutePet.Desktop/Characters/tianyi/，依次命名 blink.png、greeting.png、low.png；与 idle.png 同画布大小。下列名称为生成时的原始名称。
+使用内置 image_gen.imagegen 的编辑模式，referenced_image_paths 指向本项目的原始同人图，transparent_background=true。未使用 CLI / API key 回退，原始图未覆盖。原文件在 0.8.0 改名，0.8.1 移入 src/CutePet.Desktop/Characters/Packs/tianyi/，依次命名 blink.png、greeting.png、low.png；与 idle.png 同画布大小。下列名称为生成时的原始名称。
 
 ### 闭眼帧
 

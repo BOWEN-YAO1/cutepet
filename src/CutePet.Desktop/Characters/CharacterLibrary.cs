@@ -8,23 +8,6 @@ using System.Windows;
 
 namespace CutePet.Desktop;
 
-public enum PetCharacter { Cat, Tianyi }
-
-internal static class CharacterCatalog
-{
-    public static string BuiltInId(PetCharacter character) => character == PetCharacter.Tianyi ? "tianyi" : "cat";
-    private static readonly Lazy<IReadOnlyList<CharacterPack>> builtIns = new(() => new[] { Embedded("cat"), Embedded("tianyi") });
-    public static IReadOnlyList<CharacterPack> BuiltIns => builtIns.Value;
-    private static CharacterPack Embedded(string id)
-    {
-        Stream Open(string file) => Application.GetResourceStream(new Uri(
-            "pack://application:,,,/CutePet;component/Characters/" + id + "/" + file))?.Stream
-            ?? throw new InvalidDataException("内置角色资源缺失。");
-        using var manifest = Open("character.json");
-        return CharacterPackLoader.Load(manifest, Open, builtIn: true);
-    }
-}
-
 internal sealed class CharacterLibrary
 {
     public string Root { get; }
@@ -150,7 +133,7 @@ internal sealed class CharacterLibrary
             foreach (var name in pack.Manifest.Actions.Values.SelectMany(action => action.Frames).Select(frame => frame.Image).Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 using var source = pack.BuiltIn ? Application.GetResourceStream(new Uri(
-                    "pack://application:,,,/CutePet;component/Characters/" + pack.Id + "/" + name))!.Stream : OpenSafe(pack.Directory!, name);
+                    "pack://application:,,,/CutePet;component/Characters/Packs/" + pack.Id + "/" + name))!.Stream : OpenSafe(pack.Directory!, name);
                 using var stream = archive.CreateEntry(name).Open();
                 CharacterPackLoader.CopyLimited(source, stream, 8 * 1024 * 1024);
             }
@@ -161,7 +144,7 @@ internal sealed class CharacterLibrary
             {
                 if (!pack.BuiltIn && !File.Exists(Path.Combine(pack.Directory!, name))) continue;
                 using var source = pack.BuiltIn ? Application.GetResourceStream(new Uri(
-                    "pack://application:,,,/CutePet;component/Characters/" + pack.Id + "/" + name))!.Stream
+                    "pack://application:,,,/CutePet;component/Characters/Packs/" + pack.Id + "/" + name))!.Stream
                     : OpenSafe(pack.Directory!, name);
                 using var destinationStream = archive.CreateEntry(name).Open();
                 CharacterPackLoader.CopyLimited(source, destinationStream, 64 * 1024);
