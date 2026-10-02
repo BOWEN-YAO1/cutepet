@@ -1,8 +1,8 @@
-# 角色素材与接入（0.8.1）
+# 角色素材与接入（0.9.0）
 
 角色选择：右键或托盘 → 角色选择 → 小猫 / 洛天依（同人）。选择立即生效，保存在个人 settings.json 中。旧配置继续采用小猫。
 
-小猫的原矢量外观已导出为透明 PNG 帧，保留眨眼、点击轻摇和低额度眯眼；与洛天依、自定义角色共用角色包播放器。洛天依使用待机、闭眼、抬手、低额度四张透明 PNG，支持浮动、160 毫秒眨眼、约 1.08 秒的两姿态挥手和疲惫表情。隐藏与换角色清除临时动作。两种角色共用额度条、拖动、独立大小和详情模式。
+小猫的原矢量外观已导出为透明 PNG 帧，保留眨眼、点击轻摇和低额度眯眼；与洛天依、自定义角色共用角色包播放器。洛天依保留原四张透明 PNG，新增左右看、歪头、开心、抬手中间姿势和向外摆手六张图，支持眨眼、多姿态挥手、待机张望、悬停歪头、随机点击回应与疲惫表情。隐藏与换角色清除临时动作。两种角色共用额度条、拖动、独立大小和详情模式。
 
 ## 素材来源
 
@@ -22,11 +22,11 @@ Use case: stylized-concept. Asset type: transparent PNG character sprite for a t
 
 角色资源分别位于 `src/CutePet.Desktop/Characters/Packs/cat/` 和 `Characters/Packs/tianyi/`，每包包含 character.json、PNG 帧及素材权利说明。CharacterPackLoader 校验并解码素材，CharacterLibrary 管理内置和本地包，CharacterAnimation 共享触发规则并按包内帧时间播放。Preferences 使用稳定 CharacterPackId，旧 Character 枚举只用于迁移。
 
-Views/Controllers/CharacterPresenter 的 40 毫秒计时器驱动图片帧，WPF 变换提供轻微浮动与点击轻摇；隐藏时停止并复位。低额度表情仅由新鲜且有效的数据驱动。两处菜单都从角色库生成，可从管理窗口导入 PNG / ZIP、预览、导出和移除角色。格式与边界见 [角色包说明](character-packs.md)。内置挥手仍只有两个姿态，这次重构没有新增动作素材或骨骼播放器。
+Views/Controllers/CharacterPresenter 的 40 毫秒计时器驱动图片帧，WPF 变换提供轻微浮动与点击轻摇；隐藏时停止并复位。低额度表情仅由新鲜且有效的数据驱动。两处菜单都从角色库生成，可从管理窗口导入 PNG / ZIP、预览、导出和移除角色。格式与边界见 [角色包说明](character-packs.md)。0.9.0 扩展为七种动作、十张透明图片，仍使用逐帧播放器；没有骨骼动画。新规则见仓库 docs/tianyi-animation.md。
 
 ## 验证
 
-0.8.1 的 154 项回归检查中含全部角色默认值、缓存、透明背景与尺寸一致性检查，以及眨眼结束、挥手交替、结束回到低额度状态、旧数据不驱动疲惫表情、隐藏和换角色复位。离屏渲染含闭眼、挥手和疲惫图；预览为模拟额度。状态检查推进与实际计时器共用函数，并运行真实 WPF 帧计时器验证动作结束与隐藏后停止；不移动真实鼠标，不声称实际桌面动画观感已验收。
+0.9.0 的 188 项回归检查中含全部角色默认值、缓存、透明背景与尺寸一致性检查，以及眨眼结束、挥手多姿态切换、新动作优先级、悬停与随机张望触发、结束回到低额度状态、旧数据不驱动疲惫表情、隐藏和换角色复位。离屏渲染含闭眼、挥手和疲惫图；预览为模拟额度。状态检查推进与实际计时器共用函数，并运行真实 WPF 帧计时器验证动作结束与隐藏后停止；不移动真实鼠标，不声称实际桌面动画观感已验收。
 
 ## 2026-10-02 动画帧编辑记录
 
@@ -55,3 +55,7 @@ Use case: identity-preserve. Edit target: supplied transparent Luo Tianyi fan-ar
 ```text
 Use case: identity-preserve. Edit target: supplied transparent Luo Tianyi fan-art desktop-pet sprite. Create one low-quota tired expression frame. Change ONLY her facial expression: green eyes gently half-lidded, slightly concerned small mouth, mild tired look but still cute and friendly. Preserve exact full-body standing pose, both arms and hands, face geometry, hair, ornaments, costume, boots, line art, colors, proportions, head location, feet baseline, canvas dimensions, pixel scale and transparent padding from the input. Do not add sweat drops, symbols, effects, props, ground shadows or text. Genuine transparent alpha background. This frame must align with the original for a desktop animation.
 ```
+
+## 0.9.0 新增六张动作帧
+
+使用内置 image_gen.imagegen 编辑项目原始同人图，transparent_background=true；保留原四张图。完整生成和画布修正提示词见 [天依包 PROMPTS.md](../src/CutePet.Desktop/Characters/Packs/tianyi/PROMPTS.md)，同样嵌入包内 SOURCE.md 并随角色包导出。所有最终帧均为 1024×1535。触发与人工验收见 [动作增强说明](tianyi-animation.md)。

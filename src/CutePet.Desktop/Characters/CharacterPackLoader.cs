@@ -10,7 +10,7 @@ namespace CutePet.Desktop;
 
 internal static class CharacterPackLoader
 {
-    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low" };
+    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true, WriteIndented = true };
     public static bool ValidId(string? id) => id is not null && Regex.IsMatch(id, "\\A[a-z][a-z0-9-]{0,63}\\z");
@@ -33,9 +33,9 @@ internal static class CharacterPackLoader
             || manifest.DisplayWidth < 40 || manifest.DisplayWidth > 210 || manifest.DisplayHeight < 40 || manifest.DisplayHeight > 148
             || manifest.BlinkIntervalMs < 1000 || manifest.BlinkIntervalMs > 60000)
             throw new InvalidDataException("角色显示大小或眨眼间隔超出允许范围。");
-        if (manifest.Actions is null || !manifest.Actions.ContainsKey("idle") || manifest.Actions.Count > 4
+        if (manifest.Actions is null || !manifest.Actions.ContainsKey("idle") || manifest.Actions.Count > ActionNames.Length
             || manifest.Actions.Keys.Any(key => !ActionNames.Contains(key)))
-            throw new InvalidDataException("必须提供 idle 动作；当前支持 idle、blink、greeting、low。");
+            throw new InvalidDataException("必须提供 idle 动作；支持 idle、blink、greeting、low、look、hover、happy。");
         var images = new Dictionary<string, BitmapSource>(StringComparer.OrdinalIgnoreCase);
         var actions = new Dictionary<string, LoadedAction>();
         long pixels = 0;
@@ -45,7 +45,7 @@ internal static class CharacterPackLoader
         {
             if (action is null || action.Frames is null || action.Frames.Count == 0
                 || (frameCount += action.Frames.Count) > 120 || action.Loop != (name is "idle" or "low"))
-                throw new InvalidDataException("待机和低额度动作必须循环；眨眼和打招呼必须有限播放，最多 120 帧。");
+                throw new InvalidDataException("待机和低额度动作必须循环；其他动作必须有限播放，最多 120 帧。");
             var loaded = new List<LoadedFrame>();
             foreach (var frame in action.Frames)
             {

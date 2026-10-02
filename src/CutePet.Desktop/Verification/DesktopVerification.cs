@@ -243,9 +243,8 @@ internal static class DesktopVerification
             Check(window.Settings == previousSettings with { Character = PetCharacter.Tianyi, CharacterPackId = "tianyi" }
                 && window.Width == previousWidth && window.Model.Windows.First().RemainingText == previousRemaining,
                 "character switching preserves placement, display preferences and quota");
-            foreach (var (frame, clip) in window.SelectedCharacter.Actions)
+            foreach (var image in window.SelectedCharacter.Actions.Values.SelectMany(clip => clip.Frames).Select(frame => frame.Image).Distinct())
             {
-                var image = clip.Frames[0].Image;
                 var frameBitmap = new FormatConvertedBitmap(image, PixelFormats.Bgra32, null, 0);
                 var framePixels = new byte[image.PixelWidth * image.PixelHeight * 4];
                 frameBitmap.CopyPixels(framePixels, image.PixelWidth * 4, 0);
@@ -255,7 +254,7 @@ internal static class DesktopVerification
                 { transparentFrame |= framePixels[pixel] == 0; visibleFrame |= framePixels[pixel] == 255; }
                 Check(image.IsFrozen && image.PixelWidth == window.SelectedCharacter.Idle.Frames[0].Image.PixelWidth
                     && image.PixelHeight == window.SelectedCharacter.Idle.Frames[0].Image.PixelHeight && transparentFrame && visibleFrame,
-                    $"{frame} animation frame is cached, transparent and keeps the original canvas size");
+                    "each unique animation image is cached, transparent and keeps the original canvas size");
             }
             window.StartCharacterBlink();
             Check(window.CurrentCharacterFrame == CharacterFrame.Closed
@@ -264,11 +263,39 @@ internal static class DesktopVerification
             Render(window, directory, "animation-blink", 144);
             window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(200));
             Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "blink finishes and restores idle");
+            window.CharacterPointerChanged(true);
+            window.AdvanceAmbient(TimeSpan.FromMilliseconds(399));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "pet hover waits for its dwell threshold");
+            window.AdvanceAmbient(TimeSpan.FromMilliseconds(1));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Hover, "pet hover starts the Tianyi head tilt");
+            Render(window, directory, "animation-hover", 144);
+            window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(1));
+            window.AdvanceAmbient(TimeSpan.FromSeconds(20));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "one pointer entry plays hover once and suppresses random looks");
+            window.CharacterPointerChanged(false);
+            window.AdvanceAmbient(TimeSpan.FromSeconds(16));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Look, "idle clock eventually starts a random look");
+            Render(window, directory, "animation-look", 144);
+            window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+            window.BeginDetailsMenu();
+            window.AdvanceAmbient(TimeSpan.FromSeconds(16));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "an open context menu pauses ambient triggers");
+            window.EndDetailsMenu();
+            window.Model.Apply(Snapshot(8, 48), demo: true);
+            window.CharacterPointerChanged(true);
+            window.AdvanceAmbient(TimeSpan.FromSeconds(16));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Low, "low quota suppresses hover and idle look triggers");
+            window.Model.Apply(Snapshot(72, 48), demo: true);
+            window.HidePet();
+            window.AdvanceAmbient(TimeSpan.FromMilliseconds(500));
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "hide resets the pointer dwell and ambient schedule");
             window.PlayGreeting();
             Check(window.CurrentCharacterFrame == CharacterFrame.Wave, "click greeting starts the wave frame");
             Render(window, directory, "animation-wave", 144);
             window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(180));
-            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "greeting alternates the raised and lowered arm poses");
+            Check(window.CurrentCharacterFrame == CharacterFrame.Wave
+                && window.CharacterArt.Source == window.SelectedCharacter.Actions["greeting"].Frames[1].Image,
+                "greeting moves from the middle arm pose into the raised wave pose");
             window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
             Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "greeting stops without queuing interactions");
             window.PlayGreeting();
@@ -425,6 +452,12 @@ internal static class DesktopVerification
             manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
             Check(manager.Preview.Source == window.SelectedCharacter.Actions["greeting"].Frames[0].Image,
                 "manager greeting preview uses the selected package's real frames");
+            manager.CharacterList.SelectedItem = window.Characters.Find("tianyi");
+            Check(manager.PreviewAction.Items.Count == 7, "manager exposes all seven Tianyi action previews");
+            manager.PreviewAction.SelectedValue = "happy";
+            manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
+            Check(manager.Preview.Source == window.Characters.Find("tianyi").Actions["happy"].Frames[0].Image,
+                "manager action selector previews the new happy clip");
             RenderManager(manager, directory);
             manager.CharacterList.SelectedItem = window.Characters.Find("cat");
             Check(!manager.RemoveButton.IsEnabled && manager.Preview.Source == window.Characters.Find("cat").Idle.Frames[0].Image,

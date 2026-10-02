@@ -31,19 +31,15 @@
       "loop": false,
       "frames": [
         {
-          "image": "greeting.png",
-          "durationMs": 180
-        },
-        {
-          "image": "idle.png",
-          "durationMs": 180
+          "image": "greeting-mid-v2.png",
+          "durationMs": 140
         },
         {
           "image": "greeting.png",
           "durationMs": 180
         },
         {
-          "image": "idle.png",
+          "image": "greeting-out-v2.png",
           "durationMs": 180
         },
         {
@@ -51,8 +47,16 @@
           "durationMs": 180
         },
         {
-          "image": "idle.png",
+          "image": "greeting-out-v2.png",
           "durationMs": 180
+        },
+        {
+          "image": "greeting-mid-v2.png",
+          "durationMs": 140
+        },
+        {
+          "image": "idle.png",
+          "durationMs": 120
         }
       ]
     },
@@ -62,6 +66,53 @@
         {
           "image": "low.png",
           "durationMs": 1000
+        }
+      ]
+    },
+    "look": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "look-left-v2.png",
+          "durationMs": 450
+        },
+        {
+          "image": "idle.png",
+          "durationMs": 120
+        },
+        {
+          "image": "look-right-v2.png",
+          "durationMs": 450
+        },
+        {
+          "image": "idle.png",
+          "durationMs": 120
+        }
+      ]
+    },
+    "hover": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "tilt-v2.png",
+          "durationMs": 750
+        },
+        {
+          "image": "idle.png",
+          "durationMs": 150
+        }
+      ]
+    },
+    "happy": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "happy-v2.png",
+          "durationMs": 720
+        },
+        {
+          "image": "idle.png",
+          "durationMs": 180
         }
       ]
     }

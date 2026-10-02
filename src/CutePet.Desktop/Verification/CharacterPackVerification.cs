@@ -17,7 +17,7 @@ internal static class CharacterPackVerification
         Directory.CreateDirectory(area);
         var library = new CharacterLibrary(Path.Combine(area, "installed"));
         var cat = library.Find("cat");
-        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 4,
+        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 7 && cat.Actions.Count == 4,
             "both built-in characters load from independent manifests and PNG clips");
         foreach (var builtIn in library.Packs)
         {
@@ -93,6 +93,62 @@ internal static class CharacterPackVerification
         check(player.Action == "low", "a finite greeting returns to the current quota state");
         player.Configure(imported);
         check(player.Action == "idle", "switching packages clears transient and low state");
+        player.ReactToClick(1);
+        check(player.Action == "idle" && !player.TryAmbient("hover"), "static PNG safely ignores optional new actions");
+        player.Configure(cat);
+        player.ReactToClick(1);
+        check(player.Action == "greeting", "old four-action packs retain their greeting on either click choice");
+        var tianyi = library.Find("tianyi");
+        player.Configure(tianyi);
+        check(player.TryAmbient("look"), "Tianyi can start its package-defined look clip");
+        player.Advance(TimeSpan.FromMilliseconds(600));
+        check(player.Image == tianyi.Actions["look"].Frames[2].Image, "look clip progresses from left glance to right glance");
+        check(player.TryAmbient("hover"), "hover response takes priority over a look clip");
+        player.ReactToClick(1);
+        check(player.Action == "happy" && !player.TryAmbient("hover"), "click happy response takes priority over hover");
+        player.Advance(TimeSpan.FromMilliseconds(500));
+        player.ReactToClick(1);
+        player.Advance(TimeSpan.FromMilliseconds(500));
+        check(player.Action == "happy", "repeated click restarts its clip without adding a queue");
+        player.Low = true;
+        player.Advance(TimeSpan.FromSeconds(1));
+        check(player.Action == "low", "happy response finishes at the current low quota base");
+        check(!player.TryAmbient("look") && !player.TryAmbient("hover"), "low quota suppresses optional ambient clips");
+        player.Low = false;
+        player.TryAmbient("hover");
+        player.Low = true;
+        check(player.Action == "low", "entering low quota clears an unfinished ambient response");
+        player.ReactToClick(0);
+        check(player.Action == "greeting", "explicit click is still allowed while quota is low");
+        player.Low = false;
+        player.Advance(TimeSpan.FromSeconds(2));
+        player.Preview("low");
+        check(player.Action == "low", "manager can preview a low clip without an account");
+        player.Preview("blink");
+        player.Advance(TimeSpan.FromMilliseconds(200));
+        check(player.Action == "idle", "previewing another action clears the previous low preview state");
+        var extendedActions = new Dictionary<string, CharacterAction>(animated.Actions)
+        {
+            ["look"] = Clip(false, ("second.png", 300)),
+            ["hover"] = Clip(false, ("second.png", 500)),
+            ["happy"] = Clip(false, ("second.png", 700))
+        };
+        var extended = animated with { Id = "extended-actions", Actions = extendedActions };
+        var extendedPack = library.Import(Zip("extended", extended, new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes }));
+        check(extendedPack.Actions.Count == 7, "a custom ZIP accepts all three optional action keys");
+        var extendedExport = Path.Combine(area, "extended-export.zip");
+        library.Export(extendedPack, extendedExport);
+        check(new CharacterLibrary(Path.Combine(area, "extended-roundtrip")).Import(extendedExport).Actions.Count == 7,
+            "extended actions survive custom package export and reimport");
+        var happyOnly = animated with { Id = "happy-only", Actions = new() {
+            ["idle"] = Clip(true, ("idle.png", 100)), ["happy"] = Clip(false, ("second.png", 300)) } };
+        player.Configure(library.Import(Zip("happy-only", happyOnly, new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes })));
+        player.ReactToClick(0);
+        check(player.Action == "happy", "a happy-only custom package responds even when the click choice is zero");
+        foreach (var optional in new[] { "look", "hover", "happy" })
+            Reject(() => library.Import(Zip("loop-" + optional, animated with { Id = "loop-" + optional, Actions = new() {
+                ["idle"] = Clip(true, ("idle.png", 100)), [optional] = Clip(true, ("idle.png", 100)) } },
+                new() { ["idle.png"] = imageBytes })), "optional " + optional + " clips cannot loop indefinitely");
 
         Reject(() => library.Import(Zip("traversal", animated with { Id = "traversal" }, new() { ["../outside.png"] = imageBytes })),
             "ZIP traversal paths are rejected before installation");

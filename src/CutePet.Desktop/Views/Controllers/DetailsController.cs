@@ -14,6 +14,7 @@ internal sealed class DetailsController
     private bool hovered;
     private int menusOpen;
     internal bool DetailsVisible { get; private set; }
+    internal bool MenuOpen => menusOpen > 0;
     private Preferences Settings => window.Settings;
     private bool dragged => isDragging();
     private bool exiting => isExiting();

@@ -15,6 +15,7 @@ public partial class CharacterManagerWindow : Window
     private readonly Stopwatch clock = new();
     private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(40) };
     private CharacterPack? Selected => CharacterList.SelectedItem as CharacterPack;
+    private sealed record ActionChoice(string Key, string Label);
     public CharacterManagerWindow(MainWindow host)
     {
         this.host = host;
@@ -47,13 +48,17 @@ public partial class CharacterManagerWindow : Window
         if (Selected is not CharacterPack pack) return;
         animation.Configure(pack);
         Preview.Source = animation.Image;
-        var labels = new[] { ("idle", "待机"), ("blink", "眨眼"), ("greeting", "打招呼"), ("low", "低额度") };
+        var labels = new[] { ("idle", "待机"), ("blink", "眨眼"), ("greeting", "打招呼"), ("low", "低额度"),
+            ("look", "张望"), ("hover", "歪头"), ("happy", "开心") };
         CharacterInfo.Text = $"{(pack.BuiltIn ? "内置角色" : "自定义角色")} · {pack.Name}\n动作："
             + string.Join("、", labels.Where(pair => pack.Actions.ContainsKey(pair.Item1)).Select(pair => pair.Item2));
         RightsInfo.Text = $"作者：{(string.IsNullOrWhiteSpace(pack.Manifest.Author) ? "未填写" : pack.Manifest.Author)}\n"
             + (string.IsNullOrWhiteSpace(pack.Manifest.License) ? "未填写素材许可，请确认图片的使用权限。" : pack.Manifest.License);
         RemoveButton.IsEnabled = !pack.BuiltIn;
-        PreviewButton.IsEnabled = pack.Actions.ContainsKey("greeting");
+        PreviewAction.ItemsSource = labels.Where(pair => pack.Actions.ContainsKey(pair.Item1))
+            .Select(pair => new ActionChoice(pair.Item1, pair.Item2)).ToArray();
+        PreviewAction.SelectedValue = pack.Actions.ContainsKey("greeting") ? "greeting" : "idle";
+        PreviewButton.IsEnabled = true;
     }
     private void OnUse(object sender, RoutedEventArgs e)
     {
@@ -61,7 +66,8 @@ public partial class CharacterManagerWindow : Window
         host.SetCharacterPackage(pack.Id);
         StatusText.Text = $"已使用「{pack.Name}」，重启后会保留。";
     }
-    private void OnPreview(object sender, RoutedEventArgs e) { animation.Greet(); Preview.Source = animation.Image; }
+    private void OnPreview(object sender, RoutedEventArgs e)
+    { if (PreviewAction.SelectedValue is string action) animation.Preview(action); Preview.Source = animation.Image; }
     private void OnImport(object sender, RoutedEventArgs e)
     {
         var picker = new Microsoft.Win32.OpenFileDialog { Title = "导入自定义角色",

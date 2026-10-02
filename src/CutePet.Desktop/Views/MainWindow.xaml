@@ -8,7 +8,7 @@
           LostMouseCapture="OnDockCaptureLost">
       <Border x:Name="DockTarget" CornerRadius="14" BorderBrush="#568B70" BorderThickness="2" Background="#24568B70"
               IsHitTestVisible="False" Visibility="Collapsed" />
-      <Viewbox x:Name="PetStage" Width="230" Height="178" Canvas.Left="110" Canvas.Top="2" Stretch="Uniform">
+      <Viewbox x:Name="PetStage" Width="230" Height="178" Canvas.Left="110" Canvas.Top="2" Stretch="Uniform" MouseEnter="OnPetEnter" MouseLeave="OnPetLeave">
        <Grid Width="230" Height="178">
         <Ellipse Fill="#2029443B" Width="108" Height="13" VerticalAlignment="Bottom" Margin="0,0,0,1" />
         <Grid x:Name="PetArt" RenderTransformOrigin="0.5,0.85" Margin="0,16,0,14">

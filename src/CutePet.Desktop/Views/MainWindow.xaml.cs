@@ -33,6 +33,8 @@ public partial class MainWindow : Window
     private readonly PetDragController dragging;
     private readonly CharacterPresenter characterPresenter;
     internal CharacterFrame CurrentCharacterFrame => characterPresenter.CurrentFrame;
+    internal bool CanPlayAmbient => !exiting && !dragging.Dragged && !dragging.IsDragging && !details.MenuOpen
+        && Mouse.LeftButton != MouseButtonState.Pressed;
     private QuotaSession? session;
     private Task? syncTask;
     private bool loaded, exiting;
@@ -303,6 +305,10 @@ public partial class MainWindow : Window
         SavePlacement();
     }
     private void OnHoverEnter(object sender, MouseEventArgs e) => details.PointerChanged(true);
+    private void OnPetEnter(object sender, MouseEventArgs e) => characterPresenter.PointerChanged(true);
+    private void OnPetLeave(object sender, MouseEventArgs e) => characterPresenter.PointerChanged(false);
+    internal void CharacterPointerChanged(bool inside) => characterPresenter.PointerChanged(inside);
+    internal void AdvanceAmbient(TimeSpan elapsed) => characterPresenter.AdvanceAmbient(elapsed);
     private void OnHoverLeave(object sender, MouseEventArgs e) => details.PointerChanged(Scene.IsMouseOver || DetailsViewport.IsMouseOver);
     internal void PointerChanged(bool inside) => details.PointerChanged(inside);
     internal void CompleteHoverOpen() => details.CompleteHoverOpen();
@@ -320,7 +326,7 @@ public partial class MainWindow : Window
     {
         if (!dragging.OnMouseUp(e)) return;
         Model.CharacterMessage = "收到！我会看着的";
-        PlayGreeting();
+        characterPresenter.PlayInteraction();
         try { await Task.Delay(1800, stop.Token); } catch (OperationCanceledException) { return; }
         Model.RestoreCharacterMessage();
     }
