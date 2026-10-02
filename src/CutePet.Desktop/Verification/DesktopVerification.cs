@@ -265,13 +265,14 @@ internal static class DesktopVerification
             Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "blink finishes and restores idle");
             window.CharacterPointerChanged(true);
             window.AdvanceAmbient(TimeSpan.FromMilliseconds(399));
-            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "pet hover waits for its dwell threshold");
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "Tianyi stays standing before the hover threshold");
             window.AdvanceAmbient(TimeSpan.FromMilliseconds(1));
-            Check(window.CurrentCharacterFrame == CharacterFrame.Hover, "pet hover starts the Tianyi head tilt");
-            Render(window, directory, "animation-hover", 144);
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle && !window.SelectedCharacter.Actions.ContainsKey("hover"),
+                "Tianyi stays standing after hover instead of playing the withdrawn tilt");
+            Render(window, directory, "animation-standing-hover", 144);
             window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(1));
             window.AdvanceAmbient(TimeSpan.FromSeconds(20));
-            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "one pointer entry plays hover once and suppresses random looks");
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "long hover leaves Tianyi standing and suppresses random looks");
             window.CharacterPointerChanged(false);
             window.AdvanceAmbient(TimeSpan.FromSeconds(16));
             Check(window.CurrentCharacterFrame == CharacterFrame.Look, "idle clock eventually starts a random look");
@@ -453,7 +454,7 @@ internal static class DesktopVerification
             Check(manager.Preview.Source == window.SelectedCharacter.Actions["greeting"].Frames[0].Image,
                 "manager greeting preview uses the selected package's real frames");
             manager.CharacterList.SelectedItem = window.Characters.Find("tianyi");
-            Check(manager.PreviewAction.Items.Count == 7, "manager exposes all seven Tianyi action previews");
+            Check(manager.PreviewAction.Items.Count == 6, "manager exposes six Tianyi actions without the withdrawn tilt");
             manager.PreviewAction.SelectedValue = "happy";
             manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
             Check(manager.Preview.Source == window.Characters.Find("tianyi").Actions["happy"].Frames[0].Image,

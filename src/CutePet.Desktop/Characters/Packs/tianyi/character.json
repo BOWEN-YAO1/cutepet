@@ -90,19 +90,6 @@
         }
       ]
     },
-    "hover": {
-      "loop": false,
-      "frames": [
-        {
-          "image": "tilt-v2.png",
-          "durationMs": 750
-        },
-        {
-          "image": "idle.png",
-          "durationMs": 150
-        }
-      ]
-    },
     "happy": {
       "loop": false,
       "frames": [
