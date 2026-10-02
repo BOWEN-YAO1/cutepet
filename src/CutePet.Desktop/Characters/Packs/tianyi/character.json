@@ -112,19 +112,31 @@
         },
         {
           "image": "throne-form-v1.png",
-          "durationMs": 350
+          "durationMs": 250
         },
         {
           "image": "throne-standing-v1.png",
-          "durationMs": 250
+          "durationMs": 80
+        },
+        {
+          "image": "sit-prepare-v2.png",
+          "durationMs": 110
+        },
+        {
+          "image": "sit-lower-v2.png",
+          "durationMs": 90
         },
         {
           "image": "sit-mid-v1.png",
-          "durationMs": 250
+          "durationMs": 90
+        },
+        {
+          "image": "sit-near-seat-v2.png",
+          "durationMs": 110
         },
         {
           "image": "sit-v1.png",
-          "durationMs": 200
+          "durationMs": 320
         }
       ]
     },
@@ -141,20 +153,36 @@
       "loop": false,
       "frames": [
         {
+          "image": "sit-v1.png",
+          "durationMs": 160
+        },
+        {
+          "image": "sit-near-seat-v2.png",
+          "durationMs": 110
+        },
+        {
           "image": "sit-mid-v1.png",
-          "durationMs": 250
+          "durationMs": 90
+        },
+        {
+          "image": "sit-lower-v2.png",
+          "durationMs": 90
+        },
+        {
+          "image": "sit-prepare-v2.png",
+          "durationMs": 110
         },
         {
           "image": "throne-standing-v1.png",
-          "durationMs": 250
+          "durationMs": 80
         },
         {
           "image": "throne-form-v1.png",
-          "durationMs": 220
+          "durationMs": 160
         },
         {
           "image": "magic-v1.png",
-          "durationMs": 180
+          "durationMs": 100
         },
         {
           "image": "idle.png",

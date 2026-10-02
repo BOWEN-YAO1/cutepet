@@ -559,6 +559,7 @@ internal static class DesktopVerification
 
             await CloudVerification.RunAsync(window, Check, name => Render(window, directory, name, 192),
                 low => window.Model.Apply(Snapshot(low ? 8 : 72, 48), demo: true), () => store.Load().AutoCloud);
+            ThroneMotionVerification.Run(window, directory, Check);
 
             if (live)
             {

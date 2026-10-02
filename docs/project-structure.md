@@ -1,4 +1,4 @@
-# 项目结构与修改入口（0.11.0）
+# 项目结构与修改入口（0.12.0）
 
 日期：2026-10-02。0.8.1 整理目录，并将主窗口中的交互状态和播放计时分配给独立模块。保留 0.8 的角色包格式、设置目录、程序入口与已实现功能。
 
@@ -62,6 +62,7 @@ CutePet.Desktop/
 │   └── NativePlacement.cs             屏幕、DPI、位置约束和弹窗置顶
 └── Verification/
     ├── DesktopVerification.cs         真实 WPF 离屏功能验证
+    ├── ThroneMotionVerification.cs     王座衔接、反向播放及动画预览
     ├── CloudVerification.cs           乘云时钟、边界和交互验证
     └── CharacterPackVerification.cs   角色包端到端及错误边界验证
 ```
@@ -102,3 +103,7 @@ Views/Controllers 是与 WPF 控件关联的交互模块；角色播放器和布
 ## 0.10.0 王座休息
 
 新增五张透明素材与 conjure / sit / stand，天依共 14 张图、9 种动作。公共播放器处理坐姿基础状态、起身后的最近一次回应和清理；CharacterPresenter 处理 30 秒自动坐下、20 秒自动起身及浮动暂停。菜单支持手动休息和自动开关，开关写入 Preferences.AutoRest。旧包继续兼容。当前完整验证见 [王座休息说明](throne-rest.md)，此前版本的动作数与验证数为历史记录。
+
+## 0.12.0 王座动作衔接
+
+2026-10-02：新增 sit-prepare-v2.png、sit-lower-v2.png、sit-near-seat-v2.png 三张过渡帧，召唤 / 坐下 8 帧、起身 9 帧，按当前帧进度反向起身。格式继续为 1，像素限额调整到 33,554,432；旧包保留兼容。新图由内置 image_gen.imagegen 编辑，原图保留，完整提示词位于 REST-SMOOTH-PROMPTS.md 与 SOURCE.md。动作及验证边界详见 docs/rest-smooth.md，原角色权利说明继续适用。

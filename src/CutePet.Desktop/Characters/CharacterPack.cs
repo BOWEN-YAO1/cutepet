@@ -38,14 +38,17 @@ internal sealed record LoadedAction(bool Loop, IReadOnlyList<LoadedFrame> Frames
 {
     public double Duration => Frames.Sum(frame => frame.DurationMs);
     public BitmapSource At(double elapsed)
+        => Frames[PositionAt(elapsed).Index].Image;
+    internal (int Index, double Fraction) PositionAt(double elapsed)
     {
         var remaining = Loop ? elapsed % Duration : Math.Min(elapsed, Duration - 1);
-        foreach (var frame in Frames)
+        for (var index = 0; index < Frames.Count; index++)
         {
-            if (remaining < frame.DurationMs) return frame.Image;
+            var frame = Frames[index];
+            if (remaining < frame.DurationMs) return (index, remaining / frame.DurationMs);
             remaining -= frame.DurationMs;
         }
-        return Frames[^1].Image;
+        return (Frames.Count - 1, 0.999999);
     }
 }
 internal sealed record CharacterPack(CharacterManifest Manifest, bool BuiltIn,

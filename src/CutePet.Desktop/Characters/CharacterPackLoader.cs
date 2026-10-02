@@ -70,8 +70,8 @@ internal static class CharacterPackLoader
                     var decoder = new PngBitmapDecoder(bytes, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
                     var decoded = decoder.Frames[0];
                     if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
-                        || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 25_165_824)
-                        throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，总解码像素最大 25,165,824。");
+                        || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 33_554_432)
+                        throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，总解码像素最大 33,554,432。");
                     width ??= decoded.PixelWidth;
                     height ??= decoded.PixelHeight;
                     if (decoded.PixelWidth != width || decoded.PixelHeight != height)
@@ -97,7 +97,7 @@ internal static class CharacterPackLoader
                 var decoder = new PngBitmapDecoder(bytes, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
                 var decoded = decoder.Frames[0];
                 if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
-                    || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 25_165_824)
+                    || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 33_554_432)
                     throw new InvalidDataException("云层图片超过角色包解码大小限制。");
                 decoded.Freeze();
                 cloudImage = decoded;

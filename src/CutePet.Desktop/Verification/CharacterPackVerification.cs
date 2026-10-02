@@ -230,9 +230,9 @@ internal static class CharacterPackVerification
             System.Windows.Media.PixelFormats.Bgra32, null, new byte[2048 * 2048 * 4], 2048 * 4)));
         using var largeBytes = new MemoryStream();
         largeEncoder.Save(largeBytes);
-        var largeFiles = Enumerable.Range(0, 7).ToDictionary(i => "large-" + i + ".png", _ => largeBytes.ToArray());
+        var largeFiles = Enumerable.Range(0, 9).ToDictionary(i => "large-" + i + ".png", _ => largeBytes.ToArray());
         Reject(() => library.Import(Zip("total-pixels", animated with { Id = "total-pixels", Actions = new() {
-            ["idle"] = Clip(true, Enumerable.Range(0, 7).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
+            ["idle"] = Clip(true, Enumerable.Range(0, 9).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
             "total decoded pixels remain bounded with the expanded rest package limit");
 
         Reject(() => library.Import(Zip("traversal", animated with { Id = "traversal" }, new() { ["../outside.png"] = imageBytes })),
@@ -280,8 +280,8 @@ internal static class CharacterPackVerification
         Reject(() => library.Import(Zip("cloud-orphan", cloudManifest with { Id = "cloud-orphan", Cloud = null, Actions = new() {
             ["idle"] = Clip(true, ("idle.png", 100)), ["summon-cloud"] = Clip(false, ("idle.png", 100)) } },
             new() { ["idle.png"] = imageBytes })), "cloud summon actions require an optional cloud layer");
-        Reject(() => library.Import(Zip("cloud-pixels", cloudManifest with { Id = "cloud-pixels", Cloud = new() { Image = "large-6.png" },
-            Actions = new() { ["idle"] = Clip(true, Enumerable.Range(0, 6).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
+        Reject(() => library.Import(Zip("cloud-pixels", cloudManifest with { Id = "cloud-pixels", Cloud = new() { Image = "large-8.png" },
+            Actions = new() { ["idle"] = Clip(true, Enumerable.Range(0, 8).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
             "cloud pixels count toward the same total decoded memory limit");
         Reject(() => library.Import(Zip("canvas", animated with { Id = "canvas" }, new() {
             ["idle.png"] = imageBytes, ["second.png"] = canvasBytes.ToArray() })), "inconsistent frame canvases are rejected");

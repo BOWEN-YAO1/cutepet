@@ -17,3 +17,7 @@
 ## 0.11.0 乘云飘动
 
 2026-10-02：新增天依独立云层（cloud-v1.png）、施法召唤和短距离横向飘动、自动开关与交互暂停。角色素材保留原有脸、服装和动作；小猫保留原行为。云由内置 image_gen.imagegen 生成，1774×887 原始透明 PNG，完整提示词位于角色包 CLOUD-PROMPTS.md 及 SOURCE.md。运动与验证边界详见 docs/cloud-drift.md；属于非官方同人设计，原角色权利说明继续适用。
+
+## 0.12.0 王座动作衔接
+
+2026-10-02：新增 sit-prepare-v2.png、sit-lower-v2.png、sit-near-seat-v2.png 三张过渡帧，召唤 / 坐下 8 帧、起身 9 帧，按当前帧进度反向起身。格式继续为 1，像素限额调整到 33,554,432；旧包保留兼容。新图由内置 image_gen.imagegen 编辑，原图保留，完整提示词位于 REST-SMOOTH-PROMPTS.md 与 SOURCE.md。动作及验证边界详见 docs/rest-smooth.md，原角色权利说明继续适用。
