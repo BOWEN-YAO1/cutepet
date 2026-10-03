@@ -59,13 +59,24 @@ internal static class SwingVerification
         var trailLayer = garden.Children.OfType<Canvas>().Single();
         var trails = trailLayer.Children.OfType<Canvas>().ToArray();
         var trailFlowers = trails.SelectMany(p => p.Children.OfType<Image>()).ToArray();
-        check(trailLayer.Visibility == Visibility.Visible && trailFlowers.Length == 10
+        check(trailLayer.Visibility == Visibility.Visible && trailFlowers.Length == 16
             && trailFlowers.All(p => flowers.Any(f => ReferenceEquals(f.Source, p.Source)))
             && trails.SelectMany(p => p.Children.Cast<UIElement>()).All(p => !p.IsHitTestVisible),
             "independent flowering vines reuse cached artwork without intercepting gestures");
-        check(trails.All(p => p.Children.OfType<System.Windows.Shapes.Path>().First().Data is PathGeometry g
-            && g.Figures[0].StartPoint.Y > 0) && TrailsInside(), "independent vines start within the scene and fit its bounds");
-        var trailBreeze = ((TranslateTransform)((TransformGroup)trails[0].RenderTransform).Children[1]).X;
+        var trailRoots = trails.Select(TrailRoot).ToArray();
+        check(trailRoots.All(p => Math.Abs(p.Y) < 1e-9) && TrailsInside(), "vine roots meet the desktop top edge while foliage stays within the scene");
+        check(trails.All(canvas =>
+        {
+            var main = (PathGeometry)canvas.Children.OfType<System.Windows.Shapes.Path>().First().Data;
+            var branches = canvas.Children.OfType<System.Windows.Shapes.Path>().Where(p => p.Name.StartsWith("GardenTrailBranch", StringComparison.Ordinal)).ToArray();
+            return branches.Length == 3 && branches.All(p =>
+            {
+                var branch = (PathGeometry)p.Data;
+                var join = branch.Figures[0].StartPoint;
+                return main.StrokeContains(new Pen(Brushes.Black, 0.5), join) && branch.Figures[0].Segments.Count == 2;
+            });
+        }), "six curled side shoots connect to actual main-vine geometry");
+        var trailBreeze = ((RotateTransform)((TransformGroup)trails[0].RenderTransform).Children[1]).Angle;
         check(garden.Visibility == Visibility.Visible && leaves.Length == 36 && flowers.Length == 6
             && garden.Children.Cast<UIElement>().All(p => !p.IsHitTestVisible),
             "garden adds floral vines without intercepting gestures");
@@ -114,7 +125,7 @@ internal static class SwingVerification
         check(((RotateTransform)charm.RenderTransform).Angle == charmAngle
             && ((ScaleTransform)((TransformGroup)butterfly.RenderTransform).Children[0]).ScaleX == wingScale,
             "menu freezes hanging charm sway and butterfly flutter on the same clock");
-        check(((TranslateTransform)((TransformGroup)trails[0].RenderTransform).Children[1]).X == trailBreeze,
+        check(((RotateTransform)((TransformGroup)trails[0].RenderTransform).Children[1]).Angle == trailBreeze,
             "menu freezes independent flower trails on the existing clock");
         window.EndDetailsMenu();
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(1600));
@@ -134,8 +145,10 @@ internal static class SwingVerification
         check(((RotateTransform)charm.RenderTransform).Angle != charmAngle
             && ((ScaleTransform)((TransformGroup)butterfly.RenderTransform).Children[0]).ScaleX != wingScale
             && GardenInside(), "new ornament motion resumes within the scene");
-        check(((TranslateTransform)((TransformGroup)trails[0].RenderTransform).Children[1]).X != trailBreeze && TrailsInside(),
+        check(((RotateTransform)((TransformGroup)trails[0].RenderTransform).Children[1]).Angle != trailBreeze && TrailsInside(),
             "independent vine breeze resumes without leaving the scene");
+        check(trails.Select(TrailRoot).Zip(trailRoots).All(p => (p.First - p.Second).Length < 1e-9),
+            "vine breeze moves foliage while both desktop roots stay fixed");
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(300));
         window.PlayCharacterInteraction(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
         check(Math.Abs(window.EdgeSwing.Angle - 4) < 0.00001,
@@ -221,6 +234,7 @@ internal static class SwingVerification
         check(trailLayer.Visibility == Visibility.Visible && TrailsInside()
             && Math.Abs(((ScaleTransform)((TransformGroup)trails[0].RenderTransform).Children[0]).ScaleX - 100.0 / 148) < 0.00001,
             "independent trails scale with shorter artwork");
+        check(trails.All(p => Math.Abs(TrailRoot(p).Y) < 1e-9), "shorter character scaling keeps vine roots on the desktop top edge");
         window.WakeCharacterImmediately();
         manifest = manifest with { TopSwing = manifest.TopSwing! with { Scenery = manifest.TopSwing.Scenery! with { DisplayWidth = 60, DisplayHeight = 60 } } };
         File.WriteAllText(Path.Combine(customDirectory, "character.json"), JsonSerializer.Serialize(manifest, CharacterPackLoader.Json));
@@ -229,6 +243,15 @@ internal static class SwingVerification
         check(SceneryInside(), "maximum-sized tilted custom scenery stays within the shortened pet canvas");
         var custom = window.SelectedCharacter;
         window.SetCharacter(PetCharacter.Tianyi); window.Characters.Remove(custom);
+        Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
+        var rootedCycle = true;
+        var cycleRoots = trails.Select(TrailRoot).ToArray();
+        for (var i = 0; i < 32; i++)
+        {
+            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(100));
+            rootedCycle &= TrailsInside() && trails.Select(TrailRoot).Zip(cycleRoots).All(p => (p.First - p.Second).Length < 1e-9);
+        }
+        check(rootedCycle, "complete vine breeze cycle keeps roots fixed and branched foliage within the scene");
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
         var encoder = new GifBitmapEncoder(); var delays = new List<int>();
         for (var i = 0; i < 64; i++)
@@ -257,12 +280,17 @@ internal static class SwingVerification
             bounds.Offset(Canvas.GetLeft(art) + origin.X, Canvas.GetTop(art) + origin.Y);
             return new Rect(0, 0, 230, 178).Contains(bounds);
         });
+        Point TrailRoot(Canvas canvas) => canvas.RenderTransform.Transform(
+            ((PathGeometry)canvas.Children.OfType<System.Windows.Shapes.Path>().First().Data).Figures[0].StartPoint);
         bool TrailsInside() => trails.All(canvas => canvas.Children.Cast<FrameworkElement>().All(art =>
         {
             Rect bounds;
             if (art is System.Windows.Shapes.Path { Stroke: not null } stem)
             {
-                bounds = stem.Data.Bounds; bounds.Inflate(stem.StrokeThickness / 2, stem.StrokeThickness / 2);
+                var geometry = new GeometryGroup { Transform = canvas.RenderTransform };
+                geometry.Children.Add(stem.Data);
+                // The root's half stroke is intentionally clipped by the desktop edge.
+                return new Rect(0, -0.5, 230, 178.5).Contains(geometry.GetRenderBounds(new Pen(stem.Stroke, stem.StrokeThickness)));
             }
             else
             {
