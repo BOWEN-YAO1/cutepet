@@ -11,7 +11,7 @@ namespace CutePet.Desktop;
 
 internal static class CharacterPackLoader
 {
-    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-shy", "edge-sway", "edge-nod", "edge-top-idle", "edge-top-peek", "edge-bottom-idle", "edge-bottom-peek" };
+    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-shy", "edge-sway", "edge-nod", "edge-top-idle", "edge-top-peek", "edge-bottom-idle", "edge-bottom-peek", "edge-bottom-look", "edge-bottom-smile" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true, WriteIndented = true };
     public static bool ValidId(string? id) => id is not null && Regex.IsMatch(id, "\\A[a-z][a-z0-9-]{0,63}\\z");
@@ -67,6 +67,8 @@ internal static class CharacterPackLoader
                 throw new InvalidDataException("探头回应需要配套 " + baseAction + " 贴边姿势。");
         if (SideEdgeMotion.Responses.Any(action => manifest.Actions.ContainsKey(action)) && !manifest.Actions.ContainsKey("edge-idle"))
             throw new InvalidDataException("左右贴边回应需要配套 edge-idle 姿势。");
+        if (EdgeActions.BottomResponses.Any(action => manifest.Actions.ContainsKey(action)) && !manifest.Actions.ContainsKey("edge-bottom-idle"))
+            throw new InvalidDataException("下沿回应需要配套 edge-bottom-idle 姿势。");
         if (!manifest.Actions.ContainsKey("sit") && (manifest.RestAfterMs != 0 || manifest.Actions.ContainsKey("conjure") || manifest.Actions.ContainsKey("stand")
             || manifest.Actions.Keys.Any(key => key.StartsWith("sit-", StringComparison.Ordinal))))
             throw new InvalidDataException("召唤、起身、坐姿回应或自动休息需要配套 sit 动作。");
@@ -76,8 +78,7 @@ internal static class CharacterPackLoader
         long pixels = 0;
         var frameCount = 0;
         int? width = null, height = null;
-        int? sideWidth = null, sideHeight = null;
-        bool? sideRegions = null;
+        var edgeCanvases = new Dictionary<string, (int Width, int Height, bool Regions)>();
         foreach (var (name, action) in manifest.Actions)
         {
             if (action is null || action.Frames is null || action.Frames.Count == 0
@@ -103,17 +104,18 @@ internal static class CharacterPackLoader
                     images.Add(frame.Image, image = decoded);
                 }
                 var side = EdgeActions.BaseOf(name) == "edge-idle";
-                if (side)
+                var bottom = EdgeActions.BaseOf(name) == "edge-bottom-idle";
+                var edge = side || bottom;
+                var edgeBase = EdgeActions.BaseOf(name)!;
+                if (edge && edgeCanvases.TryGetValue(edgeBase, out var prior) && prior.Regions != (frame.Region is not null))
                 {
-                    sideRegions ??= frame.Region is not null;
-                    if (sideRegions != (frame.Region is not null))
-                        throw new InvalidDataException("左右姿势应统一使用图集区域或完整 PNG，不能混用两种画布。");
+                    throw new InvalidDataException("同方向边缘姿势应统一使用图集区域或完整 PNG，不能混用两种画布。");
                 }
-                if ((frame.EdgeAnchorX is not null || frame.EdgeAnchorY is not null)
-                    && (!side || frame.Region is null)
+                if (frame.EdgeAnchorX is not null && (!side || frame.Region is null)
+                    || frame.EdgeAnchorY is not null && (!edge || frame.Region is null)
                     || frame.EdgeAnchorX is double x && (!double.IsFinite(x) || x < 0 || x > 0.5)
-                    || frame.EdgeAnchorY is double y && (!double.IsFinite(y) || y < 0 || y > 1))
-                    throw new InvalidDataException("逐帧扶边点只用于左右图集帧，X 范围 0–0.5，Y 范围 0–1。");
+                    || frame.EdgeAnchorY is double y && (!double.IsFinite(y) || y < (bottom ? .5 : 0) || y > 1))
+                    throw new InvalidDataException("逐帧扶边点用于左右或下沿图集：左右 X 为 0–0.5、Y 为 0–1，下沿 Y 为 0.5–1。");
                 if (frame.Region is { } region)
                 {
                     if (region.X < 0 || region.Y < 0 || region.Width < 1 || region.Height < 1
@@ -130,11 +132,10 @@ internal static class CharacterPackLoader
                     }
                     image = cropped;
                 }
-                if (side && frame.Region is not null)
+                if (edge && frame.Region is not null)
                 {
-                    sideWidth ??= image.PixelWidth; sideHeight ??= image.PixelHeight;
-                    if (image.PixelWidth != sideWidth || image.PixelHeight != sideHeight)
-                        throw new InvalidDataException("左右图集的所有姿势帧需要保持相同区域大小。");
+                    if (edgeCanvases.TryGetValue(edgeBase,out var canvas) && (image.PixelWidth != canvas.Width || image.PixelHeight != canvas.Height))
+                        throw new InvalidDataException("同方向图集的所有姿势帧需要保持相同区域大小。");
                 }
                 else
                 {
@@ -142,6 +143,7 @@ internal static class CharacterPackLoader
                     if (image.PixelWidth != width || image.PixelHeight != height)
                         throw new InvalidDataException("同一角色的普通动作帧需要保持相同画布大小。");
                 }
+                if (edge) edgeCanvases.TryAdd(edgeBase, (image.PixelWidth,image.PixelHeight,frame.Region is not null));
                 loaded.Add(new(image, frame.DurationMs, frame.EdgeAnchorX, frame.EdgeAnchorY));
             }
             var clip = new LoadedAction(action.Loop, loaded);

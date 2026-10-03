@@ -131,8 +131,16 @@ internal static class ControlCenterVerification
             check(characters.Preview.Clip is RectangleGeometry && characters.SidePreviewEdge.Visibility == Visibility.Visible,
                 "character-page articulated preview masks the hidden body and shows the fixed border");
             Render(center,directory,"app-side-preview");
+            characters.PreviewAction.SelectedValue="edge-bottom-look";
+            characters.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+            await Settle();
+            check(characters.Preview.Clip is RectangleGeometry && characters.BottomPreviewEdge.Visibility == Visibility.Visible
+                && characters.SidePreviewEdge.Visibility == Visibility.Collapsed,
+                "bottom preview clips below the fixed elbow support instead of using the side mask");
+            Render(center,directory,"app-bottom-preview");
             characters.CharacterList.SelectedItem = host.Characters.Find("cat");
-            check(characters.Preview.Clip is null && characters.SidePreviewEdge.Visibility == Visibility.Collapsed,
+            check(characters.Preview.Clip is null && characters.SidePreviewEdge.Visibility == Visibility.Collapsed
+                && characters.BottomPreviewEdge.Visibility == Visibility.Collapsed,
                 "switching characters clears the side-only mask and border preview");
             characters.UseButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
             await Settle();

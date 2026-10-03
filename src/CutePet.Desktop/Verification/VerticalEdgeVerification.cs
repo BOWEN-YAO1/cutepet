@@ -60,23 +60,24 @@ internal static class VerticalEdgeVerification
             window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
             var contactShift = window.EdgeShift.Y;
             check(window.EdgeShift.X == 0 && window.EdgeMirror.ScaleX == 1
-                && (side == ScreenEdge.Top ? window.EdgeShift.Y < 0 : window.EdgeShift.Y > 20),
+                && (side == ScreenEdge.Top ? window.EdgeShift.Y < 0 : window.EdgeShift.Y > 0),
                 "vertical art aligns without horizontal mirroring or rotation " + side);
             window.PlayCharacterInteraction();
-            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
+            var duration = pack.Actions[EdgeActions.Peek(EdgeActions.Base(side))].Duration;
+            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(duration / 2));
             var expression = window.CharacterArt.Source;
-            check(ReferenceEquals(expression, pack.Actions[EdgeActions.Peek(EdgeActions.Base(side))].Frames[1].Image)
-                && window.ScreenEdgePeekOffset == 8, "vertical response selects its package frame at eased midpoint " + side);
-            check(window.EdgeShift.Y == contactShift && (side == ScreenEdge.Top ? window.EdgeStretch.ScaleY == 1
-                : window.EdgeStretch.ScaleY > 1 && window.EdgeStretch.ScaleY <= 1.04),
+            check(ReferenceEquals(expression, pack.Actions[EdgeActions.Peek(EdgeActions.Base(side))].At(duration / 2))
+                && window.ScreenEdgePeekOffset == (side == ScreenEdge.Top ? 8 : 0), "vertical response selects its package pose at midpoint " + side);
+            check((side == ScreenEdge.Top ? window.EdgeShift.Y == contactShift : window.EdgeShift.Y >= contactShift)
+                && window.EdgeStretch.ScaleY == 1,
                 "vertical response keeps the hand or elbow contact line fixed " + side);
             var movedArea = new Rect(100, 40, 1600, 900);
             window.RefreshScreenEdgeBounds(movedArea, new Size(345, 267));
             check(window.ScreenEdgeAttachment!.Area == movedArea && window.ScreenEdgeAttachment.Side == side
                 && movedArea.Contains(new Rect(window.ScreenEdgeAttachment.Position, window.ScreenEdgeAttachment.PetSize))
-                && ReferenceEquals(expression, window.CharacterArt.Source) && window.ScreenEdgePeekOffset == 8,
+                && ReferenceEquals(expression, window.CharacterArt.Source) && window.ScreenEdgePeekOffset == (side == ScreenEdge.Top ? 8 : 0),
                 "work-area and DPI changes preserve side and ongoing expression " + side);
-            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
+            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(duration / 2));
             check(window.CurrentCharacterFrame == CharacterFrame.EdgeIdle && window.ScreenEdgePeekOffset == 0
                 && window.QuotaHost.Position == quota, "vertical response settles without affecting quota " + side);
             window.TogglePositionLock();
@@ -107,6 +108,7 @@ internal static class VerticalEdgeVerification
             .ToDictionary(pair => pair.Key, pair => pair.Value) };
         check(EdgeActions.Supported(legacy).SequenceEqual(new[] { ScreenEdge.Left, ScreenEdge.Right }),
             "legacy side-only packages retain exactly their original supported sides");
+        BottomEdgeVerification.Run(window,directory,check);
         Record(window, directory, check);
         window.WakeCharacterImmediately();
     }
@@ -135,7 +137,7 @@ internal static class VerticalEdgeVerification
         File.WriteAllBytes(Path.Combine(directory, "vertical-edge.gif"), ThroneMotionVerification.WithAnimationMetadata(bytes.ToArray(), delays));
         check(encoder.Frames.Count == 30, "vertical preview uses actual WPF top and bottom artwork with fixed quota and taskbar illustration");
     }
-    internal static RenderTargetBitmap Capture(MainWindow window, ScreenEdge side)
+    internal static RenderTargetBitmap Capture(MainWindow window, ScreenEdge side, string? label = null)
     {
         var visual = new DrawingVisual();
         using (var draw = visual.RenderOpen())
@@ -147,7 +149,7 @@ internal static class VerticalEdgeVerification
                 new Rect(340 - window.Width * 0.9, side == ScreenEdge.Top ? 20 : 350 - window.Height * 1.8, window.Width * 1.8, window.Height * 1.8));
             var card = window.QuotaHost;
             draw.DrawImage(WindowPreview.Surface((FrameworkElement)card.Content, card.Width, card.Height, 96), new Rect(525, 250, card.Width, card.Height));
-            draw.DrawText(new FormattedText(side == ScreenEdge.Top ? "上侧 · 悬挂秋千，轻轻摇摆" : "下侧 · 趴在任务栏上沿托腮",
+            draw.DrawText(new FormattedText(label ?? (side == ScreenEdge.Top ? "上侧 · 悬挂秋千，轻轻摇摆" : "下侧 · 趴在任务栏上沿托腮"),
                 System.Globalization.CultureInfo.GetCultureInfo("zh-CN"), FlowDirection.LeftToRight, new Typeface("Microsoft YaHei"),
                 13, new SolidColorBrush(Color.FromRgb(75, 102, 88)), 1), new Point(20, 371));
         }

@@ -82,7 +82,8 @@ public partial class CharactersPage : UserControl, IDisposable
             ("sit-blink", "坐姿眨眼"), ("sit-greeting", "坐姿挥手"), ("sit-happy", "坐姿微笑"),
             ("edge-idle", "左右贴边"), ("edge-peek", "左右探头微笑"), ("edge-top-idle", "花藤秋千"),
             ("edge-shy", "缩回再探出"), ("edge-sway", "探头轻摇"), ("edge-nod", "探头点头"),
-            ("edge-top-peek", "秋千轻摆"), ("edge-bottom-idle", "下沿托腮"), ("edge-bottom-peek", "下沿抬头微笑") };
+            ("edge-top-peek", "秋千轻摆"), ("edge-bottom-idle", "下沿托腮"), ("edge-bottom-peek", "下沿抬头微笑"),
+            ("edge-bottom-look", "下沿左右张望"), ("edge-bottom-smile", "下沿歪头微笑") };
         CharacterInfo.Text = pack.Name;
         RightsInfo.Text = $"作者：{(string.IsNullOrWhiteSpace(pack.Manifest.Author) ? "未填写" : pack.Manifest.Author)}\n"
             + (string.IsNullOrWhiteSpace(pack.Manifest.License) ? "未填写素材许可，请确认图片的使用权限。" : pack.Manifest.License);
@@ -109,6 +110,20 @@ public partial class CharactersPage : UserControl, IDisposable
     }
     private void RefreshSidePreview()
     {
+        BottomPreviewEdge.Visibility = Visibility.Collapsed;
+        if (Selected is { } bottom && EdgeActions.BaseOf(animation.Action) == "edge-bottom-idle"
+            && animation.Image is System.Windows.Media.Imaging.CroppedBitmap)
+        {
+            SidePreviewEdge.Visibility = Visibility.Collapsed;
+            BottomPreviewEdge.Visibility = Visibility.Visible;
+            var frame = animation.SpriteFrame;
+            var height = Math.Min(Preview.ActualHeight,Preview.ActualWidth * frame.Image.PixelHeight / frame.Image.PixelWidth);
+            var anchor = (Preview.ActualHeight - height) / 2 + height * (frame.EdgeAnchorY ?? bottom.Manifest.EdgeBottomAnchorY);
+            Preview.Clip = new RectangleGeometry(new Rect(0,0,Preview.ActualWidth,anchor));
+            sidePreviewTilt.Angle = 0; sidePreviewShift.X = 0;
+            sidePreviewShift.Y = Preview.ActualHeight - anchor;
+            return;
+        }
         if (Selected is { } pack && EdgeActions.BaseOf(animation.Action) == "edge-idle"
             && animation.Image is System.Windows.Media.Imaging.CroppedBitmap)
         {

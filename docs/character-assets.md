@@ -122,3 +122,7 @@ Use case: identity-preserve. Edit target: supplied transparent Luo Tianyi fan-ar
 ## 0.33.0 逐帧侧身探出
 
 内置 image_gen 参考 idle.png 生成八姿势图集，随后修正细节。edge-sequence-v3.png 为 1536×1024 RGBA，原样接入，运行时按 384×512 区域播放。旧完整人物图保留在源码，停止引用。完整提示词见 [SIDE-SEQUENCE-PROMPTS.md](../src/CutePet.Desktop/Characters/Packs/tianyi/SIDE-SEQUENCE-PROMPTS.md) 和 SOURCE.md；原角色权利说明继续适用。
+
+## 0.34.0 下沿托腮素材
+
+2026-10-04：内置 image_gen 编辑原下沿同人素材，生成八种托腮姿势并修整分格留白。最终 bottom-sequence-v4.png 为 1536×1024 RGBA 原始输出，原样复制，运行时按八个 384×512 区域取帧。v2 / v3 草稿和旧素材留在源码，角色包只导出实际引用图集。完整提示词和原始输出记录在天依包 BOTTOM-SEQUENCE-PROMPTS.md / SOURCE.md；此前完整来源档案保留为 SOURCE-HISTORY-v033.md，纳入匹配源码 ZIP。原角色权利说明继续适用。

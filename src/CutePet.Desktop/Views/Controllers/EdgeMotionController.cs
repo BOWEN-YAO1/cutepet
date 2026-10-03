@@ -94,6 +94,7 @@ internal sealed class EdgeMotionController
         if (!Active || peekElapsed >= 0) return;
         var choices = Attachment!.Side is ScreenEdge.Left or ScreenEdge.Right
             ? SideEdgeMotion.Responses.Where(window.SelectedCharacter.Actions.ContainsKey).ToArray()
+            : Attachment.Side == ScreenEdge.Bottom ? EdgeActions.BottomResponses.Where(window.SelectedCharacter.Actions.ContainsKey).ToArray()
             : window.SelectedCharacter.Actions.ContainsKey(PeekAction) ? new[] { PeekAction } : Array.Empty<string>();
         if (choices.Length == 0) return;
         response = choices[nextResponse % choices.Length];
@@ -168,11 +169,12 @@ internal sealed class EdgeMotionController
         var renderedHeight = Math.Min(window.CharacterArt.Height, width * image.PixelHeight / image.PixelWidth);
         // The package artwork's left canvas edge is the virtual border. Hands may overlap it.
         var articulated = Attachment.Side is ScreenEdge.Left or ScreenEdge.Right && image is System.Windows.Media.Imaging.CroppedBitmap;
+        var bottomArticulated = Attachment.Side == ScreenEdge.Bottom && image is System.Windows.Media.Imaging.CroppedBitmap;
         var current = window.CurrentSpriteFrame;
         var anchorX = articulated ? current.EdgeAnchorX ?? window.SelectedCharacter.Manifest.EdgeAnchorX : window.SelectedCharacter.Manifest.EdgeAnchorX;
         var anchor = (230 - renderedWidth) / 2 + renderedWidth * anchorX;
         var t = peekElapsed < 0 ? 0 : peekElapsed / window.SelectedCharacter.Actions[response].Duration;
-        var sidePose = articulated ? default : SideEdgeMotion.Sample(response, t);
+        var sidePose = articulated || bottomArticulated ? default : SideEdgeMotion.Sample(response, t);
         PeekOffset = sidePose.Peek;
         window.EdgeMirror.ScaleX = right ? -1 : 1;
         var entry = entering / 320;
@@ -180,8 +182,8 @@ internal sealed class EdgeMotionController
         window.EdgeShift.X = Attachment.Side is ScreenEdge.Left or ScreenEdge.Right
             ? (right ? 1 : -1) * (anchor * entry - PeekOffset) : 0;
         var imageTop = 16 + 148 - window.CharacterArt.Height + (window.CharacterArt.Height - renderedHeight) / 2;
-        var verticalAnchor = Attachment.Side == ScreenEdge.Top ? window.SelectedCharacter.Manifest.EdgeTopAnchorY
-            : window.SelectedCharacter.Manifest.EdgeBottomAnchorY;
+        var bottomAnchor = bottomArticulated ? current.EdgeAnchorY ?? window.SelectedCharacter.Manifest.EdgeBottomAnchorY : window.SelectedCharacter.Manifest.EdgeBottomAnchorY;
+        var verticalAnchor = Attachment.Side == ScreenEdge.Top ? window.SelectedCharacter.Manifest.EdgeTopAnchorY : bottomAnchor;
         // Top may swing independently; bottom keeps a small elbow-anchored lift.
         var vertical = Attachment.Side is ScreenEdge.Top or ScreenEdge.Bottom;
         window.EdgeStretch.CenterY = vertical ? renderedHeight * (verticalAnchor - 0.5) : 0;
@@ -189,7 +191,7 @@ internal sealed class EdgeMotionController
         window.EdgeShift.Y = Attachment.Side switch
         {
             ScreenEdge.Top => -(imageTop + renderedHeight * window.SelectedCharacter.Manifest.EdgeTopAnchorY) * entry,
-            ScreenEdge.Bottom => (178 - imageTop - renderedHeight * window.SelectedCharacter.Manifest.EdgeBottomAnchorY) * entry,
+            ScreenEdge.Bottom => (178 - imageTop - renderedHeight * bottomAnchor) * entry,
             _ => 0
         };
         RenderSwing(imageTop, renderedWidth, renderedHeight, entry);

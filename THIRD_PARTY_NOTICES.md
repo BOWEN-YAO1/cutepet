@@ -44,3 +44,7 @@
 ## 0.33.0 逐帧左右探出素材
 
 2026-10-03：内置 image_gen 参考原同人图制作八姿势图集，最终 edge-sequence-v3.png 为 1536×1024 RGBA 原始输出，原样复制，运行时取区域帧。提示词及修正记录位于天依包 SIDE-SEQUENCE-PROMPTS.md / SOURCE.md，旧图保留、原角色权利说明继续适用。
+
+## 0.34.0 下沿托腮素材
+
+2026-10-04：内置 image_gen 编辑原下沿同人素材，生成八种托腮姿势并修整分格留白。最终 bottom-sequence-v4.png 为 1536×1024 RGBA 原始输出，原样复制，运行时按八个 384×512 区域取帧。v2 / v3 草稿和旧素材留在源码，角色包只导出实际引用图集。完整提示词和原始输出记录在天依包 BOTTOM-SEQUENCE-PROMPTS.md / SOURCE.md；此前完整来源档案保留为 SOURCE-HISTORY-v033.md，纳入匹配源码 ZIP。原角色权利说明继续适用。

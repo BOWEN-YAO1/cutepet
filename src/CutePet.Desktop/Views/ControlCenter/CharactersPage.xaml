@@ -17,6 +17,7 @@
         <StackPanel>
           <Border Background="{DynamicResource CenterSoft}" CornerRadius="14" Height="170">
             <Grid><Border x:Name="SidePreviewEdge" Width="2" Background="{DynamicResource CenterLine}" HorizontalAlignment="Center" Margin="0,12,0,24" Visibility="Collapsed" IsHitTestVisible="False"/>
+              <Border x:Name="BottomPreviewEdge" Height="2" Background="{DynamicResource CenterLine}" VerticalAlignment="Bottom" Margin="16,0,16,24" Visibility="Collapsed" IsHitTestVisible="False"/>
               <Image x:Name="CloudPreview" Width="140" Height="32" VerticalAlignment="Bottom" Margin="0,0,0,12" Opacity="0" Stretch="Uniform"/>
               <Image x:Name="Preview" Margin="16,12,16,24" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="所选角色动作预览"/></Grid>
           </Border>

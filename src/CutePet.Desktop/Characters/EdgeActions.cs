@@ -6,6 +6,7 @@ namespace CutePet.Desktop;
 
 internal static class EdgeActions
 {
+    internal static readonly string[] BottomResponses = { "edge-bottom-peek", "edge-bottom-look", "edge-bottom-smile" };
     internal static string Base(ScreenEdge side) => side switch
     { ScreenEdge.Top => "edge-top-idle", ScreenEdge.Bottom => "edge-bottom-idle", _ => "edge-idle" };
     internal static string Peek(string baseAction) => baseAction[..^4] + "peek";
@@ -13,7 +14,7 @@ internal static class EdgeActions
     {
         "edge-idle" or "edge-peek" or "edge-shy" or "edge-sway" or "edge-nod" => "edge-idle",
         "edge-top-idle" or "edge-top-peek" => "edge-top-idle",
-        "edge-bottom-idle" or "edge-bottom-peek" => "edge-bottom-idle",
+        "edge-bottom-idle" or "edge-bottom-peek" or "edge-bottom-look" or "edge-bottom-smile" => "edge-bottom-idle",
         _ => null
     };
     internal static IEnumerable<ScreenEdge> Supported(CharacterPack pack) => Enum.GetValues<ScreenEdge>()

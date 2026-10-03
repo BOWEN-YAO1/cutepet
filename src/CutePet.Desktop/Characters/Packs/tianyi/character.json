@@ -430,8 +430,15 @@
       "loop": true,
       "frames": [
         {
-          "image": "edge-bottom-v1.png",
-          "durationMs": 1000
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 1000,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
         }
       ]
     },
@@ -439,16 +446,81 @@
       "loop": false,
       "frames": [
         {
-          "image": "edge-bottom-v1.png",
-          "durationMs": 300
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 140,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
         },
         {
-          "image": "edge-bottom-smile-v1.png",
-          "durationMs": 400
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
         },
         {
-          "image": "edge-bottom-v1.png",
-          "durationMs": 300
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 200,
+          "region": {
+            "x": 768,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 640,
+          "region": {
+            "x": 768,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.83984375
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 200,
+          "region": {
+            "x": 768,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 140,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
         }
       ]
     },
@@ -934,6 +1006,170 @@
           "edgeAnchorY": 0.654296875
         }
       ]
+    },
+    "edge-bottom-look": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 140,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 360,
+          "region": {
+            "x": 1152,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 160,
+          "region": {
+            "x": 1152,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.841796875
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 600,
+          "region": {
+            "x": 0,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.841796875
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 160,
+          "region": {
+            "x": 1152,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.841796875
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 360,
+          "region": {
+            "x": 1152,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 140,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
+        }
+      ]
+    },
+    "edge-bottom-smile": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 140,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 180,
+          "region": {
+            "x": 1152,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.841796875
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 240,
+          "region": {
+            "x": 384,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.841796875
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 640,
+          "region": {
+            "x": 768,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.83984375
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 240,
+          "region": {
+            "x": 384,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.841796875
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 180,
+          "region": {
+            "x": 1152,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.841796875
+        },
+        {
+          "image": "bottom-sequence-v4.png",
+          "durationMs": 140,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.91015625
+        }
+      ]
     }
   },
   "restAfterMs": 30000,
@@ -945,7 +1181,7 @@
   },
   "edgeAnchorX": 0.4244791666666667,
   "edgeTopAnchorY": 0,
-  "edgeBottomAnchorY": 0.9,
+  "edgeBottomAnchorY": 0.91015625,
   "topSwing": {
     "seatAnchorY": 0.69,
     "seatHalfWidth": 0.36,

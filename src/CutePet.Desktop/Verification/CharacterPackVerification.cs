@@ -17,7 +17,7 @@ internal static class CharacterPackVerification
         Directory.CreateDirectory(area);
         var library = new CharacterLibrary(Path.Combine(area, "installed"));
         var cat = library.Find("cat");
-        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 22 && cat.Actions.Count == 4,
+        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 24 && cat.Actions.Count == 4,
             "both built-in characters load from independent manifests and PNG clips");
         foreach (var builtIn in library.Packs)
         {
@@ -134,8 +134,27 @@ internal static class CharacterPackVerification
         var mixedMode = tianyi.Manifest with {Id = "mixed-mode", Actions = new(tianyi.Manifest.Actions)};
         mixedMode.Actions["edge-peek"] = Clip(false,("idle.png",100));
         Reject(() => other.Import(Zip("mixed-mode",mixedMode,edgeFiles)), "side clips cannot mix atlas views with unrelated full PNG canvases");
+        check(EdgeActions.BottomResponses.All(edgeRoundTrip.Actions.ContainsKey)
+            && edgeRoundTrip.Actions["edge-bottom-peek"].Frames[0].Image == edgeRoundTrip.Actions["edge-bottom-idle"].Frames[0].Image
+            && edgeFiles.ContainsKey("bottom-sequence-v4.png") && !edgeFiles.ContainsKey("edge-bottom-v1.png"),
+            "bottom atlas responses export and import with shared cached views instead of old body-stretch sprites");
+        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 120,
+            "new bottom clips fit within the existing total 120-frame package limit");
+        foreach (var response in EdgeActions.BottomResponses.Skip(1))
+        {
+            var orphan = tianyi.Manifest with {Id="bottom-orphan",Actions=new() {
+                ["idle"]=Clip(true,("idle.png",100)),[response]=Clip(false,("idle.png",100))}};
+            Reject(() => other.Import(Zip("bottom-orphan",orphan,edgeFiles)), "bottom response requires its own base " + response);
+            var looping = tianyi.Manifest with {Id="bottom-loop",Actions=new(tianyi.Manifest.Actions)};
+            looping.Actions[response] = looping.Actions[response] with {Loop=true};
+            Reject(() => other.Import(Zip("bottom-loop",looping,edgeFiles)), "bottom response cannot loop indefinitely " + response);
+        }
+        var badBottomAnchor=tianyi.Manifest with {Id="bottom-anchor",Actions=new(tianyi.Manifest.Actions)};
+        badBottomAnchor.Actions["edge-bottom-idle"]=new() {Loop=true,Frames=new() {
+            tianyi.Manifest.Actions["edge-bottom-idle"].Frames[0] with {EdgeAnchorY=.49}}};
+        Reject(() => other.Import(Zip("bottom-anchor",badBottomAnchor,edgeFiles)), "bottom elbow anchor cannot be above its supported half");
         check(edgeRoundTrip.Actions.ContainsKey("edge-top-peek") && edgeRoundTrip.Actions.ContainsKey("edge-bottom-peek")
-            && edgeRoundTrip.Manifest.EdgeTopAnchorY == 0 && edgeRoundTrip.Manifest.EdgeBottomAnchorY == 0.9,
+            && edgeRoundTrip.Manifest.EdgeTopAnchorY == tianyi.Manifest.EdgeTopAnchorY && edgeRoundTrip.Manifest.EdgeBottomAnchorY == tianyi.Manifest.EdgeBottomAnchorY,
             "all vertical actions and contact anchors survive actual package export and import");
         other.Remove(edgeRoundTrip);
         check(edgeRoundTrip.Manifest.TopSwing is { SeatAnchorY: 0.69, SeatHalfWidth: 0.36, RopeColor: "#77B4A8" },
