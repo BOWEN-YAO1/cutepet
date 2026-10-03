@@ -28,10 +28,15 @@ internal static class DesktopRoamingVerification
             flight.Start(700, route.TravelMs);
             for (var i = 0; i <= 20; i++)
             {
-                var point = route.Start + (route.Target - route.Start) * flight.Travel;
+                var point = route.At(flight.Travel);
                 check(area.Contains(new Rect(point, size)), "every roam sample stays within work-area bounds " + area.Left + ":" + i);
                 flight.Advance(TimeSpan.FromMilliseconds((flight.DurationMs + 1) / 20));
             }
+            check((route.At(0) - route.Start).Length < 0.001 && (route.At(1) - route.Target).Length < 0.001
+                && (route.At(0.5) - (route.Start + (route.Target - route.Start) / 2)).Length > 1,
+                "curved route keeps exact endpoints and a visible arc " + area.Left);
+            check(area.Contains(new Rect(route.Control1, size)) && area.Contains(new Rect(route.Control2, size)),
+                "curve controls keep the full scaled pet inside the work area " + area.Left);
         }
         var fallback = DesktopRoaming.Plan(new Rect(0, 0, 1920, 1040), new Size(230, 178), new Point(0, 0),
             new Rect(0, 0, 116, 68), 1, () => 0);
@@ -75,6 +80,8 @@ internal static class DesktopRoamingVerification
         var midpoint = new Point(window.CloudRequestedX, window.CloudRequestedY);
         check((midpoint - actual.Start).Length > 1 && window.QuotaHost.Position == quotaPosition,
             "host roam travels in desktop coordinates while quota remains fixed");
+        check((midpoint - actual.At(0.5)).Length < 0.01,
+            "host follows the same curved path used by geometry verification");
         window.PointerChanged(true);
         window.AdvanceCharacterAnimation(TimeSpan.FromMinutes(2));
         check(window.CloudActive && midpoint == new Point(window.CloudRequestedX, window.CloudRequestedY),
@@ -119,6 +126,7 @@ internal static class DesktopRoamingVerification
         check(!window.CloudActive && window.LastRecallPosition is not null, "cat supports recall without gaining unsupported cloud movement");
         window.SetCharacter(PetCharacter.Tianyi);
         Record(window, directory, check);
+        RecordClose(window, directory, check);
     }
     private static void Record(MainWindow window, string directory, Action<bool, string> check)
     {
@@ -147,5 +155,32 @@ internal static class DesktopRoamingVerification
             $"Work area: {route.Area}\nPet physical size: {route.PetSize}\nFrom: {route.Start}\nTo: {route.Target}\nTravel: {route.TravelMs:F0} ms\nPreview speed is compressed.\n");
         check(encoder.Frames.Count == 41, "desktop preview captures the real pet and quota WPF surfaces over the chosen route");
         window.WakeCharacterImmediately();
+    }
+    private static void RecordClose(MainWindow window, string directory, Action<bool, string> check)
+    {
+        window.SetCharacterScale(1.5);
+        window.WakeCharacterImmediately();
+        window.SummonCloud();
+        var origin = window.CloudRequestedX;
+        var dpi = System.Windows.Media.VisualTreeHelper.GetDpi(window).DpiScaleX;
+        var quota = window.QuotaHost.Position;
+        var encoder = new GifBitmapEncoder(); var delays = new List<int>();
+        for (var i = 0; i < 99; i++)
+        {
+            var image = WindowPreview.Capture(window, 144, (window.CloudRequestedX - origin) / dpi, 820, window.Height + 12);
+            encoder.Frames.Add(BitmapFrame.Create(image)); delays.Add(10);
+            if (i == 32)
+            {
+                var png = new PngBitmapEncoder(); png.Frames.Add(BitmapFrame.Create(image));
+                using var file = File.Create(Path.Combine(directory, "cloud-motion.png")); png.Save(file);
+            }
+            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(100));
+        }
+        using var bytes = new MemoryStream(); encoder.Save(bytes);
+        File.WriteAllBytes(Path.Combine(directory, "cloud-motion.gif"),
+            ThroneMotionVerification.WithAnimationMetadata(bytes.ToArray(), delays));
+        check(!window.CloudActive && window.CloudCharacterBob.Y == 0 && window.QuotaHost.Position == quota,
+            "real-time WPF cloud preview includes spell, cruise, blink and settled arrival with fixed quota");
+        window.WakeCharacterImmediately(); window.SetCharacterScale(1);
     }
 }

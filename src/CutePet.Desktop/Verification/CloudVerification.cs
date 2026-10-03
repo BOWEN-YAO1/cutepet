@@ -99,6 +99,8 @@ internal static class CloudVerification
         check(!window.CloudActive && !savedAutoCloud(), "disabling automatic cloud cancels and prevents new trips");
         window.SummonCloud();
         check(window.CloudActive, "manual cloud remains available when automatic cloud is off");
+        CloudMotionVerification.Run(window, check, render);
+        window.SummonCloud();
         window.StartAnimationClock();
         await Task.Delay(1450);
         check(window.CloudActive && window.CloudArt.Opacity == 1 && window.CurrentCharacterFrame == CharacterFrame.Idle,

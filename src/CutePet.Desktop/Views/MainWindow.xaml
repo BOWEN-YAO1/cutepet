@@ -17,15 +17,17 @@
         <Grid x:Name="PetArt" RenderTransformOrigin="0.5,0.85" Margin="0,16,0,14">
           <Grid.RenderTransform><TransformGroup><TranslateTransform x:Name="Bob" /><TranslateTransform x:Name="CloudLift" /><RotateTransform x:Name="GreetingTilt" /></TransformGroup></Grid.RenderTransform>
           <Image x:Name="CloudArt" Width="140" Height="32" Stretch="Uniform" VerticalAlignment="Bottom"
-                 Margin="0,0,0,-16" Opacity="0" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality">
-            <Image.RenderTransform><TranslateTransform x:Name="CloudBob" /></Image.RenderTransform>
+                 Margin="0,0,0,-16" Opacity="0" IsHitTestVisible="False" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality">
+            <Image.RenderTransform><TransformGroup><ScaleTransform x:Name="CloudBreath" />
+              <RotateTransform x:Name="CloudRoll" /><TranslateTransform x:Name="CloudBob" /></TransformGroup></Image.RenderTransform>
           </Image>
           <Image x:Name="CharacterArt" Width="178" Height="148" Stretch="Uniform" VerticalAlignment="Bottom"
                  RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality">
             <Image.RenderTransform><TransformGroup><ScaleTransform x:Name="EdgeMirror" ScaleX="1" />
               <ScaleTransform x:Name="EdgeStretch" ScaleY="1" />
               <RotateTransform x:Name="EdgeSwing" />
-              <TranslateTransform x:Name="EdgeShift" /></TransformGroup></Image.RenderTransform>
+              <TranslateTransform x:Name="EdgeShift" /><RotateTransform x:Name="CloudLean" />
+              <TranslateTransform x:Name="CloudCharacterBob" /></TransformGroup></Image.RenderTransform>
           </Image>
         </Grid>
         <Border x:Name="SpeechBubble" Background="#FFF9ED" CornerRadius="10" BorderBrush="#D8E5DB" BorderThickness="1"

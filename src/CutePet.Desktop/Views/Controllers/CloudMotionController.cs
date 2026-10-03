@@ -76,6 +76,11 @@ internal sealed class CloudMotionController
         var finished = flight.Advance(elapsed);
         RequestedX = startX + (targetX - startX) * flight.Travel;
         RequestedY = top + (targetY - top) * flight.Travel;
+        if (Route is not null)
+        {
+            var point = Route.At(flight.Travel);
+            RequestedX = point.X; RequestedY = point.Y;
+        }
         // Verification executes the same plan/clock while leaving the real desktop untouched.
         if (!verification) NativePlacement.Apply(window, RequestedX, RequestedY);
         Render();
@@ -98,7 +103,12 @@ internal sealed class CloudMotionController
     {
         window.CloudArt.Opacity = flight.Opacity;
         window.CloudLift.Y = flight.Lift;
-        window.CloudBob.Y = flight.Bob;
+        window.CloudCharacterBob.Y = flight.Bob;
+        window.CloudBob.Y = flight.CloudBob;
+        window.CloudLean.Angle = flight.Lean(Route?.Heading(flight.Travel).X ?? Math.Sign(targetX - startX));
+        window.CloudRoll.Angle = flight.CloudTilt;
+        window.CloudBreath.ScaleX = 1 + flight.CloudBreath;
+        window.CloudBreath.ScaleY = 1 - flight.CloudBreath;
         window.GroundShadow.Opacity = 1 - flight.Opacity;
     }
 }

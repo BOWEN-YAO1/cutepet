@@ -4,7 +4,24 @@ using System.Windows;
 
 namespace CutePet.Desktop;
 
-internal sealed record RoamingRoute(Rect Area, Size PetSize, Point Start, Point Target, double TravelMs);
+internal sealed record RoamingRoute(Rect Area, Size PetSize, Point Start, Point Target, double TravelMs)
+{
+    internal Point Control1 { get; init; }
+    internal Point Control2 { get; init; }
+    internal Point At(double progress)
+    {
+        var t = Math.Clamp(progress, 0, 1); var u = 1 - t;
+        return new(u * u * u * Start.X + 3 * u * u * t * Control1.X + 3 * u * t * t * Control2.X + t * t * t * Target.X,
+            u * u * u * Start.Y + 3 * u * u * t * Control1.Y + 3 * u * t * t * Control2.Y + t * t * t * Target.Y);
+    }
+    internal Vector Heading(double progress)
+    {
+        var t = Math.Clamp(progress, 0, 1); var u = 1 - t;
+        var tangent = 3 * u * u * (Control1 - Start) + 6 * u * t * (Control2 - Control1) + 3 * t * t * (Target - Control2);
+        if (tangent.Length > 0) tangent.Normalize();
+        return tangent;
+    }
+}
 
 // Geometry uses physical desktop pixels, including negative monitor origins.
 internal static class DesktopRoaming
@@ -33,9 +50,16 @@ internal static class DesktopRoaming
                 .OrderByDescending(point => (point - start).Length).Select(point => (Point?)point).FirstOrDefault();
         }
         if (target is not Point destination) return null;
-        // Smoothstep's peak speed is 1.5 times its average: aim for at most 40 DIP per second.
-        var duration = Math.Clamp((destination - start).Length / Math.Max(0.1, dpi) * 1.5 / 40 * 1000, 8000, 120000);
-        return new(area, pet, start, destination, duration);
+        var delta = destination - start;
+        var bend = new Vector(-delta.Y, delta.X); bend.Normalize();
+        bend *= Math.Min(48 * dpi, delta.Length * 0.12);
+        // The curve stays inside the work area when all four controls do.
+        var first = Clamp(start + delta / 3 + bend, area, pet);
+        var second = Clamp(start + delta * (2.0 / 3) + bend, area, pet);
+        var peakDerivative = 3 * Math.Max((first - start).Length, Math.Max((second - first).Length, (destination - second).Length));
+        // Quintic easing peaks at 1.875; account for the curved path's derivative.
+        var duration = Math.Clamp(peakDerivative / Math.Max(0.1, dpi) * 1.875 / 40 * 1000, 8000, 120000);
+        return new(area, pet, start, destination, duration) { Control1 = first, Control2 = second };
     }
     internal static Point Recall(Rect area, Size pet, Rect quota)
     {

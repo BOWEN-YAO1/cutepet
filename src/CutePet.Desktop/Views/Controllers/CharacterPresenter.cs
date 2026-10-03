@@ -18,7 +18,7 @@ internal sealed class CharacterPresenter
     private readonly CharacterAnimation characterAnimation = new();
     private bool hovered, hoverPlayed;
     private double hoverElapsed, lookElapsed, nextLook = NextLook();
-    private double idleForRest, seatedElapsed;
+    private double idleForRest, seatedElapsed, cloudBlinkElapsed;
     private bool automaticRest, floating;
     internal bool Resting => characterAnimation.Resting;
     internal bool RestPose => characterAnimation.RestPose;
@@ -68,6 +68,13 @@ internal sealed class CharacterPresenter
         if ((!window.CloudActive || window.CanCloudMove) && (!window.ScreenEdgeActive || window.CanPlayAmbient)) characterAnimation.Advance(elapsed);
         window.AdvanceScreenEdge(elapsed);
         window.AdvanceCloud(elapsed);
+        if (!window.CloudActive) cloudBlinkElapsed = 0;
+        else if (window.CanCloudMove && window.CloudArt.Opacity == 1)
+        {
+            cloudBlinkElapsed += Math.Max(0, elapsed.TotalMilliseconds);
+            if (cloudBlinkElapsed >= 4200 && characterAnimation.Action == "idle")
+            { characterAnimation.Blink(); cloudBlinkElapsed %= 4200; }
+        }
         RefreshCharacterFrame();
         if (window.IsVisible && !verification) AdvanceAmbient(elapsed);
     }
@@ -241,6 +248,7 @@ internal sealed class CharacterPresenter
 
     internal void StartCloudSpell()
     {
+        cloudBlinkElapsed = 0;
         characterAnimation.Preview("summon-cloud");
         window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
         RefreshCharacterFrame();
