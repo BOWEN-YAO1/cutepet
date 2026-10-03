@@ -33,7 +33,7 @@ internal static class SwingVerification
         var scenery = window.SwingScenery.Children.OfType<Image>().ToArray();
         check(window.SwingScenery.Visibility == Visibility.Visible && scenery.Length == 2
             && scenery.All(p => ReferenceEquals(p.Source, window.SelectedCharacter.SwingSceneryImage) && !p.IsHitTestVisible)
-            && ((ScaleTransform)scenery[1].RenderTransform).ScaleX == -1, "side scenery reuses one cached image with right-side mirroring");
+            && ((TransformGroup)scenery[1].RenderTransform).Children[0] is ScaleTransform { ScaleX: -1 }, "side scenery reuses one cached image with right-side mirroring");
         check(scenery.All(p => Canvas.GetLeft(p) >= 0 && Canvas.GetTop(p) >= 0
             && Canvas.GetLeft(p) + p.Width <= 230 && Canvas.GetTop(p) + p.Height <= 178)
             && window.QuotaHost.Position == quota, "side scenery stays inside the pet scene and leaves quota fixed");
@@ -48,6 +48,8 @@ internal static class SwingVerification
                 "floating scenery ribbon remains attached to its swing rope " + side);
         }
         var sceneryTop = Canvas.GetTop(scenery[0]);
+        var sceneryTilt = ((RotateTransform)((TransformGroup)scenery[0].RenderTransform).Children[1]).Angle;
+        check(SceneryInside(), "tilted lotus clusters including their rotated corners remain inside the pet canvas");
         var star = window.SwingScenery.Children.OfType<System.Windows.Shapes.Path>().Last();
         var starOpacity = star.Opacity;
         var garden = window.SwingScenery.Children.OfType<Canvas>().Single();
@@ -85,7 +87,8 @@ internal static class SwingVerification
         check(new Point(Canvas.GetLeft(pendants[0]), Canvas.GetTop(pendants[0])) == pendantPoint
             && ((RotateTransform)pendants[0].RenderTransform).Angle == pendantAngle,
             "menu also freezes pendant placement and delayed sway");
-        check(Canvas.GetTop(scenery[0]) == sceneryTop && star.Opacity == starOpacity,
+        check(Canvas.GetTop(scenery[0]) == sceneryTop && star.Opacity == starOpacity
+            && ((RotateTransform)((TransformGroup)scenery[0].RenderTransform).Children[1]).Angle == sceneryTilt,
             "menu freezes side-cloud floating and star twinkle");
         check(new Point(Canvas.GetLeft(leaves[0]), Canvas.GetTop(leaves[0])) == leafPoint
             && ((RotateTransform)flowers[0].RenderTransform).Angle == flowerAngle, "menu freezes the connected garden as well");
@@ -171,6 +174,8 @@ internal static class SwingVerification
             "custom side scenery scales with shorter artwork and shared PNGs decode once");
         check(window.SelectedCharacter.Manifest.TopSwing!.Scenery!.Layout == "floating" && garden.Visibility == Visibility.Collapsed,
             "old custom scenery keeps its floating layout without inherited flowers");
+        check(scenery.All(p => ((RotateTransform)((TransformGroup)p.RenderTransform).Children[1]).Angle == 0),
+            "old floating layout does not inherit tilted lotus transforms");
         window.WakeCharacterImmediately();
         manifest = manifest with { TopSwing = manifest.TopSwing! with { Scenery = manifest.TopSwing.Scenery! with { Layout = "garden" } } };
         File.WriteAllText(Path.Combine(customDirectory, "character.json"), JsonSerializer.Serialize(manifest, CharacterPackLoader.Json));
@@ -178,6 +183,12 @@ internal static class SwingVerification
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(800));
         check(garden.Visibility == Visibility.Visible && Math.Abs(flowers[0].Width - 8 * 100.0 / 148) < 0.00001
             && window.QuotaHost.Position == quota, "opt-in garden scales with short custom artwork and keeps quota fixed");
+        window.WakeCharacterImmediately();
+        manifest = manifest with { TopSwing = manifest.TopSwing! with { Scenery = manifest.TopSwing.Scenery! with { DisplayWidth = 60, DisplayHeight = 60 } } };
+        File.WriteAllText(Path.Combine(customDirectory, "character.json"), JsonSerializer.Serialize(manifest, CharacterPackLoader.Json));
+        window.Characters.Reload(); window.SetCharacterPackage(manifest.Id);
+        Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(800));
+        check(SceneryInside(), "maximum-sized tilted custom scenery stays within the shortened pet canvas");
         var custom = window.SelectedCharacter;
         window.SetCharacter(PetCharacter.Tianyi); window.Characters.Remove(custom);
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
@@ -194,6 +205,13 @@ internal static class SwingVerification
         check(window.QuotaHost.Position == quota && encoder.Frames.Count == 64,
             "actual WPF swing preview completes two cycles with stationary quota");
         window.WakeCharacterImmediately();
+
+        bool SceneryInside() => scenery.All(art =>
+        {
+            var bounds = art.RenderTransform.TransformBounds(new Rect(-art.Width / 2, -art.Height / 2, art.Width, art.Height));
+            bounds.Offset(Canvas.GetLeft(art) + art.Width / 2, Canvas.GetTop(art) + art.Height / 2);
+            return new Rect(0, 0, 230, 178).Contains(bounds);
+        });
 
         void CheckRopes()
         {

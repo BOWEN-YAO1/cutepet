@@ -19,6 +19,7 @@ internal sealed class EdgeMotionController
     private readonly Image[] pendants = new Image[4];
     private readonly Ellipse[] beads = new Ellipse[4];
     private readonly Image[] sceneryImages = new Image[2];
+    private readonly RotateTransform[] sceneryTilts = { new(), new() };
     private readonly Path[] ribbons = new Path[2];
     private readonly Path[] stars = new Path[4];
     private readonly SwingGarden garden;
@@ -46,8 +47,11 @@ internal sealed class EdgeMotionController
         {
             ribbons[i] = new Path { IsHitTestVisible = false, Stroke = new SolidColorBrush(Color.FromRgb(143, 199, 184)),
                 StrokeThickness = 1.7, Opacity = 0.65, StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round };
+            var transform = new TransformGroup();
+            transform.Children.Add(new ScaleTransform(i == 0 ? 1 : -1, 1));
+            transform.Children.Add(sceneryTilts[i]);
             sceneryImages[i] = new Image { IsHitTestVisible = false, Stretch = Stretch.Uniform, RenderTransformOrigin = new Point(0.5, 0.5),
-                RenderTransform = new ScaleTransform(i == 0 ? 1 : -1, 1) };
+                RenderTransform = transform };
             RenderOptions.SetBitmapScalingMode(sceneryImages[i], BitmapScalingMode.HighQuality);
             window.SwingScenery.Children.Add(ribbons[i]);
             window.SwingScenery.Children.Add(sceneryImages[i]);
@@ -250,6 +254,7 @@ internal sealed class EdgeMotionController
     {
         window.SwingScenery.Visibility = Visibility.Collapsed;
         garden.Hide();
+        foreach (var tilt in sceneryTilts) tilt.Angle = 0;
         foreach (var scenery in sceneryImages) scenery.Source = null;
     }
     private void RenderScenery(CharacterTopSwing swing, double height, double pivotY, double entry)
@@ -264,12 +269,14 @@ internal sealed class EdgeMotionController
         {
             var sign = side == 0 ? -1 : 1;
             var x = 115 + sign * (natural ? 77 : 74) * scale;
-            var y = pivotY + height * (natural ? (side == 0 ? 0.73 : 0.68) : (side == 0 ? 0.62 : 0.48))
+            var y = pivotY + height * (natural ? (side == 0 ? 0.74 : 0.66) : (side == 0 ? 0.62 : 0.48))
                 + (natural ? 0.7 : 1.8) * scale * Math.Sin(phase + side * Math.PI);
             var art = sceneryImages[side];
             art.Source = image;
-            art.Width = scenery.DisplayWidth * scale * (natural ? 0.76 : 1);
-            art.Height = scenery.DisplayHeight * scale * (natural ? 0.76 : 1);
+            var size = natural ? (side == 0 ? 0.73 : 0.63) : 1;
+            art.Width = scenery.DisplayWidth * scale * size;
+            art.Height = scenery.DisplayHeight * scale * size;
+            sceneryTilts[side].Angle = natural ? (side == 0 ? -40 : 35) + 0.9 * Math.Sin(phase + side) : 0;
             art.Opacity = natural ? 0.9 : 1;
             Canvas.SetLeft(art, x - art.Width / 2);
             Canvas.SetTop(art, y - art.Height / 2);

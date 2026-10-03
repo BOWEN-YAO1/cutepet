@@ -451,3 +451,8 @@ Composition: single cluster centered, fills central 800x750 region of a 1024x102
 ## v0.23.0 连贯花藤配景
 
 保留 scenery-lotus-v1.png、rope-ornament-v1.png 与 swing-jade-v2.png 原图。云莲缩小并移至坐板两侧，新增侧枝、玉叶、小花、珠饰及柔雾由项目 WPF 原生几何和渐变绘制；没有新生成或编辑的位图，原提示词与来源继续适用。布局配置为 topSwing.scenery.layout: garden；省略时为 floating。
+
+
+## 0.23.1 两侧莲花姿态修正
+
+保留云莲原图，garden 布局通过 WPF 绘制变换向外轻斜，并错开两侧大小和高度。没有新增或编辑的 PNG，原提示词和素材权利说明继续适用。
