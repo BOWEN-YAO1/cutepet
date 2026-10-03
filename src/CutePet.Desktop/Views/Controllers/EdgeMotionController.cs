@@ -11,6 +11,9 @@ internal sealed class EdgeMotionController
     private readonly bool verification;
     private double peekElapsed = -1;
     private double entering;
+    private double swingElapsed;
+    private string? ropeColor;
+    private SolidColorBrush? ropeBrush;
     internal EdgeAttachment? Attachment { get; private set; }
     internal bool Active => Attachment is not null;
     private string BaseAction => EdgeActions.Base(Attachment!.Side);
@@ -28,6 +31,7 @@ internal sealed class EdgeMotionController
         window.WakeCharacterImmediately();
         Attachment = plan;
         entering = 0;
+        swingElapsed = 0;
         window.StartEdgePose(BaseAction);
         Render();
         if (!verification) NativePlacement.Apply(window, plan.Position.X, plan.Position.Y);
@@ -51,7 +55,9 @@ internal sealed class EdgeMotionController
             { Reanchor(bounds.Area, bounds.Size); if (!Active) return; }
         }
         if (!window.CanPlayAmbient) return;
-        entering = Math.Min(320, entering + Math.Max(0, elapsed.TotalMilliseconds));
+        var delta = Math.Max(0, elapsed.TotalMilliseconds);
+        entering = Math.Min(320, entering + delta);
+        swingElapsed = (swingElapsed + delta) % 3200;
         if (peekElapsed < 0) { Render(); return; }
         var duration = window.SelectedCharacter.Actions[PeekAction].Duration;
         peekElapsed += Math.Max(0, elapsed.TotalMilliseconds);
@@ -63,6 +69,10 @@ internal sealed class EdgeMotionController
         Attachment = null;
         peekElapsed = -1;
         PeekOffset = 0;
+        swingElapsed = 0;
+        window.EdgeSwing.Angle = 0;
+        window.EdgeSwing.CenterY = 0;
+        window.SwingRopes.Visibility = Visibility.Collapsed;
         window.EdgeMirror.ScaleX = 1;
         window.EdgeStretch.ScaleY = 1;
         window.EdgeStretch.CenterY = 0;
@@ -103,12 +113,12 @@ internal sealed class EdgeMotionController
         entry = entry * entry * (3 - 2 * entry);
         window.EdgeShift.X = Attachment.Side is ScreenEdge.Left or ScreenEdge.Right
             ? (right ? 1 : -1) * (anchor * entry - PeekOffset) : 0;
-        var imageTop = 16 + (window.CharacterArt.Height - renderedHeight) / 2;
+        var imageTop = 16 + 148 - window.CharacterArt.Height + (window.CharacterArt.Height - renderedHeight) / 2;
         var verticalAnchor = Attachment.Side == ScreenEdge.Top ? window.SelectedCharacter.Manifest.EdgeTopAnchorY
             : window.SelectedCharacter.Manifest.EdgeBottomAnchorY;
-        // Top peeking changes expression only; bottom keeps a small elbow-anchored lift.
+        // Top may swing independently; bottom keeps a small elbow-anchored lift.
         var vertical = Attachment.Side is ScreenEdge.Top or ScreenEdge.Bottom;
-        window.EdgeStretch.CenterY = vertical ? imageTop - 16 + renderedHeight * verticalAnchor - window.CharacterArt.Height / 2 : 0;
+        window.EdgeStretch.CenterY = vertical ? renderedHeight * (verticalAnchor - 0.5) : 0;
         window.EdgeStretch.ScaleY = Attachment.Side == ScreenEdge.Bottom ? 1 + 0.04 * PeekOffset / 8 : 1;
         window.EdgeShift.Y = Attachment.Side switch
         {
@@ -116,7 +126,41 @@ internal sealed class EdgeMotionController
             ScreenEdge.Bottom => (178 - imageTop - renderedHeight * window.SelectedCharacter.Manifest.EdgeBottomAnchorY) * entry,
             _ => 0
         };
+        RenderSwing(imageTop, renderedWidth, renderedHeight, entry);
         window.Scene.ClipToBounds = true;
         window.GroundShadow.Visibility = Visibility.Hidden;
+    }
+    private void RenderSwing(double imageTop, double width, double height, double entry)
+    {
+        if (Attachment!.Side != ScreenEdge.Top || window.SelectedCharacter.Manifest.TopSwing is not { } swing)
+        {
+            window.EdgeSwing.Angle = 0;
+            window.SwingRopes.Visibility = Visibility.Collapsed;
+            return;
+        }
+        var anchor = window.SelectedCharacter.Manifest.EdgeTopAnchorY;
+        var angle = (3 + PeekOffset / 8) * Math.Sin(2 * Math.PI * swingElapsed / 3200) * entry;
+        window.EdgeSwing.CenterY = height * (anchor - 0.5);
+        window.EdgeSwing.Angle = angle;
+        var radians = angle * Math.PI / 180;
+        var span = width * swing.SeatHalfWidth;
+        var drop = height * (swing.SeatAnchorY - anchor);
+        var pivotY = imageTop + height * anchor + window.EdgeShift.Y;
+        if (ropeColor != swing.RopeColor)
+        {
+            ropeColor = swing.RopeColor;
+            ropeBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ropeColor));
+            ropeBrush.Freeze();
+        }
+        foreach (var (rope, x) in new[] { (window.SwingRopeLeft, -span), (window.SwingRopeRight, span) })
+        {
+            rope.X1 = 115 + x;
+            rope.Y1 = 0;
+            rope.X2 = 115 + x * Math.Cos(radians) - drop * Math.Sin(radians);
+            rope.Y2 = pivotY + x * Math.Sin(radians) + drop * Math.Cos(radians);
+            rope.Stroke = ropeBrush;
+        }
+        window.SwingRopes.Opacity = entry;
+        window.SwingRopes.Visibility = Visibility.Visible;
     }
 }

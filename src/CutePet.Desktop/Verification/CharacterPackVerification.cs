@@ -110,9 +110,21 @@ internal static class CharacterPackVerification
         check(edgeRoundTrip.Actions.ContainsKey("edge-idle") && edgeRoundTrip.Actions.ContainsKey("edge-peek")
             && edgeRoundTrip.Manifest.EdgeAnchorX == 0.06, "edge poses and anchor survive actual package export and import");
         check(edgeRoundTrip.Actions.ContainsKey("edge-top-peek") && edgeRoundTrip.Actions.ContainsKey("edge-bottom-peek")
-            && edgeRoundTrip.Manifest.EdgeTopAnchorY == 0.12 && edgeRoundTrip.Manifest.EdgeBottomAnchorY == 0.9,
+            && edgeRoundTrip.Manifest.EdgeTopAnchorY == 0 && edgeRoundTrip.Manifest.EdgeBottomAnchorY == 0.9,
             "all vertical actions and contact anchors survive actual package export and import");
         other.Remove(edgeRoundTrip);
+        check(edgeRoundTrip.Manifest.TopSwing is { SeatAnchorY: 0.69, SeatHalfWidth: 0.36, RopeColor: "#897055" },
+            "swing configuration survives real export and import");
+        foreach (var (config, reason) in new[] {
+            (new CharacterTopSwing { SeatAnchorY = 0.05 }, "seat above suspension anchor"),
+            (new CharacterTopSwing { SeatAnchorY = 1 }, "seat outside canvas"),
+            (new CharacterTopSwing { SeatHalfWidth = 0.51 }, "rope span outside canvas"),
+            (new CharacterTopSwing { SeatHalfWidth = 0 }, "zero rope span"),
+            (new CharacterTopSwing { RopeColor = "Transparent" }, "unsupported rope color") })
+            Reject(() => library.Import(Zip("swing-invalid", tianyi.Manifest with { Id = "swing-invalid", TopSwing = config }, edgeFiles)),
+                "swing loader rejects " + reason);
+        Reject(() => library.Import(Zip("swing-orphan", animated with { Id = "swing-orphan", TopSwing = new() },
+            new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes })), "swing requires its own top base artwork");
         var edgeOnly = animated with { Id = "edge-only", Actions = new() {
             ["idle"] = Clip(true, ("idle.png", 100)), ["edge-idle"] = Clip(true, ("idle.png", 100)) } };
         var edgeCustom = library.Import(Zip("edge-only", edgeOnly, new() { ["idle.png"] = imageBytes }));

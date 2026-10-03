@@ -47,6 +47,11 @@ internal static class CharacterPackLoader
             throw new InvalidDataException("云层图片路径或显示大小不合法。");
         if (manifest.Actions.ContainsKey("summon-cloud") && manifest.Cloud is null)
             throw new InvalidDataException("召唤云动作需要配套 cloud 图层。");
+        if (manifest.TopSwing is { } swing && (!manifest.Actions.ContainsKey("edge-top-idle")
+            || !double.IsFinite(swing.SeatAnchorY) || swing.SeatAnchorY <= manifest.EdgeTopAnchorY + 0.1 || swing.SeatAnchorY > 0.95
+            || !double.IsFinite(swing.SeatHalfWidth) || swing.SeatHalfWidth < 0.1 || swing.SeatHalfWidth > 0.5
+            || swing.RopeColor is null || !Regex.IsMatch(swing.RopeColor, "\\A#[0-9a-fA-F]{6}\\z")))
+            throw new InvalidDataException("上沿秋千需要上侧基础动作、合法坐板位置和六位十六进制绳索颜色。");
         foreach (var baseAction in new[] { "edge-idle", "edge-top-idle", "edge-bottom-idle" })
             if (manifest.Actions.ContainsKey(EdgeActions.Peek(baseAction)) && !manifest.Actions.ContainsKey(baseAction))
                 throw new InvalidDataException("探头回应需要配套 " + baseAction + " 贴边姿势。");

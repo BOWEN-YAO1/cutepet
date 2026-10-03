@@ -22,7 +22,14 @@ public sealed record CharacterManifest
     public double EdgeTopAnchorY { get; init; }
     public double EdgeBottomAnchorY { get; init; } = 1;
     public CharacterCloud? Cloud { get; init; }
+    public CharacterTopSwing? TopSwing { get; init; }
     public Dictionary<string, CharacterAction> Actions { get; init; } = new();
+}
+public sealed record CharacterTopSwing
+{
+    public double SeatAnchorY { get; init; } = 0.69;
+    public double SeatHalfWidth { get; init; } = 0.36;
+    public string RopeColor { get; init; } = "#897055";
 }
 public sealed record CharacterCloud
 {
