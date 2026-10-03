@@ -80,8 +80,8 @@ internal static class SwingVerification
         check(garden.Visibility == Visibility.Visible && leaves.Length == 36 && flowers.Length == 6
             && garden.Children.Cast<UIElement>().All(p => !p.IsHitTestVisible),
             "garden adds floral vines without intercepting gestures");
-        check(flowers.Select(p => p.Source).Distinct().Count() == 3 && flowers.All(p => p.Source is DrawingImage { IsFrozen: true }),
-            "three native floral styles reuse frozen drawings without additional PNG decoding");
+        check(flowers.Select(p => p.Source).Distinct().Count() == 6 && flowers.All(p => p.Source is DrawingImage { IsFrozen: true }),
+            "six distinct floral styles reuse frozen drawings without additional PNG decoding");
         check(ornaments.Length == 4 && ornaments.Select(p => p.Source).Distinct().Count() == 3
             && ornaments.All(p => p.Source is DrawingImage { IsFrozen: true } && !p.IsHitTestVisible),
             "moon, wind chime and butterflies add distinct cached motifs without a pointer surface");
@@ -227,7 +227,7 @@ internal static class SwingVerification
         File.WriteAllText(Path.Combine(customDirectory, "character.json"), JsonSerializer.Serialize(manifest, CharacterPackLoader.Json));
         window.Characters.Reload(); window.SetCharacterPackage(manifest.Id);
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(800));
-        check(garden.Visibility == Visibility.Visible && Math.Abs(flowers[0].Width - 8 * 100.0 / 148) < 0.00001
+        check(garden.Visibility == Visibility.Visible && Math.Abs(flowers[0].Width - 10 * 100.0 / 148) < 0.00001
             && window.QuotaHost.Position == quota, "opt-in garden scales with short custom artwork and keeps quota fixed");
         check(Math.Abs(charm.Height - 25 * 100.0 / 148) < 0.00001 && GardenInside(),
             "diverse garden ornaments scale with smaller custom characters");

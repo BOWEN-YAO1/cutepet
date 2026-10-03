@@ -51,7 +51,7 @@ internal sealed class SwingFlowerTrails
             {
                 geometry.GetPointAtFractionLength(0.1 + level * 0.21, out var p, out _);
                 var rotation = new RotateTransform(sign * (12 + level * 9)); rotation.Freeze();
-                var size = level == 2 ? 12 : (level == 4 ? 11 : 8);
+                var size = level == 2 ? 14 : (level == 4 ? 12 : 10);
                 var flower = new Image { Name = "GardenTrailFlower" + side + level, Source = blossoms[(level + side) % blossoms.Length],
                     Width = size, Height = size, Stretch = Stretch.Uniform, IsHitTestVisible = false,
                     Opacity = 0.9, RenderTransformOrigin = new Point(0.5, 0.5), RenderTransform = rotation };

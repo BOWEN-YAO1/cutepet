@@ -43,12 +43,11 @@ internal sealed class SwingGarden
                 RenderTransformOrigin = new Point(0, 0.5), RenderTransform = new RotateTransform(), Opacity = 0.8 };
             layer.Children.Add(leaves[i]);
         }
-        var blossoms = new[] { Blossom(6, Color.FromRgb(255, 253, 239)), Blossom(5, Color.FromRgb(248, 219, 228)),
-            Blossom(8, Color.FromRgb(221, 235, 250)) };
+        var blossoms = SwingFlowerArt.Create();
         flowerTrails = new SwingFlowerTrails(layer, leaf, jade, blossoms);
         for (var i = 0; i < flowers.Length; i++)
         {
-            flowers[i] = new Image { Name = "GardenFlower" + i, Source = blossoms[(i + i / 3) % 3], IsHitTestVisible = false, Stretch = Stretch.Uniform,
+            flowers[i] = new Image { Name = "GardenFlower" + i, Source = blossoms[i % blossoms.Length], IsHitTestVisible = false, Stretch = Stretch.Uniform,
                 RenderTransformOrigin = new Point(0.5, 0.5), RenderTransform = new RotateTransform() };
             layer.Children.Add(flowers[i]);
         }
@@ -99,7 +98,7 @@ internal sealed class SwingGarden
         {
             var p = Curve(start, a, b, end, 0.2 + level * 0.29);
             var flower = flowers[side * 3 + level];
-            flower.Width = flower.Height = (level == 1 ? 11 : 8) * scale;
+            flower.Width = flower.Height = (level == 1 ? 13 : 10) * scale;
             Canvas.SetLeft(flower, p.X - flower.Width / 2); Canvas.SetTop(flower, p.Y - flower.Height / 2);
             ((RotateTransform)flower.RenderTransform).Angle = sign * 12 + 1.5 * Math.Sin(phase + side);
             var cloud = haze[side * 3 + level];
@@ -144,21 +143,6 @@ internal sealed class SwingGarden
         var s = 1 - t;
         return new Point(s * s * s * p.X + 3 * s * s * t * a.X + 3 * s * t * t * b.X + t * t * t * end.X,
             s * s * s * p.Y + 3 * s * s * t * a.Y + 3 * s * t * t * b.Y + t * t * t * end.Y);
-    }
-
-    private static DrawingImage Blossom(int petals, Color tint)
-    {
-        var drawing = new DrawingGroup();
-        var ivory = new LinearGradientBrush(tint, Color.FromRgb(212, 225, 201), 90);
-        var petal = Geometry.Parse("M0,0 C-6,-3 -6,-11 0,-15 C6,-11 6,-3 0,0 Z");
-        for (var i = 0; i < petals; i++)
-        {
-            var group = new DrawingGroup { Transform = new RotateTransform(i * 360.0 / petals) };
-            group.Children.Add(new GeometryDrawing(ivory, new Pen(new SolidColorBrush(Color.FromRgb(206, 201, 167)), 0.45), petal));
-            drawing.Children.Add(group);
-        }
-        drawing.Children.Add(new GeometryDrawing(new SolidColorBrush(Color.FromRgb(219, 184, 98)), null, new EllipseGeometry(new Point(), 2.3, 2.3)));
-        var image = new DrawingImage(drawing); image.Freeze(); return image;
     }
 
     private static DrawingImage Moon()
