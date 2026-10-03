@@ -52,6 +52,10 @@ internal static class CharacterPackLoader
             || !double.IsFinite(swing.SeatHalfWidth) || swing.SeatHalfWidth < 0.1 || swing.SeatHalfWidth > 0.5
             || swing.RopeColor is null || !Regex.IsMatch(swing.RopeColor, "\\A#[0-9a-fA-F]{6}\\z")))
             throw new InvalidDataException("上沿秋千需要上侧基础动作、合法坐板位置和六位十六进制绳索颜色。");
+        if (manifest.TopSwing?.Ornament is { } ornament && (ornament.Image is null || !SafeFile(ornament.Image)
+            || !double.IsFinite(ornament.DisplayWidth) || ornament.DisplayWidth < 6 || ornament.DisplayWidth > 30
+            || !double.IsFinite(ornament.DisplayHeight) || ornament.DisplayHeight < 8 || ornament.DisplayHeight > 44))
+            throw new InvalidDataException("秋千挂饰图片路径或显示大小不合法。");
         foreach (var baseAction in new[] { "edge-idle", "edge-top-idle", "edge-bottom-idle" })
             if (manifest.Actions.ContainsKey(EdgeActions.Peek(baseAction)) && !manifest.Actions.ContainsKey(baseAction))
                 throw new InvalidDataException("探头回应需要配套 " + baseAction + " 贴边姿势。");
@@ -97,12 +101,15 @@ internal static class CharacterPackLoader
             if (clip.Duration > 30000) throw new InvalidDataException("一个动作最多持续 30 秒。");
             actions.Add(name, clip);
         }
-        BitmapSource? cloudImage = null;
-        if (manifest.Cloud is { } layer)
+        var cloudImage = manifest.Cloud is { } layer ? LoadLayer(layer.Image) : null;
+        var ornamentImage = manifest.TopSwing?.Ornament is { } decoration ? LoadLayer(decoration.Image) : null;
+        return new(manifest, builtIn, actions, directory, cloudImage, ornamentImage);
+
+        BitmapSource LoadLayer(string name)
         {
-            if (!images.TryGetValue(layer.Image, out cloudImage))
+            if (!images.TryGetValue(name, out var image))
             {
-                using var stream = openImage(layer.Image);
+                using var stream = openImage(name);
                 using var bytes = new MemoryStream();
                 CopyLimited(stream, bytes, 8 * 1024 * 1024);
                 bytes.Position = 0;
@@ -110,12 +117,12 @@ internal static class CharacterPackLoader
                 var decoded = decoder.Frames[0];
                 if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
                     || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 44_040_192)
-                    throw new InvalidDataException("云层图片超过角色包解码大小限制。");
+                    throw new InvalidDataException("角色附加图层超过解码大小限制。");
                 decoded.Freeze();
-                cloudImage = decoded;
+                images.Add(name, image = decoded);
             }
+            return image;
         }
-        return new(manifest, builtIn, actions, directory, cloudImage);
     }
     internal static void CopyLimited(Stream source, Stream destination, long limit)
     {

@@ -11,6 +11,7 @@
         <Canvas x:Name="SwingRopes" Width="230" Height="178" IsHitTestVisible="False" Visibility="Collapsed">
           <Line x:Name="SwingRopeLeft" Stroke="#897055" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
           <Line x:Name="SwingRopeRight" Stroke="#897055" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+          <Canvas x:Name="SwingDecorations" Width="230" Height="178" IsHitTestVisible="False" Visibility="Collapsed" />
         </Canvas>
         <Grid x:Name="PetArt" RenderTransformOrigin="0.5,0.85" Margin="0,16,0,14">
           <Grid.RenderTransform><TransformGroup><TranslateTransform x:Name="Bob" /><TranslateTransform x:Name="CloudLift" /><RotateTransform x:Name="GreetingTilt" /></TransformGroup></Grid.RenderTransform>

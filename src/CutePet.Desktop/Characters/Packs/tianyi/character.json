@@ -338,6 +338,11 @@
   "topSwing": {
     "seatAnchorY": 0.69,
     "seatHalfWidth": 0.36,
-    "ropeColor": "#77B4A8"
+    "ropeColor": "#77B4A8",
+    "ornament": {
+      "image": "rope-ornament-v1.png",
+      "displayWidth": 18,
+      "displayHeight": 27
+    }
   }
 }

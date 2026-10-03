@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace CutePet.Desktop;
@@ -26,6 +29,13 @@ internal static class SwingVerification
         check(Math.Abs(window.EdgeSwing.Angle - 3) < 0.00001 && window.EdgeStretch.ScaleY == 1,
             "swing reaches a small positive extreme without stretching artwork");
         CheckRopes();
+        var pendants = window.SwingDecorations.Children.OfType<Image>().ToArray();
+        check(window.SwingDecorations.Visibility == Visibility.Visible && pendants.Length == 4
+            && pendants.All(p => ReferenceEquals(p.Source, window.SelectedCharacter.SwingOrnamentImage) && !p.IsHitTestVisible),
+            "four cached ornaments decorate ropes without intercepting pet gestures");
+        CheckOrnaments();
+        var pendantPoint = new Point(Canvas.GetLeft(pendants[0]), Canvas.GetTop(pendants[0]));
+        var pendantAngle = ((RotateTransform)pendants[0].RenderTransform).Angle;
         var leftTop = window.SwingRopeLeft.X1;
         var rightTop = window.SwingRopeRight.X1;
         var angle = window.EdgeSwing.Angle;
@@ -34,12 +44,19 @@ internal static class SwingVerification
         window.AdvanceCharacterAnimation(TimeSpan.FromMinutes(1));
         check(window.EdgeSwing.Angle == angle && new Point(window.SwingRopeLeft.X2, window.SwingRopeLeft.Y2) == endpoint,
             "menu freezes swing phase and both rope connections");
+        check(new Point(Canvas.GetLeft(pendants[0]), Canvas.GetTop(pendants[0])) == pendantPoint
+            && ((RotateTransform)pendants[0].RenderTransform).Angle == pendantAngle,
+            "menu also freezes pendant placement and delayed sway");
         window.EndDetailsMenu();
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(1600));
         check(Math.Abs(window.EdgeSwing.Angle + 3) < 0.00001 && window.SwingRopeLeft.X1 == leftTop
             && window.SwingRopeRight.X1 == rightTop && window.SwingRopeLeft.Y1 == 0 && window.SwingRopeRight.Y1 == 0,
             "swing reverses direction while both top attachments stay fixed");
         CheckRopes();
+        CheckOrnaments();
+        check(new Point(Canvas.GetLeft(pendants[0]), Canvas.GetTop(pendants[0])) != pendantPoint
+            && Math.Abs(((RotateTransform)pendants[0].RenderTransform).Angle) <= 4,
+            "pendants follow reversed ropes with a bounded separate sway");
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(300));
         window.PlayCharacterInteraction(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
         check(Math.Abs(window.EdgeSwing.Angle - 4) < 0.00001,
@@ -58,6 +75,8 @@ internal static class SwingVerification
         window.TogglePositionLock(); window.RecallPet();
         check(window.EdgeSwing.Angle == 0 && window.SwingRopes.Visibility == Visibility.Collapsed
             && window.QuotaHost.Position == quota, "recall removes ropes and rotation without affecting quota");
+        check(window.SwingDecorations.Visibility == Visibility.Collapsed && pendants.All(p => p.Source is null),
+            "recall clears ornament references and their visual layer");
         foreach (var point in new[] { new Point(0, 350), new Point(800, 862) })
         {
             window.CompletePetDrag(screen, size, point, 1); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(800));
@@ -78,19 +97,25 @@ internal static class SwingVerification
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(1));
         check(window.ScreenEdgeActive && window.EdgeSwing.Angle == 0 && window.SwingRopes.Visibility == Visibility.Collapsed,
             "legacy top-only pack without swing configuration keeps its original pose");
+        check(window.SwingDecorations.Visibility == Visibility.Collapsed && pendants.All(p => p.Source is null),
+            "legacy top-only pack retains no previous character's ornaments");
         var legacy = window.SelectedCharacter;
         window.SetCharacter(PetCharacter.Tianyi); window.Characters.Remove(legacy);
         var customDirectory = Path.Combine(window.Characters.Root, "short-swing-test");
         Directory.CreateDirectory(customDirectory);
         png = new PngBitmapEncoder(); png.Frames.Add(BitmapFrame.Create(window.Characters.Find("cat").Idle.Frames[0].Image));
         using (var file = File.Create(Path.Combine(customDirectory, "idle.png"))) png.Save(file);
-        manifest = manifest with { Id = "short-swing-test", Name = "不同尺寸秋千测试", DisplayHeight = 100, TopSwing = new() };
+        manifest = manifest with { Id = "short-swing-test", Name = "不同尺寸秋千测试", DisplayHeight = 100,
+            TopSwing = new() { Ornament = new() { Image = "idle.png" } } };
         File.WriteAllText(Path.Combine(customDirectory, "character.json"), JsonSerializer.Serialize(manifest, CharacterPackLoader.Json));
         window.Characters.Reload(); window.SetCharacterPackage(manifest.Id);
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(800));
         check(window.SwingRopes.Visibility == Visibility.Visible && window.CharacterArt.Height == 100,
             "custom swing supports a shorter manifest display size");
         CheckRopes();
+        check(Math.Abs(pendants[0].Width - 18 * 100.0 / 148) < 0.00001 && window.SwingDecorations.Visibility == Visibility.Visible,
+            "custom ornament dimensions scale with the shorter artwork display");
+        CheckOrnaments();
         var custom = window.SelectedCharacter;
         window.SetCharacter(PetCharacter.Tianyi); window.Characters.Remove(custom);
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
@@ -124,6 +149,22 @@ internal static class SwingVerification
                 check(Math.Abs(actual.X - rope.X2) < 0.00001 && Math.Abs(actual.Y - rope.Y2) < 0.00001,
                     "rope lower endpoint follows the actual transformed board corner " + sign);
             }
+        }
+        void CheckOrnaments()
+        {
+            var ropes = new[] { window.SwingRopeLeft, window.SwingRopeRight };
+            for (var side = 0; side < 2; side++)
+                for (var level = 0; level < 2; level++)
+                {
+                    var pendant = pendants[side * 2 + level];
+                    var fraction = level == 0 ? 0.13 : 0.58;
+                    var x = Canvas.GetLeft(pendant) + pendant.Width / 2;
+                    var y = Canvas.GetTop(pendant);
+                    var rope = ropes[side];
+                    check(Math.Abs(x - rope.X1 - (rope.X2 - rope.X1) * fraction) < 0.00001
+                        && Math.Abs(y - rope.Y1 - (rope.Y2 - rope.Y1) * fraction) < 0.00001,
+                        "ornament contact stays on its moving rope " + side + level);
+                }
         }
     }
 }

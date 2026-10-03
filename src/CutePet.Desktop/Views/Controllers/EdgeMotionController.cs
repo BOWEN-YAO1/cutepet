@@ -1,6 +1,8 @@
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace CutePet.Desktop;
 
@@ -14,13 +16,27 @@ internal sealed class EdgeMotionController
     private double swingElapsed;
     private string? ropeColor;
     private SolidColorBrush? ropeBrush;
+    private readonly Image[] pendants = new Image[4];
+    private readonly Ellipse[] beads = new Ellipse[4];
     internal EdgeAttachment? Attachment { get; private set; }
     internal bool Active => Attachment is not null;
     private string BaseAction => EdgeActions.Base(Attachment!.Side);
     private string PeekAction => EdgeActions.Peek(BaseAction);
     internal double PeekOffset { get; private set; }
     internal EdgeMotionController(MainWindow window, bool verification)
-    { this.window = window; this.verification = verification; }
+    {
+        this.window = window; this.verification = verification;
+        for (var i = 0; i < pendants.Length; i++)
+        {
+            pendants[i] = new Image { IsHitTestVisible = false, Stretch = Stretch.Uniform,
+                RenderTransformOrigin = new Point(0.5, 0), RenderTransform = new RotateTransform() };
+            RenderOptions.SetBitmapScalingMode(pendants[i], BitmapScalingMode.HighQuality);
+            beads[i] = new Ellipse { IsHitTestVisible = false, Fill = new SolidColorBrush(Color.FromRgb(191, 229, 215)),
+                Stroke = new SolidColorBrush(Color.FromRgb(187, 154, 92)), StrokeThickness = 0.55 };
+            window.SwingDecorations.Children.Add(pendants[i]);
+            window.SwingDecorations.Children.Add(beads[i]);
+        }
+    }
 
     internal bool Attach(Rect area, Size size, Point released, double dpi)
     {
@@ -73,6 +89,7 @@ internal sealed class EdgeMotionController
         window.EdgeSwing.Angle = 0;
         window.EdgeSwing.CenterY = 0;
         window.SwingRopes.Visibility = Visibility.Collapsed;
+        HideDecorations();
         window.EdgeMirror.ScaleX = 1;
         window.EdgeStretch.ScaleY = 1;
         window.EdgeStretch.CenterY = 0;
@@ -136,6 +153,7 @@ internal sealed class EdgeMotionController
         {
             window.EdgeSwing.Angle = 0;
             window.SwingRopes.Visibility = Visibility.Collapsed;
+            HideDecorations();
             return;
         }
         var anchor = window.SelectedCharacter.Manifest.EdgeTopAnchorY;
@@ -162,5 +180,41 @@ internal sealed class EdgeMotionController
         }
         window.SwingRopes.Opacity = entry;
         window.SwingRopes.Visibility = Visibility.Visible;
+        RenderDecorations(swing, height, entry);
+    }
+    private void HideDecorations()
+    {
+        window.SwingDecorations.Visibility = Visibility.Collapsed;
+        foreach (var pendant in pendants) pendant.Source = null;
+    }
+    private void RenderDecorations(CharacterTopSwing swing, double height, double entry)
+    {
+        if (swing.Ornament is not { } ornament || window.SelectedCharacter.SwingOrnamentImage is not { } image)
+        { HideDecorations(); return; }
+        var scale = height / 148;
+        var sway = -4 * Math.Sin(2 * Math.PI * (swingElapsed - 160) / 3200) * entry;
+        var ropes = new[] { window.SwingRopeLeft, window.SwingRopeRight };
+        for (var side = 0; side < ropes.Length; side++)
+        {
+            var rope = ropes[side];
+            for (var level = 0; level < 2; level++)
+            {
+                var index = side * 2 + level;
+                var pendant = pendants[index];
+                var fraction = level == 0 ? 0.13 : 0.58;
+                pendant.Source = image;
+                pendant.Width = ornament.DisplayWidth * scale;
+                pendant.Height = ornament.DisplayHeight * scale;
+                Canvas.SetLeft(pendant, rope.X1 + (rope.X2 - rope.X1) * fraction - pendant.Width / 2);
+                Canvas.SetTop(pendant, rope.Y1 + (rope.Y2 - rope.Y1) * fraction);
+                ((RotateTransform)pendant.RenderTransform).Angle = sway;
+                var bead = beads[index];
+                fraction = level == 0 ? 0.43 : 0.88;
+                bead.Width = bead.Height = 3.2 * scale;
+                Canvas.SetLeft(bead, rope.X1 + (rope.X2 - rope.X1) * fraction - bead.Width / 2);
+                Canvas.SetTop(bead, rope.Y1 + (rope.Y2 - rope.Y1) * fraction - bead.Height / 2);
+            }
+        }
+        window.SwingDecorations.Visibility = Visibility.Visible;
     }
 }

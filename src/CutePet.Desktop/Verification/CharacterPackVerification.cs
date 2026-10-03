@@ -115,6 +115,20 @@ internal static class CharacterPackVerification
         other.Remove(edgeRoundTrip);
         check(edgeRoundTrip.Manifest.TopSwing is { SeatAnchorY: 0.69, SeatHalfWidth: 0.36, RopeColor: "#77B4A8" },
             "swing configuration survives real export and import");
+        check(edgeRoundTrip.Manifest.TopSwing?.Ornament is { Image: "rope-ornament-v1.png", DisplayWidth: 18, DisplayHeight: 27 }
+            && edgeRoundTrip.SwingOrnamentImage is { IsFrozen: true } && edgeFiles.ContainsKey("rope-ornament-v1.png"),
+            "ornament artwork and size survive actual built-in export and package import");
+        foreach (var ornament in new[] {
+            new CharacterSwingOrnament { Image = "../ornament.png" },
+            new CharacterSwingOrnament { Image = "ornament.gif" },
+            new CharacterSwingOrnament { Image = "rope-ornament-v1.png", DisplayWidth = 31 },
+            new CharacterSwingOrnament { Image = "rope-ornament-v1.png", DisplayWidth = 0 },
+            new CharacterSwingOrnament { Image = "rope-ornament-v1.png", DisplayHeight = 45 },
+            new CharacterSwingOrnament { Image = "rope-ornament-v1.png", DisplayHeight = 0 },
+            new CharacterSwingOrnament { Image = "missing-ornament.png" } })
+            Reject(() => library.Import(Zip("ornament-invalid", tianyi.Manifest with { Id = "ornament-invalid",
+                TopSwing = tianyi.Manifest.TopSwing! with { Ornament = ornament } }, edgeFiles)),
+                "ornament path, size and required artwork are validated " + ornament);
         foreach (var (config, reason) in new[] {
             (new CharacterTopSwing { SeatAnchorY = 0.05 }, "seat above suspension anchor"),
             (new CharacterTopSwing { SeatAnchorY = 1 }, "seat outside canvas"),
@@ -299,6 +313,11 @@ internal static class CharacterPackVerification
         using var largeBytes = new MemoryStream();
         largeEncoder.Save(largeBytes);
         var largeFiles = Enumerable.Range(0, 11).ToDictionary(i => "large-" + i + ".png", _ => largeBytes.ToArray());
+        Reject(() => library.Import(Zip("ornament-pixels", animated with { Id = "ornament-pixels",
+            TopSwing = new() { Ornament = new() { Image = "large-10.png" } }, Actions = new() {
+                ["idle"] = Clip(true, Enumerable.Range(0, 10).Select(i => ("large-" + i + ".png", 100)).ToArray()),
+                ["edge-top-idle"] = Clip(true, ("large-0.png", 100)) } }, largeFiles)),
+            "ornament pixels share the same total decoded memory limit");
         Reject(() => library.Import(Zip("total-pixels", animated with { Id = "total-pixels", Actions = new() {
             ["idle"] = Clip(true, Enumerable.Range(0, 11).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
             "total decoded pixels remain bounded with the expanded rest package limit");
@@ -335,6 +354,12 @@ internal static class CharacterPackVerification
         var cloudPack = library.Import(Zip("cloud-custom", cloudManifest,
             new() { ["idle.png"] = imageBytes, ["cloud.png"] = canvasBytes.ToArray() }));
         check(cloudPack.CloudImage is { PixelWidth: 1, IsFrozen: true }, "cloud layers may use their own canvas without changing character frames");
+        var ornamentPack = library.Import(Zip("ornament-custom", cloudManifest with { Id = "ornament-custom", Cloud = null,
+            TopSwing = new() { Ornament = new() { Image = "ornament.png" } }, Actions = new() {
+                ["idle"] = Clip(true, ("idle.png", 100)), ["edge-top-idle"] = Clip(true, ("idle.png", 100)) } },
+            new() { ["idle.png"] = imageBytes, ["ornament.png"] = canvasBytes.ToArray() }));
+        check(ornamentPack.SwingOrnamentImage is { PixelWidth: 1, IsFrozen: true },
+            "ornament layer accepts its own independent canvas");
         var cloudExport = Path.Combine(area, "cloud-roundtrip.zip");
         library.Export(cloudPack, cloudExport);
         check(new CharacterLibrary(Path.Combine(area, "cloud-roundtrip")).Import(cloudExport).CloudImage is not null,
