@@ -133,6 +133,7 @@ internal sealed class CharacterLibrary
             var imageNames = pack.Manifest.Actions.Values.SelectMany(action => action.Frames).Select(frame => frame.Image);
             if (pack.Manifest.Cloud is { } cloud) imageNames = imageNames.Append(cloud.Image);
             if (pack.Manifest.TopSwing?.Ornament is { } ornament) imageNames = imageNames.Append(ornament.Image);
+            if (pack.Manifest.TopSwing?.Scenery is { } scenery) imageNames = imageNames.Append(scenery.Image);
             foreach (var name in imageNames.Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 using var source = pack.BuiltIn ? Application.GetResourceStream(new Uri(

@@ -8,6 +8,7 @@
       <Viewbox x:Name="PetStage" Width="230" Height="178" Canvas.Left="0" Canvas.Top="0" Stretch="Uniform" MouseEnter="OnPetEnter" MouseLeave="OnPetLeave">
        <Grid Width="230" Height="178">
         <Ellipse x:Name="GroundShadow" Fill="#2029443B" Width="108" Height="13" VerticalAlignment="Bottom" Margin="0,0,0,1" />
+        <Canvas x:Name="SwingScenery" Width="230" Height="178" IsHitTestVisible="False" Visibility="Collapsed" />
         <Canvas x:Name="SwingRopes" Width="230" Height="178" IsHitTestVisible="False" Visibility="Collapsed">
           <Line x:Name="SwingRopeLeft" Stroke="#897055" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
           <Line x:Name="SwingRopeRight" Stroke="#897055" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />

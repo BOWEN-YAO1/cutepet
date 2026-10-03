@@ -18,6 +18,9 @@ internal sealed class EdgeMotionController
     private SolidColorBrush? ropeBrush;
     private readonly Image[] pendants = new Image[4];
     private readonly Ellipse[] beads = new Ellipse[4];
+    private readonly Image[] sceneryImages = new Image[2];
+    private readonly Path[] ribbons = new Path[2];
+    private readonly Path[] stars = new Path[4];
     internal EdgeAttachment? Attachment { get; private set; }
     internal bool Active => Attachment is not null;
     private string BaseAction => EdgeActions.Base(Attachment!.Side);
@@ -35,6 +38,24 @@ internal sealed class EdgeMotionController
                 Stroke = new SolidColorBrush(Color.FromRgb(187, 154, 92)), StrokeThickness = 0.55 };
             window.SwingDecorations.Children.Add(pendants[i]);
             window.SwingDecorations.Children.Add(beads[i]);
+        }
+        for (var i = 0; i < sceneryImages.Length; i++)
+        {
+            ribbons[i] = new Path { IsHitTestVisible = false, Stroke = new SolidColorBrush(Color.FromRgb(143, 199, 184)),
+                StrokeThickness = 1.7, Opacity = 0.65, StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round };
+            sceneryImages[i] = new Image { IsHitTestVisible = false, Stretch = Stretch.Uniform, RenderTransformOrigin = new Point(0.5, 0.5),
+                RenderTransform = new ScaleTransform(i == 0 ? 1 : -1, 1) };
+            RenderOptions.SetBitmapScalingMode(sceneryImages[i], BitmapScalingMode.HighQuality);
+            window.SwingScenery.Children.Add(ribbons[i]);
+            window.SwingScenery.Children.Add(sceneryImages[i]);
+        }
+        var starGeometry = Geometry.Parse("M3,0 L4,2 L6,3 L4,4 L3,6 L2,4 L0,3 L2,2 Z");
+        starGeometry.Freeze();
+        for (var i = 0; i < stars.Length; i++)
+        {
+            stars[i] = new Path { IsHitTestVisible = false, Data = starGeometry, Stretch = Stretch.Fill,
+                Fill = new SolidColorBrush(Color.FromRgb(218, 184, 110)) };
+            window.SwingScenery.Children.Add(stars[i]);
         }
     }
 
@@ -90,6 +111,7 @@ internal sealed class EdgeMotionController
         window.EdgeSwing.CenterY = 0;
         window.SwingRopes.Visibility = Visibility.Collapsed;
         HideDecorations();
+        HideScenery();
         window.EdgeMirror.ScaleX = 1;
         window.EdgeStretch.ScaleY = 1;
         window.EdgeStretch.CenterY = 0;
@@ -154,6 +176,7 @@ internal sealed class EdgeMotionController
             window.EdgeSwing.Angle = 0;
             window.SwingRopes.Visibility = Visibility.Collapsed;
             HideDecorations();
+            HideScenery();
             return;
         }
         var anchor = window.SelectedCharacter.Manifest.EdgeTopAnchorY;
@@ -181,6 +204,7 @@ internal sealed class EdgeMotionController
         window.SwingRopes.Opacity = entry;
         window.SwingRopes.Visibility = Visibility.Visible;
         RenderDecorations(swing, height, entry);
+        RenderScenery(swing, height, pivotY, entry);
     }
     private void HideDecorations()
     {
@@ -216,5 +240,48 @@ internal sealed class EdgeMotionController
             }
         }
         window.SwingDecorations.Visibility = Visibility.Visible;
+    }
+    private void HideScenery()
+    {
+        window.SwingScenery.Visibility = Visibility.Collapsed;
+        foreach (var scenery in sceneryImages) scenery.Source = null;
+    }
+    private void RenderScenery(CharacterTopSwing swing, double height, double pivotY, double entry)
+    {
+        if (swing.Scenery is not { } scenery || window.SelectedCharacter.SwingSceneryImage is not { } image)
+        { HideScenery(); return; }
+        var scale = height / 148;
+        var phase = 2 * Math.PI * swingElapsed / 3200;
+        for (var side = 0; side < sceneryImages.Length; side++)
+        {
+            var sign = side == 0 ? -1 : 1;
+            var x = 115 + sign * 74 * scale;
+            var y = pivotY + height * (side == 0 ? 0.62 : 0.48) + 1.8 * scale * Math.Sin(phase + side * Math.PI);
+            var art = sceneryImages[side];
+            art.Source = image;
+            art.Width = scenery.DisplayWidth * scale;
+            art.Height = scenery.DisplayHeight * scale;
+            Canvas.SetLeft(art, x - art.Width / 2);
+            Canvas.SetTop(art, y - art.Height / 2);
+            var rope = side == 0 ? window.SwingRopeLeft : window.SwingRopeRight;
+            var figure = new PathFigure { IsFilled = false, StartPoint = new Point(
+                rope.X1 + (rope.X2 - rope.X1) * 0.07, rope.Y1 + (rope.Y2 - rope.Y1) * 0.07) };
+            figure.Segments.Add(new BezierSegment(new Point(115 + sign * 104 * scale, pivotY + 34 * scale),
+                new Point(115 + sign * 35 * scale, y - 24 * scale), new Point(x, y), true));
+            var geometry = new PathGeometry(new[] { figure });
+            geometry.Freeze();
+            ribbons[side].Data = geometry;
+            ribbons[side].StrokeThickness = 1.7 * scale;
+            for (var level = 0; level < 2; level++)
+            {
+                var star = stars[side * 2 + level];
+                star.Width = star.Height = (level == 0 ? 4.5 : 3.5) * scale;
+                star.Opacity = 0.25 + 0.6 * Math.Pow(Math.Sin(phase + side + level), 2);
+                Canvas.SetLeft(star, 115 + sign * (level == 0 ? 90 : 64) * scale - star.Width / 2);
+                Canvas.SetTop(star, pivotY + height * (level == 0 ? 0.29 : 0.85) - star.Height / 2);
+            }
+        }
+        window.SwingScenery.Opacity = entry;
+        window.SwingScenery.Visibility = Visibility.Visible;
     }
 }

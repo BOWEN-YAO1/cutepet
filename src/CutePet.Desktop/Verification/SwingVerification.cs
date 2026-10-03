@@ -30,6 +30,26 @@ internal static class SwingVerification
             "swing reaches a small positive extreme without stretching artwork");
         CheckRopes();
         var pendants = window.SwingDecorations.Children.OfType<Image>().ToArray();
+        var scenery = window.SwingScenery.Children.OfType<Image>().ToArray();
+        check(window.SwingScenery.Visibility == Visibility.Visible && scenery.Length == 2
+            && scenery.All(p => ReferenceEquals(p.Source, window.SelectedCharacter.SwingSceneryImage) && !p.IsHitTestVisible)
+            && ((ScaleTransform)scenery[1].RenderTransform).ScaleX == -1, "side scenery reuses one cached image with right-side mirroring");
+        check(scenery.All(p => Canvas.GetLeft(p) >= 0 && Canvas.GetTop(p) >= 0
+            && Canvas.GetLeft(p) + p.Width <= 230 && Canvas.GetTop(p) + p.Height <= 178)
+            && window.QuotaHost.Position == quota, "side scenery stays inside the pet scene and leaves quota fixed");
+        var ribbons = window.SwingScenery.Children.OfType<System.Windows.Shapes.Path>().Take(2).ToArray();
+        var sceneryRopes = new[] { window.SwingRopeLeft, window.SwingRopeRight };
+        for (var side = 0; side < 2; side++)
+        {
+            var start = ((PathGeometry)ribbons[side].Data).Figures[0].StartPoint;
+            var rope = sceneryRopes[side];
+            check(Math.Abs(start.X - rope.X1 - (rope.X2 - rope.X1) * 0.07) < 0.00001
+                && Math.Abs(start.Y - rope.Y1 - (rope.Y2 - rope.Y1) * 0.07) < 0.00001,
+                "floating scenery ribbon remains attached to its swing rope " + side);
+        }
+        var sceneryTop = Canvas.GetTop(scenery[0]);
+        var star = window.SwingScenery.Children.OfType<System.Windows.Shapes.Path>().Last();
+        var starOpacity = star.Opacity;
         check(window.SwingDecorations.Visibility == Visibility.Visible && pendants.Length == 4
             && pendants.All(p => ReferenceEquals(p.Source, window.SelectedCharacter.SwingOrnamentImage) && !p.IsHitTestVisible),
             "four cached ornaments decorate ropes without intercepting pet gestures");
@@ -47,6 +67,8 @@ internal static class SwingVerification
         check(new Point(Canvas.GetLeft(pendants[0]), Canvas.GetTop(pendants[0])) == pendantPoint
             && ((RotateTransform)pendants[0].RenderTransform).Angle == pendantAngle,
             "menu also freezes pendant placement and delayed sway");
+        check(Canvas.GetTop(scenery[0]) == sceneryTop && star.Opacity == starOpacity,
+            "menu freezes side-cloud floating and star twinkle");
         window.EndDetailsMenu();
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(1600));
         check(Math.Abs(window.EdgeSwing.Angle + 3) < 0.00001 && window.SwingRopeLeft.X1 == leftTop
@@ -57,6 +79,8 @@ internal static class SwingVerification
         check(new Point(Canvas.GetLeft(pendants[0]), Canvas.GetTop(pendants[0])) != pendantPoint
             && Math.Abs(((RotateTransform)pendants[0].RenderTransform).Angle) <= 4,
             "pendants follow reversed ropes with a bounded separate sway");
+        check(Canvas.GetTop(scenery[0]) != sceneryTop && star.Opacity >= 0.25 && star.Opacity <= 0.85,
+            "side clouds resume floating with bounded star brightness");
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(300));
         window.PlayCharacterInteraction(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
         check(Math.Abs(window.EdgeSwing.Angle - 4) < 0.00001,
@@ -77,6 +101,8 @@ internal static class SwingVerification
             && window.QuotaHost.Position == quota, "recall removes ropes and rotation without affecting quota");
         check(window.SwingDecorations.Visibility == Visibility.Collapsed && pendants.All(p => p.Source is null),
             "recall clears ornament references and their visual layer");
+        check(window.SwingScenery.Visibility == Visibility.Collapsed && scenery.All(p => p.Source is null),
+            "recall also removes side scenery and clears artwork references");
         foreach (var point in new[] { new Point(0, 350), new Point(800, 862) })
         {
             window.CompletePetDrag(screen, size, point, 1); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(800));
@@ -99,6 +125,8 @@ internal static class SwingVerification
             "legacy top-only pack without swing configuration keeps its original pose");
         check(window.SwingDecorations.Visibility == Visibility.Collapsed && pendants.All(p => p.Source is null),
             "legacy top-only pack retains no previous character's ornaments");
+        check(window.SwingScenery.Visibility == Visibility.Collapsed && scenery.All(p => p.Source is null),
+            "legacy top-only pack retains no previous side scenery");
         var legacy = window.SelectedCharacter;
         window.SetCharacter(PetCharacter.Tianyi); window.Characters.Remove(legacy);
         var customDirectory = Path.Combine(window.Characters.Root, "short-swing-test");
@@ -106,7 +134,7 @@ internal static class SwingVerification
         png = new PngBitmapEncoder(); png.Frames.Add(BitmapFrame.Create(window.Characters.Find("cat").Idle.Frames[0].Image));
         using (var file = File.Create(Path.Combine(customDirectory, "idle.png"))) png.Save(file);
         manifest = manifest with { Id = "short-swing-test", Name = "不同尺寸秋千测试", DisplayHeight = 100,
-            TopSwing = new() { Ornament = new() { Image = "idle.png" } } };
+            TopSwing = new() { Ornament = new() { Image = "idle.png" }, Scenery = new() { Image = "idle.png" } } };
         File.WriteAllText(Path.Combine(customDirectory, "character.json"), JsonSerializer.Serialize(manifest, CharacterPackLoader.Json));
         window.Characters.Reload(); window.SetCharacterPackage(manifest.Id);
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(800));
@@ -116,6 +144,9 @@ internal static class SwingVerification
         check(Math.Abs(pendants[0].Width - 18 * 100.0 / 148) < 0.00001 && window.SwingDecorations.Visibility == Visibility.Visible,
             "custom ornament dimensions scale with the shorter artwork display");
         CheckOrnaments();
+        check(Math.Abs(scenery[0].Width - 42 * 100.0 / 148) < 0.00001 && window.SwingScenery.Visibility == Visibility.Visible
+            && ReferenceEquals(window.SelectedCharacter.SwingSceneryImage, window.SelectedCharacter.SwingOrnamentImage),
+            "custom side scenery scales with shorter artwork and shared PNGs decode once");
         var custom = window.SelectedCharacter;
         window.SetCharacter(PetCharacter.Tianyi); window.Characters.Remove(custom);
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));

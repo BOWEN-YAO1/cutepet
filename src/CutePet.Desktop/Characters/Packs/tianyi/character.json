@@ -343,6 +343,11 @@
       "image": "rope-ornament-v1.png",
       "displayWidth": 18,
       "displayHeight": 27
+    },
+    "scenery": {
+      "image": "scenery-lotus-v1.png",
+      "displayWidth": 42,
+      "displayHeight": 42
     }
   }
 }

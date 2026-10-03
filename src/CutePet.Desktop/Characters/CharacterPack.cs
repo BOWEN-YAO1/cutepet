@@ -31,6 +31,13 @@ public sealed record CharacterTopSwing
     public double SeatHalfWidth { get; init; } = 0.36;
     public string RopeColor { get; init; } = "#897055";
     public CharacterSwingOrnament? Ornament { get; init; }
+    public CharacterSwingScenery? Scenery { get; init; }
+}
+public sealed record CharacterSwingScenery
+{
+    public string Image { get; init; } = "";
+    public double DisplayWidth { get; init; } = 42;
+    public double DisplayHeight { get; init; } = 42;
 }
 public sealed record CharacterSwingOrnament
 {
@@ -70,7 +77,7 @@ internal sealed record LoadedAction(bool Loop, IReadOnlyList<LoadedFrame> Frames
 }
 internal sealed record CharacterPack(CharacterManifest Manifest, bool BuiltIn,
     IReadOnlyDictionary<string, LoadedAction> Actions, string? Directory = null, BitmapSource? CloudImage = null,
-    BitmapSource? SwingOrnamentImage = null)
+    BitmapSource? SwingOrnamentImage = null, BitmapSource? SwingSceneryImage = null)
 {
     public string Id => Manifest.Id;
     public string Name => Manifest.Name;

@@ -56,6 +56,10 @@ internal static class CharacterPackLoader
             || !double.IsFinite(ornament.DisplayWidth) || ornament.DisplayWidth < 6 || ornament.DisplayWidth > 30
             || !double.IsFinite(ornament.DisplayHeight) || ornament.DisplayHeight < 8 || ornament.DisplayHeight > 44))
             throw new InvalidDataException("秋千挂饰图片路径或显示大小不合法。");
+        if (manifest.TopSwing?.Scenery is { } scenery && (scenery.Image is null || !SafeFile(scenery.Image)
+            || !double.IsFinite(scenery.DisplayWidth) || scenery.DisplayWidth < 12 || scenery.DisplayWidth > 60
+            || !double.IsFinite(scenery.DisplayHeight) || scenery.DisplayHeight < 12 || scenery.DisplayHeight > 60))
+            throw new InvalidDataException("秋千两侧装饰图片路径或显示大小不合法。");
         foreach (var baseAction in new[] { "edge-idle", "edge-top-idle", "edge-bottom-idle" })
             if (manifest.Actions.ContainsKey(EdgeActions.Peek(baseAction)) && !manifest.Actions.ContainsKey(baseAction))
                 throw new InvalidDataException("探头回应需要配套 " + baseAction + " 贴边姿势。");
@@ -103,7 +107,8 @@ internal static class CharacterPackLoader
         }
         var cloudImage = manifest.Cloud is { } layer ? LoadLayer(layer.Image) : null;
         var ornamentImage = manifest.TopSwing?.Ornament is { } decoration ? LoadLayer(decoration.Image) : null;
-        return new(manifest, builtIn, actions, directory, cloudImage, ornamentImage);
+        var sceneryImage = manifest.TopSwing?.Scenery is { } sceneryLayer ? LoadLayer(sceneryLayer.Image) : null;
+        return new(manifest, builtIn, actions, directory, cloudImage, ornamentImage, sceneryImage);
 
         BitmapSource LoadLayer(string name)
         {
