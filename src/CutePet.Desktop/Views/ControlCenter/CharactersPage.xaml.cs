@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using System.Windows.Media;
 
 namespace CutePet.Desktop;
 
@@ -13,6 +14,8 @@ public partial class CharactersPage : UserControl, IDisposable
     private readonly MainWindow host;
     private readonly CharacterAnimation animation = new();
     private readonly CloudFlight cloudPreview = new();
+    private readonly RotateTransform sidePreviewTilt = new();
+    private readonly TranslateTransform sidePreviewShift = new();
     private readonly Stopwatch clock = new();
     private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(40) };
     private CharacterPack? Selected => CharacterList.SelectedItem as CharacterPack;
@@ -22,6 +25,9 @@ public partial class CharactersPage : UserControl, IDisposable
     {
         this.host = host;
         InitializeComponent();
+        var sideTransform = new TransformGroup();
+        sideTransform.Children.Add(sidePreviewTilt); sideTransform.Children.Add(sidePreviewShift);
+        Preview.RenderTransformOrigin = new Point(.5,.5); Preview.RenderTransform = sideTransform;
         host.Characters.Reload();
         host.SetCharacterPackage(host.SelectedCharacter.Id);
         RefreshList(host.SelectedCharacter.Id);
@@ -34,6 +40,7 @@ public partial class CharactersPage : UserControl, IDisposable
             cloudPreview.Advance(elapsed);
             CloudPreview.Opacity = cloudPreview.Opacity;
             Preview.Source = animation.Image;
+            RefreshSidePreview();
         };
         IsVisibleChanged += (_, _) =>
         {
@@ -69,10 +76,12 @@ public partial class CharactersPage : UserControl, IDisposable
         CloudPreview.Width = pack.Manifest.Cloud?.DisplayWidth ?? 140;
         CloudPreview.Height = pack.Manifest.Cloud?.DisplayHeight ?? 32;
         Preview.Source = animation.Image;
+        RefreshSidePreview();
         var labels = new[] { ("idle", "待机"), ("blink", "眨眼"), ("greeting", "打招呼"), ("low", "低额度"),
             ("look", "张望"), ("hover", "悬停"), ("happy", "开心"), ("conjure", "召唤王座"), ("sit", "坐下休息"), ("stand", "起身收起"), ("summon-cloud", "召唤小云"),
             ("sit-blink", "坐姿眨眼"), ("sit-greeting", "坐姿挥手"), ("sit-happy", "坐姿微笑"),
             ("edge-idle", "左右贴边"), ("edge-peek", "左右探头微笑"), ("edge-top-idle", "花藤秋千"),
+            ("edge-shy", "缩回再探出"), ("edge-sway", "探头轻摇"), ("edge-nod", "探头点头"),
             ("edge-top-peek", "秋千轻摆"), ("edge-bottom-idle", "下沿托腮"), ("edge-bottom-peek", "下沿抬头微笑") };
         CharacterInfo.Text = pack.Name;
         RightsInfo.Text = $"作者：{(string.IsNullOrWhiteSpace(pack.Manifest.Author) ? "未填写" : pack.Manifest.Author)}\n"
@@ -96,6 +105,12 @@ public partial class CharactersPage : UserControl, IDisposable
         { animation.Preview(action); if (action == "summon-cloud") cloudPreview.Start(Selected!.Actions[action].Duration); }
         CloudPreview.Opacity = 0;
         Preview.Source = animation.Image;
+        RefreshSidePreview();
+    }
+    private void RefreshSidePreview()
+    {
+        var pose = SideEdgeMotion.Responses.Contains(animation.Action) ? SideEdgeMotion.Sample(animation.Action, animation.ActionProgress) : default;
+        sidePreviewTilt.Angle = pose.Angle; sidePreviewShift.X = pose.Peek; sidePreviewShift.Y = pose.Lift;
     }
     private void OnImport(object sender, RoutedEventArgs e)
     {

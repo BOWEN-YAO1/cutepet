@@ -10,7 +10,7 @@ namespace CutePet.Desktop;
 
 internal static class CharacterPackLoader
 {
-    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-top-idle", "edge-top-peek", "edge-bottom-idle", "edge-bottom-peek" };
+    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-shy", "edge-sway", "edge-nod", "edge-top-idle", "edge-top-peek", "edge-bottom-idle", "edge-bottom-peek" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true, WriteIndented = true };
     public static bool ValidId(string? id) => id is not null && Regex.IsMatch(id, "\\A[a-z][a-z0-9-]{0,63}\\z");
@@ -64,6 +64,8 @@ internal static class CharacterPackLoader
         foreach (var baseAction in new[] { "edge-idle", "edge-top-idle", "edge-bottom-idle" })
             if (manifest.Actions.ContainsKey(EdgeActions.Peek(baseAction)) && !manifest.Actions.ContainsKey(baseAction))
                 throw new InvalidDataException("探头回应需要配套 " + baseAction + " 贴边姿势。");
+        if (SideEdgeMotion.Responses.Any(action => manifest.Actions.ContainsKey(action)) && !manifest.Actions.ContainsKey("edge-idle"))
+            throw new InvalidDataException("左右贴边回应需要配套 edge-idle 姿势。");
         if (!manifest.Actions.ContainsKey("sit") && (manifest.RestAfterMs != 0 || manifest.Actions.ContainsKey("conjure") || manifest.Actions.ContainsKey("stand")
             || manifest.Actions.Keys.Any(key => key.StartsWith("sit-", StringComparison.Ordinal))))
             throw new InvalidDataException("召唤、起身、坐姿回应或自动休息需要配套 sit 动作。");

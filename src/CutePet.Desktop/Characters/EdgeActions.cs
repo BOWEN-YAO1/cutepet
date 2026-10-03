@@ -11,7 +11,7 @@ internal static class EdgeActions
     internal static string Peek(string baseAction) => baseAction[..^4] + "peek";
     internal static string? BaseOf(string action) => action switch
     {
-        "edge-idle" or "edge-peek" => "edge-idle",
+        "edge-idle" or "edge-peek" or "edge-shy" or "edge-sway" or "edge-nod" => "edge-idle",
         "edge-top-idle" or "edge-top-peek" => "edge-top-idle",
         "edge-bottom-idle" or "edge-bottom-peek" => "edge-bottom-idle",
         _ => null

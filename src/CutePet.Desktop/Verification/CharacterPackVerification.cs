@@ -17,7 +17,7 @@ internal static class CharacterPackVerification
         Directory.CreateDirectory(area);
         var library = new CharacterLibrary(Path.Combine(area, "installed"));
         var cat = library.Find("cat");
-        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 19 && cat.Actions.Count == 4,
+        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 22 && cat.Actions.Count == 4,
             "both built-in characters load from independent manifests and PNG clips");
         foreach (var builtIn in library.Packs)
         {
@@ -109,6 +109,9 @@ internal static class CharacterPackVerification
         var edgeRoundTrip = other.Import(Zip("edge-roundtrip", tianyi.Manifest with { Id = "edge-roundtrip" }, edgeFiles));
         check(edgeRoundTrip.Actions.ContainsKey("edge-idle") && edgeRoundTrip.Actions.ContainsKey("edge-peek")
             && edgeRoundTrip.Manifest.EdgeAnchorX == 0.06, "edge poses and anchor survive actual package export and import");
+        check(SideEdgeMotion.Responses.All(edgeRoundTrip.Actions.ContainsKey)
+            && ReferenceEquals(edgeRoundTrip.Actions["edge-shy"].Frames[0].Image,edgeRoundTrip.Actions["edge-idle"].Frames[0].Image),
+            "all side gestures export and import while deduplicating their shared artwork");
         check(edgeRoundTrip.Actions.ContainsKey("edge-top-peek") && edgeRoundTrip.Actions.ContainsKey("edge-bottom-peek")
             && edgeRoundTrip.Manifest.EdgeTopAnchorY == 0 && edgeRoundTrip.Manifest.EdgeBottomAnchorY == 0.9,
             "all vertical actions and contact anchors survive actual package export and import");
@@ -154,6 +157,15 @@ internal static class CharacterPackVerification
             new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes })), "swing requires its own top base artwork");
         var edgeOnly = animated with { Id = "edge-only", Actions = new() {
             ["idle"] = Clip(true, ("idle.png", 100)), ["edge-idle"] = Clip(true, ("idle.png", 100)) } };
+        foreach (var response in SideEdgeMotion.Responses.Skip(1))
+        {
+            Reject(() => library.Import(Zip("orphan-" + response, animated with { Id = "orphan-" + response, Actions = new() {
+                ["idle"] = Clip(true,("idle.png",100)), [response] = Clip(false,("idle.png",100)) } }, new() { ["idle.png"] = imageBytes })),
+                "side response rejects a missing edge base " + response);
+            Reject(() => library.Import(Zip("loop-" + response, edgeOnly with { Id = "loop-" + response, Actions = new() {
+                ["idle"] = Clip(true,("idle.png",100)), ["edge-idle"] = Clip(true,("idle.png",100)), [response] = Clip(true,("idle.png",100)) } }, new() { ["idle.png"] = imageBytes })),
+                "side response cannot loop forever " + response);
+        }
         var edgeCustom = library.Import(Zip("edge-only", edgeOnly, new() { ["idle.png"] = imageBytes }));
         player.Configure(edgeCustom); player.AttachEdge(); player.ReactToClick(0); player.Advance(TimeSpan.FromSeconds(10));
         check(player.Action == "edge-idle", "custom edge base works without optional peek action");

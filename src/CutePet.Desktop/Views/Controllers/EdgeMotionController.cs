@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -14,6 +15,9 @@ internal sealed class EdgeMotionController
     private double peekElapsed = -1;
     private double entering;
     private double swingElapsed;
+    private string response = "edge-peek";
+    private int nextResponse;
+    internal string? Response => peekElapsed < 0 ? null : response;
     private string? ropeColor;
     private SolidColorBrush? ropeBrush;
     private readonly Image[] pendants = new Image[4];
@@ -78,6 +82,7 @@ internal sealed class EdgeMotionController
         Attachment = plan;
         entering = 0;
         swingElapsed = 0;
+        nextResponse = 0;
         window.StartEdgePose(BaseAction);
         Render();
         if (!verification) NativePlacement.Apply(window, plan.Position.X, plan.Position.Y);
@@ -86,9 +91,15 @@ internal sealed class EdgeMotionController
     }
     internal void Peek()
     {
-        if (!Active || peekElapsed >= 0 || !window.SelectedCharacter.Actions.ContainsKey(PeekAction)) return;
+        if (!Active || peekElapsed >= 0) return;
+        var choices = Attachment!.Side is ScreenEdge.Left or ScreenEdge.Right
+            ? SideEdgeMotion.Responses.Where(window.SelectedCharacter.Actions.ContainsKey).ToArray()
+            : window.SelectedCharacter.Actions.ContainsKey(PeekAction) ? new[] { PeekAction } : Array.Empty<string>();
+        if (choices.Length == 0) return;
+        response = choices[nextResponse % choices.Length];
+        nextResponse = (nextResponse + 1) % choices.Length;
         peekElapsed = 0;
-        window.StartEdgePeek();
+        window.StartEdgePeek(response);
         Render();
     }
     internal void Advance(TimeSpan elapsed)
@@ -105,7 +116,7 @@ internal sealed class EdgeMotionController
         entering = Math.Min(320, entering + delta);
         swingElapsed = (swingElapsed + delta) % 3200;
         if (peekElapsed < 0) { Render(); return; }
-        var duration = window.SelectedCharacter.Actions[PeekAction].Duration;
+        var duration = window.SelectedCharacter.Actions[response].Duration;
         peekElapsed += Math.Max(0, elapsed.TotalMilliseconds);
         if (peekElapsed >= duration) peekElapsed = -1;
         Render();
@@ -117,6 +128,9 @@ internal sealed class EdgeMotionController
         PeekOffset = 0;
         swingElapsed = 0;
         window.EdgeSwing.Angle = 0;
+        window.EdgeSwing.CenterX = 0;
+        window.SideEdgeTilt.Angle = 0;
+        window.SideEdgeTilt.CenterX = 0;
         window.EdgeSwing.CenterY = 0;
         window.SwingRopes.Visibility = Visibility.Collapsed;
         HideDecorations();
@@ -154,8 +168,9 @@ internal sealed class EdgeMotionController
         var renderedHeight = Math.Min(window.CharacterArt.Height, width * image.PixelHeight / image.PixelWidth);
         // The package artwork's left canvas edge is the virtual border. Hands may overlap it.
         var anchor = (230 - renderedWidth) / 2 + renderedWidth * window.SelectedCharacter.Manifest.EdgeAnchorX;
-        var t = peekElapsed < 0 ? 0 : peekElapsed / window.SelectedCharacter.Actions[PeekAction].Duration;
-        PeekOffset = 8 * Math.Pow(Math.Sin(Math.PI * t), 2);
+        var t = peekElapsed < 0 ? 0 : peekElapsed / window.SelectedCharacter.Actions[response].Duration;
+        var sidePose = SideEdgeMotion.Sample(response, t);
+        PeekOffset = sidePose.Peek;
         window.EdgeMirror.ScaleX = right ? -1 : 1;
         var entry = entering / 320;
         entry = entry * entry * (3 - 2 * entry);
@@ -175,6 +190,13 @@ internal sealed class EdgeMotionController
             _ => 0
         };
         RenderSwing(imageTop, renderedWidth, renderedHeight, entry);
+        if (!vertical && SideEdgeMotion.Responses.Skip(1).Any(window.SelectedCharacter.Actions.ContainsKey))
+        {
+            var phase = 2 * Math.PI * swingElapsed / 3200;
+            window.SideEdgeTilt.CenterX = (right ? 1 : -1) * renderedWidth * (0.5 - window.SelectedCharacter.Manifest.EdgeAnchorX);
+            window.SideEdgeTilt.Angle = (right ? -1 : 1) * (sidePose.Angle + .55 * Math.Sin(phase)) * entry;
+            window.EdgeShift.Y = (sidePose.Lift + .6 * Math.Sin(phase)) * entry;
+        }
         window.Scene.ClipToBounds = true;
         window.GroundShadow.Visibility = Visibility.Hidden;
     }

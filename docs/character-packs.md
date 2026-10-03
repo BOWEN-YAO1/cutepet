@@ -88,6 +88,9 @@ my-pet.cutepet.zip
 | sit-happy | 可选 | false | 坐稳时点击或每隔 8–16 秒尝试微笑，需要 sit；结束继续坐着 |
 | edge-idle | 可选 | true | 左侧贴边基础姿势，右侧自动镜像 |
 | edge-peek | 可选 | false | 有限探头回应，需要 edge-idle；结束保持贴边 |
+| edge-shy | 可选 | false | 左右缩回再探出，需要 edge-idle；有限播放后返回基础姿势 |
+| edge-sway | 可选 | false | 左右探头轻摇，需要 edge-idle |
+| edge-nod | 可选 | false | 左右探头点头，需要 edge-idle |
 | edge-top-idle | 可选 | true | 上沿抓边姿势，可独立提供 |
 | edge-top-peek | 可选 | false | 上沿回应，需要 edge-top-idle |
 | edge-bottom-idle | 可选 | true | 下沿托腮姿势，可独立提供 |
@@ -95,6 +98,8 @@ my-pet.cutepet.zip
 | low | 可选 | true | 新鲜有效额度低于 20% 时播放；旧数据或额度恢复后回到待机 |
 
 待机、低额度、坐姿及贴边基础动作必须循环，其他动作必须有限播放。点击回应优先于歪头，歪头优先于张望 / 眨眼；拖动、按住鼠标或打开右键菜单时暂停自动动作触发。进入低额度状态会清除自动动作；点击回应仍能播放，结束后返回低额度。隐藏桌宠时停止帧计时器并清除临时动作，恢复后继续基础状态；切换角色清除旧动作。管理预览独立于桌宠，也没有账号连接。
+
+0.31.0 的左右回应只轮换角色包实际提供的 edge-peek / edge-shy / edge-sway / edge-nod，顺序如表，旧包只提供 edge-peek 时仍使用原有单一回应。动作时长与姿势帧由包定义，内置运动按动作总时长归一化：edge-shy 先缩回后探出，edge-sway 双次轻摆，edge-nod 小幅上下点头。动作过程有输入保护，不在播放中追加队列；角色页也显示对应位移和轻摇预览。没有新增 PNG，依旧遵守总解码像素上限。
 
 ## 配置字段
 

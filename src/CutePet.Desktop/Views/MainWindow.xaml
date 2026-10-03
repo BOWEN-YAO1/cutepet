@@ -25,6 +25,7 @@
                  RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality">
             <Image.RenderTransform><TransformGroup><ScaleTransform x:Name="EdgeMirror" ScaleX="1" />
               <ScaleTransform x:Name="EdgeStretch" ScaleY="1" />
+              <RotateTransform x:Name="SideEdgeTilt" />
               <RotateTransform x:Name="EdgeSwing" />
               <TranslateTransform x:Name="EdgeShift" /><RotateTransform x:Name="CloudLean" />
               <TranslateTransform x:Name="CloudCharacterBob" /></TransformGroup></Image.RenderTransform>

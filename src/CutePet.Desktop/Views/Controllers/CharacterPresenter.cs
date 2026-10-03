@@ -262,6 +262,6 @@ internal sealed class CharacterPresenter
         window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
         RefreshCharacterFrame();
     }
-    internal void PeekEdge() { characterAnimation.PeekEdge(); RefreshCharacterFrame(); }
+    internal void PeekEdge(string? action = null) { characterAnimation.PeekEdge(action); RefreshCharacterFrame(); }
 
 }

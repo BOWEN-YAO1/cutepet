@@ -323,6 +323,57 @@
           "durationMs": 300
         }
       ]
+    },
+    "edge-shy": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "edge-v1.png",
+          "durationMs": 880
+        },
+        {
+          "image": "edge-smile-v1.png",
+          "durationMs": 940
+        },
+        {
+          "image": "edge-v1.png",
+          "durationMs": 380
+        }
+      ]
+    },
+    "edge-sway": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "edge-v1.png",
+          "durationMs": 300
+        },
+        {
+          "image": "edge-smile-v1.png",
+          "durationMs": 1200
+        },
+        {
+          "image": "edge-v1.png",
+          "durationMs": 300
+        }
+      ]
+    },
+    "edge-nod": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "edge-v1.png",
+          "durationMs": 240
+        },
+        {
+          "image": "edge-smile-v1.png",
+          "durationMs": 920
+        },
+        {
+          "image": "edge-v1.png",
+          "durationMs": 240
+        }
+      ]
     }
   },
   "restAfterMs": 30000,

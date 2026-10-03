@@ -44,7 +44,8 @@ public partial class MainWindow : Window
     internal double ScreenEdgePeekOffset => edgeMotion.PeekOffset;
     internal void StartEdgePose(string baseAction) => characterPresenter.AttachEdge(baseAction);
     internal void RefreshScreenEdgeBounds(Rect area, Size size) => edgeMotion.Reanchor(area, size);
-    internal void StartEdgePeek() => characterPresenter.PeekEdge();
+    internal string? ScreenEdgeResponse => edgeMotion.Response;
+    internal void StartEdgePeek(string? action = null) => characterPresenter.PeekEdge(action);
     internal void PeekScreenEdge() => edgeMotion.Peek();
     internal void CancelScreenEdge() => edgeMotion.Cancel();
     internal void AdvanceScreenEdge(TimeSpan elapsed) => edgeMotion.Advance(elapsed);

@@ -37,6 +37,7 @@ internal sealed class CharacterAnimation
         }
     }
     public string Action => transient ?? (Low && pack.Actions.ContainsKey("low") ? "low" : onEdge ? edgeBase : resting ? "sit" : "idle");
+    internal double ActionProgress => (transient is null ? baseElapsed : transientElapsed) / pack.Actions[Action].Duration;
     public BitmapSource Image => pack.Actions[Action].At(transient is null ? baseElapsed : transientElapsed);
     public CharacterFrame Frame => Action switch
     { "low" => CharacterFrame.Low, "blink" => CharacterFrame.Closed,
@@ -45,13 +46,14 @@ internal sealed class CharacterAnimation
         "conjure" => CharacterFrame.Conjure, "sit" => CharacterFrame.Sit, "stand" => CharacterFrame.Rise,
         "sit-blink" => CharacterFrame.SeatedBlink, "sit-greeting" => CharacterFrame.SeatedWave, "sit-happy" => CharacterFrame.SeatedHappy,
         "edge-idle" or "edge-top-idle" or "edge-bottom-idle" => CharacterFrame.EdgeIdle,
-        "edge-peek" or "edge-top-peek" or "edge-bottom-peek" => CharacterFrame.EdgePeek,
+        "edge-peek" or "edge-shy" or "edge-sway" or "edge-nod" or "edge-top-peek" or "edge-bottom-peek" => CharacterFrame.EdgePeek,
         _ => CharacterFrame.Idle };
     public void Configure(CharacterPack selected) { pack = selected; low = false; baseElapsed = 0; Reset(); }
     public void Blink() { if (transient is null && !Low && !onEdge) Start(resting ? "sit-blink" : "blink"); }
     internal void AttachEdge(string baseAction = "edge-idle")
     { Reset(); edgeBase = baseAction; onEdge = EdgeActions.BaseOf(baseAction) == baseAction && pack.Actions.ContainsKey(baseAction); baseElapsed = 0; }
-    internal void PeekEdge() { if (onEdge && !Low && transient is null) Start(EdgeActions.Peek(edgeBase)); }
+    internal void PeekEdge(string? action = null)
+    { if (onEdge && !Low && transient is null && (action is null || EdgeActions.BaseOf(action) == edgeBase)) Start(action ?? EdgeActions.Peek(edgeBase)); }
     public void Greet() => Respond("greeting");
     private void Respond(string action)
     {
