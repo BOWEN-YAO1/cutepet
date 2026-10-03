@@ -15,4 +15,13 @@ jobs:
       - run: dotnet build CutePet.sln -c Release
       - run: dotnet run --project tests/CutePet.Tests -c Release --no-build
       - name: Verify WPF states without an account or visible desktop window
-        run: dotnet src/CutePet.Desktop/bin/Release/net8.0-windows/CutePet.dll --verify artifacts/desktop-verification
+        run: |
+          dotnet src/CutePet.Desktop/bin/Release/net8.0-windows/CutePet.dll --verify artifacts/desktop-verification
+          $taskVerificationExit = $LASTEXITCODE
+          $taskReportPath = 'artifacts/desktop-verification/verification.json'
+          if (Test-Path -LiteralPath $taskReportPath) {
+            $taskReport = Get-Content -LiteralPath $taskReportPath -Raw | ConvertFrom-Json
+            Write-Output "WPF verification: passed=$($taskReport.passed), checks=$($taskReport.checks.Count)"
+            if (-not $taskReport.passed) { Write-Output $taskReport.failure }
+          }
+          exit $taskVerificationExit
