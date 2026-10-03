@@ -67,7 +67,8 @@ internal static class VerticalEdgeVerification
             var expression = window.CharacterArt.Source;
             check(ReferenceEquals(expression, pack.Actions[EdgeActions.Peek(EdgeActions.Base(side))].Frames[1].Image)
                 && window.ScreenEdgePeekOffset == 8, "vertical response uses its own smile at eased midpoint " + side);
-            check(window.EdgeShift.Y == contactShift && window.EdgeStretch.ScaleY > 1 && window.EdgeStretch.ScaleY <= 1.04,
+            check(window.EdgeShift.Y == contactShift && (side == ScreenEdge.Top ? window.EdgeStretch.ScaleY == 1
+                : window.EdgeStretch.ScaleY > 1 && window.EdgeStretch.ScaleY <= 1.04),
                 "vertical response keeps the hand or elbow contact line fixed " + side);
             var movedArea = new Rect(100, 40, 1600, 900);
             window.RefreshScreenEdgeBounds(movedArea, new Size(345, 267));
@@ -146,7 +147,7 @@ internal static class VerticalEdgeVerification
                 new Rect(340 - window.Width * 0.9, side == ScreenEdge.Top ? 20 : 350 - window.Height * 1.8, window.Width * 1.8, window.Height * 1.8));
             var card = window.QuotaHost;
             draw.DrawImage(WindowPreview.Surface((FrameworkElement)card.Content, card.Width, card.Height, 96), new Rect(525, 250, card.Width, card.Height));
-            draw.DrawText(new FormattedText(side == ScreenEdge.Top ? "上侧 · 扒住边缘向下探头" : "下侧 · 趴在任务栏上沿托腮",
+            draw.DrawText(new FormattedText(side == ScreenEdge.Top ? "上侧 · 轻搭小手，从上方探头" : "下侧 · 趴在任务栏上沿托腮",
                 System.Globalization.CultureInfo.GetCultureInfo("zh-CN"), FlowDirection.LeftToRight, new Typeface("Microsoft YaHei"),
                 13, new SolidColorBrush(Color.FromRgb(75, 102, 88)), 1), new Point(20, 371));
         }

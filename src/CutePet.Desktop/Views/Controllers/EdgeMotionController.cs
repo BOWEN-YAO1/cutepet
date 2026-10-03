@@ -106,10 +106,10 @@ internal sealed class EdgeMotionController
         var imageTop = 16 + (window.CharacterArt.Height - renderedHeight) / 2;
         var verticalAnchor = Attachment.Side == ScreenEdge.Top ? window.SelectedCharacter.Manifest.EdgeTopAnchorY
             : window.SelectedCharacter.Manifest.EdgeBottomAnchorY;
-        // A very small stretch about the hand/elbow line keeps that contact point fixed.
+        // Top peeking changes expression only; bottom keeps a small elbow-anchored lift.
         var vertical = Attachment.Side is ScreenEdge.Top or ScreenEdge.Bottom;
         window.EdgeStretch.CenterY = vertical ? imageTop - 16 + renderedHeight * verticalAnchor - window.CharacterArt.Height / 2 : 0;
-        window.EdgeStretch.ScaleY = vertical ? 1 + (Attachment.Side == ScreenEdge.Top ? 0.02 : 0.04) * PeekOffset / 8 : 1;
+        window.EdgeStretch.ScaleY = Attachment.Side == ScreenEdge.Bottom ? 1 + 0.04 * PeekOffset / 8 : 1;
         window.EdgeShift.Y = Attachment.Side switch
         {
             ScreenEdge.Top => -(imageTop + renderedHeight * window.SelectedCharacter.Manifest.EdgeTopAnchorY) * entry,

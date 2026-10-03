@@ -276,7 +276,7 @@
       "loop": true,
       "frames": [
         {
-          "image": "edge-top-v1.png",
+          "image": "edge-top-v2.png",
           "durationMs": 1000
         }
       ]
@@ -285,15 +285,15 @@
       "loop": false,
       "frames": [
         {
-          "image": "edge-top-v1.png",
+          "image": "edge-top-v2.png",
           "durationMs": 300
         },
         {
-          "image": "edge-top-smile-v1.png",
+          "image": "edge-top-smile-v2.png",
           "durationMs": 400
         },
         {
-          "image": "edge-top-v1.png",
+          "image": "edge-top-v2.png",
           "durationMs": 300
         }
       ]
@@ -333,6 +333,6 @@
     "displayHeight": 32
   },
   "edgeAnchorX": 0.06,
-  "edgeTopAnchorY": 0.085,
+  "edgeTopAnchorY": 0.12,
   "edgeBottomAnchorY": 0.9
 }

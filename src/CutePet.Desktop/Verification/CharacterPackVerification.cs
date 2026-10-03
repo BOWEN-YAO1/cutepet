@@ -110,7 +110,7 @@ internal static class CharacterPackVerification
         check(edgeRoundTrip.Actions.ContainsKey("edge-idle") && edgeRoundTrip.Actions.ContainsKey("edge-peek")
             && edgeRoundTrip.Manifest.EdgeAnchorX == 0.06, "edge poses and anchor survive actual package export and import");
         check(edgeRoundTrip.Actions.ContainsKey("edge-top-peek") && edgeRoundTrip.Actions.ContainsKey("edge-bottom-peek")
-            && edgeRoundTrip.Manifest.EdgeTopAnchorY == 0.085 && edgeRoundTrip.Manifest.EdgeBottomAnchorY == 0.9,
+            && edgeRoundTrip.Manifest.EdgeTopAnchorY == 0.12 && edgeRoundTrip.Manifest.EdgeBottomAnchorY == 0.9,
             "all vertical actions and contact anchors survive actual package export and import");
         other.Remove(edgeRoundTrip);
         var edgeOnly = animated with { Id = "edge-only", Actions = new() {
