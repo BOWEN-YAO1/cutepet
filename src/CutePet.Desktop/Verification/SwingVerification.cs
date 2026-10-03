@@ -56,6 +56,16 @@ internal static class SwingVerification
         var leaves = garden.Children.OfType<System.Windows.Shapes.Path>().Where(p => p.Fill is not null).ToArray();
         var flowers = garden.Children.OfType<Image>().Where(p => p.Name.StartsWith("GardenFlower", StringComparison.Ordinal)).ToArray();
         var ornaments = garden.Children.OfType<Image>().Except(flowers).ToArray();
+        var trailLayer = garden.Children.OfType<Canvas>().Single();
+        var trails = trailLayer.Children.OfType<Canvas>().ToArray();
+        var trailFlowers = trails.SelectMany(p => p.Children.OfType<Image>()).ToArray();
+        check(trailLayer.Visibility == Visibility.Visible && trailFlowers.Length == 10
+            && trailFlowers.All(p => flowers.Any(f => ReferenceEquals(f.Source, p.Source)))
+            && trails.SelectMany(p => p.Children.Cast<UIElement>()).All(p => !p.IsHitTestVisible),
+            "independent flowering vines reuse cached artwork without intercepting gestures");
+        check(trails.All(p => p.Children.OfType<System.Windows.Shapes.Path>().First().Data is PathGeometry g
+            && g.Figures[0].StartPoint.Y > 0) && TrailsInside(), "independent vines start within the scene and fit its bounds");
+        var trailBreeze = ((TranslateTransform)((TransformGroup)trails[0].RenderTransform).Children[1]).X;
         check(garden.Visibility == Visibility.Visible && leaves.Length == 36 && flowers.Length == 6
             && garden.Children.Cast<UIElement>().All(p => !p.IsHitTestVisible),
             "garden adds floral vines without intercepting gestures");
@@ -104,6 +114,8 @@ internal static class SwingVerification
         check(((RotateTransform)charm.RenderTransform).Angle == charmAngle
             && ((ScaleTransform)((TransformGroup)butterfly.RenderTransform).Children[0]).ScaleX == wingScale,
             "menu freezes hanging charm sway and butterfly flutter on the same clock");
+        check(((TranslateTransform)((TransformGroup)trails[0].RenderTransform).Children[1]).X == trailBreeze,
+            "menu freezes independent flower trails on the existing clock");
         window.EndDetailsMenu();
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(1600));
         check(Math.Abs(window.EdgeSwing.Angle + 3) < 0.00001 && window.SwingRopeLeft.X1 == leftTop
@@ -122,6 +134,8 @@ internal static class SwingVerification
         check(((RotateTransform)charm.RenderTransform).Angle != charmAngle
             && ((ScaleTransform)((TransformGroup)butterfly.RenderTransform).Children[0]).ScaleX != wingScale
             && GardenInside(), "new ornament motion resumes within the scene");
+        check(((TranslateTransform)((TransformGroup)trails[0].RenderTransform).Children[1]).X != trailBreeze && TrailsInside(),
+            "independent vine breeze resumes without leaving the scene");
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(300));
         window.PlayCharacterInteraction(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
         check(Math.Abs(window.EdgeSwing.Angle - 4) < 0.00001,
@@ -144,7 +158,8 @@ internal static class SwingVerification
             "recall clears ornament references and their visual layer");
         check(window.SwingScenery.Visibility == Visibility.Collapsed && scenery.All(p => p.Source is null),
             "recall also removes side scenery and clears artwork references");
-        check(garden.Visibility == Visibility.Collapsed, "recall clears native garden decoration");
+        check(garden.Visibility == Visibility.Collapsed && trailLayer.Visibility == Visibility.Collapsed,
+            "recall clears native garden and independent vine decoration");
         foreach (var point in new[] { new Point(0, 350), new Point(800, 862) })
         {
             window.CompletePetDrag(screen, size, point, 1); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(800));
@@ -191,6 +206,7 @@ internal static class SwingVerification
             "custom side scenery scales with shorter artwork and shared PNGs decode once");
         check(window.SelectedCharacter.Manifest.TopSwing!.Scenery!.Layout == "floating" && garden.Visibility == Visibility.Collapsed,
             "old custom scenery keeps its floating layout without inherited flowers");
+        check(trailLayer.Visibility == Visibility.Collapsed, "old floating layouts do not inherit free-standing vines");
         check(scenery.All(p => ((RotateTransform)((TransformGroup)p.RenderTransform).Children[1]).Angle == 0),
             "old floating layout does not inherit tilted lotus transforms");
         window.WakeCharacterImmediately();
@@ -202,6 +218,9 @@ internal static class SwingVerification
             && window.QuotaHost.Position == quota, "opt-in garden scales with short custom artwork and keeps quota fixed");
         check(Math.Abs(charm.Height - 25 * 100.0 / 148) < 0.00001 && GardenInside(),
             "diverse garden ornaments scale with smaller custom characters");
+        check(trailLayer.Visibility == Visibility.Visible && TrailsInside()
+            && Math.Abs(((ScaleTransform)((TransformGroup)trails[0].RenderTransform).Children[0]).ScaleX - 100.0 / 148) < 0.00001,
+            "independent trails scale with shorter artwork");
         window.WakeCharacterImmediately();
         manifest = manifest with { TopSwing = manifest.TopSwing! with { Scenery = manifest.TopSwing.Scenery! with { DisplayWidth = 60, DisplayHeight = 60 } } };
         File.WriteAllText(Path.Combine(customDirectory, "character.json"), JsonSerializer.Serialize(manifest, CharacterPackLoader.Json));
@@ -238,6 +257,21 @@ internal static class SwingVerification
             bounds.Offset(Canvas.GetLeft(art) + origin.X, Canvas.GetTop(art) + origin.Y);
             return new Rect(0, 0, 230, 178).Contains(bounds);
         });
+        bool TrailsInside() => trails.All(canvas => canvas.Children.Cast<FrameworkElement>().All(art =>
+        {
+            Rect bounds;
+            if (art is System.Windows.Shapes.Path { Stroke: not null } stem)
+            {
+                bounds = stem.Data.Bounds; bounds.Inflate(stem.StrokeThickness / 2, stem.StrokeThickness / 2);
+            }
+            else
+            {
+                var origin = new Point(art.Width * art.RenderTransformOrigin.X, art.Height * art.RenderTransformOrigin.Y);
+                bounds = art.RenderTransform.TransformBounds(new Rect(-origin.X, -origin.Y, art.Width, art.Height));
+                bounds.Offset(Canvas.GetLeft(art) + origin.X, Canvas.GetTop(art) + origin.Y);
+            }
+            return new Rect(0, 0, 230, 178).Contains(canvas.RenderTransform.TransformBounds(bounds));
+        }));
 
         void CheckRopes()
         {

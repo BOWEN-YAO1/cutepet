@@ -18,6 +18,7 @@ internal sealed class SwingGarden
     private readonly Ellipse[] haze = new Ellipse[6];
     private readonly Image[] charms = new Image[2];
     private readonly Image[] butterflies = new Image[2];
+    private readonly SwingFlowerTrails flowerTrails;
 
     internal SwingGarden(Canvas parent)
     {
@@ -44,6 +45,7 @@ internal sealed class SwingGarden
         }
         var blossoms = new[] { Blossom(6, Color.FromRgb(255, 253, 239)), Blossom(5, Color.FromRgb(248, 219, 228)),
             Blossom(8, Color.FromRgb(221, 235, 250)) };
+        flowerTrails = new SwingFlowerTrails(layer, leaf, jade, blossoms);
         for (var i = 0; i < flowers.Length; i++)
         {
             flowers[i] = new Image { Name = "GardenFlower" + i, Source = blossoms[(i + i / 3) % 3], IsHitTestVisible = false, Stretch = Stretch.Uniform,
@@ -70,11 +72,12 @@ internal sealed class SwingGarden
         }
     }
 
-    internal void Hide() => layer.Visibility = Visibility.Collapsed;
+    internal void Hide() { layer.Visibility = Visibility.Collapsed; flowerTrails.Hide(); }
 
     internal void RenderSide(int side, Point start, Point a, Point b, Point end, Line rope, double scale, double phase)
     {
         layer.Visibility = Visibility.Visible;
+        flowerTrails.RenderSide(side, scale, phase);
         var sign = side == 0 ? -1 : 1;
         // Small alternating leaves grow from the same curved stem that reaches the lotus.
         for (var level = 0; level < 9; level++)
