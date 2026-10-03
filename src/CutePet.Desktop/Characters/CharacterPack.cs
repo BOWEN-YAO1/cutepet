@@ -19,6 +19,8 @@ public sealed record CharacterManifest
     public int RestAfterMs { get; init; }
     public int RestDurationMs { get; init; } = 20000;
     public double EdgeAnchorX { get; init; }
+    public double EdgeTopAnchorY { get; init; }
+    public double EdgeBottomAnchorY { get; init; } = 1;
     public CharacterCloud? Cloud { get; init; }
     public Dictionary<string, CharacterAction> Actions { get; init; } = new();
 }

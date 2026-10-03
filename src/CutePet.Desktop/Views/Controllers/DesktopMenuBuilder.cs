@@ -68,7 +68,7 @@ internal static class DesktopMenuBuilder
                 && !window.CharacterRestPose && !window.CloudActive && !(window.Model.IsLow && !window.Model.IsStale);
             autoCloud.IsEnabled = window.SelectedCharacter.CloudImage is not null;
             autoCloud.IsChecked = window.Settings.AutoCloud;
-            edge.IsEnabled = window.SelectedCharacter.Actions.ContainsKey("edge-idle");
+            edge.IsEnabled = EdgeActions.Available(window.SelectedCharacter);
             edge.IsChecked = window.Settings.EdgeInteraction;
             foreach (MenuItem item in characterSize.Items)
                 item.IsChecked = Math.Abs(window.Settings.EffectiveCharacterScale - (double)item.Tag) < 0.01;

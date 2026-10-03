@@ -521,7 +521,7 @@ internal static class DesktopVerification
             Check(manager.Preview.Source == window.SelectedCharacter.Actions["greeting"].Frames[0].Image,
                 "manager greeting preview uses the selected package's real frames");
             manager.CharacterList.SelectedItem = window.Characters.Find("tianyi");
-            Check(manager.PreviewAction.Items.Count == 15, "manager exposes fifteen Tianyi actions including screen-edge responses");
+            Check(manager.PreviewAction.Items.Count == 19, "manager exposes nineteen Tianyi actions including four screen-edge directions");
             manager.PreviewAction.SelectedValue = "happy";
             manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
             Check(manager.Preview.Source == window.Characters.Find("tianyi").Actions["happy"].Frames[0].Image,
@@ -574,6 +574,7 @@ internal static class DesktopVerification
             await SplitWindowVerification.RunAsync(window, directory, Check);
             DesktopRoamingVerification.Run(window, directory, Check);
             ScreenEdgeVerification.Run(window, directory, Check, low => window.Model.Apply(Snapshot(low ? 8 : 72, 48), demo: true));
+            VerticalEdgeVerification.Run(window, directory, Check, low => window.Model.Apply(Snapshot(low ? 8 : 72, 48), demo: true));
 
             if (live)
             {

@@ -95,4 +95,13 @@ internal static class NativePlacement
         if (PresentationSource.FromVisual(content) is HwndSource source)
             SetWindowPos(source.Handle, new IntPtr(topmost ? -1 : -2), 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010);
     }
+    internal static (Rect Area, Size Size, Point Origin) EdgeBounds(Window window)
+    {
+        var bounds = RoamingBounds(window);
+        var handle = new WindowInteropHelper(window).Handle;
+        var screen = handle == IntPtr.Zero ? Forms.Screen.PrimaryScreen! : Forms.Screen.FromHandle(handle);
+        var full = screen.Bounds;
+        return (ScreenEdgeLayout.SafeArea(bounds.Area, new Rect(full.Left, full.Top, full.Width, full.Height),
+            VisualTreeHelper.GetDpi(window).DpiScaleY), bounds.Size, bounds.Origin);
+    }
 }

@@ -17,7 +17,7 @@ internal static class CharacterPackVerification
         Directory.CreateDirectory(area);
         var library = new CharacterLibrary(Path.Combine(area, "installed"));
         var cat = library.Find("cat");
-        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 15 && cat.Actions.Count == 4,
+        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 19 && cat.Actions.Count == 4,
             "both built-in characters load from independent manifests and PNG clips");
         foreach (var builtIn in library.Packs)
         {
@@ -109,6 +109,9 @@ internal static class CharacterPackVerification
         var edgeRoundTrip = other.Import(Zip("edge-roundtrip", tianyi.Manifest with { Id = "edge-roundtrip" }, edgeFiles));
         check(edgeRoundTrip.Actions.ContainsKey("edge-idle") && edgeRoundTrip.Actions.ContainsKey("edge-peek")
             && edgeRoundTrip.Manifest.EdgeAnchorX == 0.06, "edge poses and anchor survive actual package export and import");
+        check(edgeRoundTrip.Actions.ContainsKey("edge-top-peek") && edgeRoundTrip.Actions.ContainsKey("edge-bottom-peek")
+            && edgeRoundTrip.Manifest.EdgeTopAnchorY == 0.085 && edgeRoundTrip.Manifest.EdgeBottomAnchorY == 0.9,
+            "all vertical actions and contact anchors survive actual package export and import");
         other.Remove(edgeRoundTrip);
         var edgeOnly = animated with { Id = "edge-only", Actions = new() {
             ["idle"] = Clip(true, ("idle.png", 100)), ["edge-idle"] = Clip(true, ("idle.png", 100)) } };
@@ -126,6 +129,30 @@ internal static class CharacterPackVerification
             ["edge-peek"] = Clip(true, ("idle.png", 100)) } }, new() { ["idle.png"] = imageBytes })), "peek response cannot loop forever");
         Reject(() => library.Import(Zip("edge-anchor", edgeOnly with { Id = "edge-anchor", EdgeAnchorX = 0.6 },
             new() { ["idle.png"] = imageBytes })), "edge anchor cannot hide more than half the artwork canvas");
+        foreach (var direction in new[] { "top", "bottom" })
+        {
+            var idleAction = "edge-" + direction + "-idle";
+            var peekAction = "edge-" + direction + "-peek";
+            var verticalOnly = animated with { Id = "edge-" + direction + "-only", Actions = new() {
+                ["idle"] = Clip(true, ("idle.png", 100)), [idleAction] = Clip(true, ("idle.png", 100)) } };
+            var verticalPack = library.Import(Zip(verticalOnly.Id, verticalOnly, new() { ["idle.png"] = imageBytes }));
+            player.Configure(verticalPack); player.AttachEdge(idleAction); player.ReactToClick(0);
+            check(player.Action == idleAction && EdgeActions.Supported(verticalPack).Count() == 1,
+                "vertical-only custom pack requires no side artwork or response " + direction);
+            Reject(() => library.Import(Zip("edge-" + direction + "-orphan", verticalOnly with { Id = "edge-" + direction + "-orphan", Actions = new() {
+                ["idle"] = Clip(true, ("idle.png", 100)), [peekAction] = Clip(false, ("idle.png", 100)) } },
+                new() { ["idle.png"] = imageBytes })), "vertical response needs matching base " + direction);
+            Reject(() => library.Import(Zip("edge-" + direction + "-loop", verticalOnly with { Id = "edge-" + direction + "-loop", Actions = new() {
+                ["idle"] = Clip(true, ("idle.png", 100)), [idleAction] = Clip(false, ("idle.png", 100)) } },
+                new() { ["idle.png"] = imageBytes })), "vertical base must loop " + direction);
+            Reject(() => library.Import(Zip("peek-" + direction + "-loop", verticalOnly with { Id = "peek-" + direction + "-loop", Actions = new() {
+                ["idle"] = Clip(true, ("idle.png", 100)), [idleAction] = Clip(true, ("idle.png", 100)), [peekAction] = Clip(true, ("idle.png", 100)) } },
+                new() { ["idle.png"] = imageBytes })), "vertical response cannot loop " + direction);
+        }
+        Reject(() => library.Import(Zip("top-anchor", edgeOnly with { Id = "top-anchor", EdgeTopAnchorY = 0.6 },
+            new() { ["idle.png"] = imageBytes })), "top contact anchor is bounded");
+        Reject(() => library.Import(Zip("bottom-anchor", edgeOnly with { Id = "bottom-anchor", EdgeBottomAnchorY = 0.4 },
+            new() { ["idle.png"] = imageBytes })), "bottom contact anchor is bounded");
         check(tianyi.CloudImage is { IsFrozen: true } && cat.CloudImage is null,
             "cloud is a cached optional package layer independent of the character canvas");
         using (var cloudArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
@@ -259,9 +286,9 @@ internal static class CharacterPackVerification
             System.Windows.Media.PixelFormats.Bgra32, null, new byte[2048 * 2048 * 4], 2048 * 4)));
         using var largeBytes = new MemoryStream();
         largeEncoder.Save(largeBytes);
-        var largeFiles = Enumerable.Range(0, 9).ToDictionary(i => "large-" + i + ".png", _ => largeBytes.ToArray());
+        var largeFiles = Enumerable.Range(0, 11).ToDictionary(i => "large-" + i + ".png", _ => largeBytes.ToArray());
         Reject(() => library.Import(Zip("total-pixels", animated with { Id = "total-pixels", Actions = new() {
-            ["idle"] = Clip(true, Enumerable.Range(0, 9).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
+            ["idle"] = Clip(true, Enumerable.Range(0, 11).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
             "total decoded pixels remain bounded with the expanded rest package limit");
 
         Reject(() => library.Import(Zip("traversal", animated with { Id = "traversal" }, new() { ["../outside.png"] = imageBytes })),
@@ -309,8 +336,8 @@ internal static class CharacterPackVerification
         Reject(() => library.Import(Zip("cloud-orphan", cloudManifest with { Id = "cloud-orphan", Cloud = null, Actions = new() {
             ["idle"] = Clip(true, ("idle.png", 100)), ["summon-cloud"] = Clip(false, ("idle.png", 100)) } },
             new() { ["idle.png"] = imageBytes })), "cloud summon actions require an optional cloud layer");
-        Reject(() => library.Import(Zip("cloud-pixels", cloudManifest with { Id = "cloud-pixels", Cloud = new() { Image = "large-8.png" },
-            Actions = new() { ["idle"] = Clip(true, Enumerable.Range(0, 8).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
+        Reject(() => library.Import(Zip("cloud-pixels", cloudManifest with { Id = "cloud-pixels", Cloud = new() { Image = "large-10.png" },
+            Actions = new() { ["idle"] = Clip(true, Enumerable.Range(0, 10).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
             "cloud pixels count toward the same total decoded memory limit");
         Reject(() => library.Import(Zip("canvas", animated with { Id = "canvas" }, new() {
             ["idle.png"] = imageBytes, ["second.png"] = canvasBytes.ToArray() })), "inconsistent frame canvases are rejected");

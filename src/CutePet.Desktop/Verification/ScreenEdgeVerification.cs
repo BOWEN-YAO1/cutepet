@@ -28,7 +28,8 @@ internal static class ScreenEdgeVerification
         var screen = new Rect(0, 0, 1920, 1040);
         var pet = new Size(230, 178);
         check(ScreenEdgeLayout.Plan(screen, pet, new Point(-60, 1500), 1) is { Position.Y: 862 }, "partly offscreen release snaps safely above bottom taskbar");
-        check(ScreenEdgeLayout.Plan(screen, pet, new Point(800, 0), 1) is null, "top and bottom alone do not activate side-edge poses");
+        check(ScreenEdgeLayout.Plan(screen, pet, new Point(800, 0), 1, new[] { ScreenEdge.Left, ScreenEdge.Right }) is null,
+            "legacy side-only packs do not attach to unsupported top edge");
         check(ScreenEdgeLayout.Plan(new Rect(0, 0, 200, 150), pet, new Point(), 1) is null, "oversized pets reject attachment");
         check(ScreenEdgeLayout.Plan(screen, pet, new Point(double.NaN, 0), 1) is null, "nonfinite release coordinates are rejected");
 

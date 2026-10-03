@@ -247,9 +247,9 @@ internal sealed class CharacterPresenter
     }
     internal void CancelCloudSpell()
     { if (characterAnimation.Action == "summon-cloud") characterAnimation.ResetTransient(); }
-    internal void AttachEdge()
+    internal void AttachEdge(string baseAction)
     {
-        characterAnimation.AttachEdge();
+        characterAnimation.AttachEdge(baseAction);
         ResetAmbient();
         window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
         RefreshCharacterFrame();

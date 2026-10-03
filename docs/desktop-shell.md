@@ -209,3 +209,7 @@ dotnet publish src/CutePet.Desktop -c Release --self-contained false -o artifact
 ## 0.16.0 屏幕边缘互动
 
 天依支持拖至左右屏幕边缘贴边、点击 / 悬停探头，额度保持独立固定。新增角色包动作 edge-idle / edge-peek、可选 edgeAnchorX 和持久化开关 EdgeInteraction。Layout/ScreenEdgeLayout.cs 计算吸附位置，Views/Controllers/EdgeMotionController.cs 控制贴边与轻微探出，CharacterAnimation / CharacterPresenter 接入角色包动作与生命周期。旧角色包兼容。范围、素材、内存限额、退出规则和验收见 [屏幕边缘互动](screen-edge.md)。
+
+## 0.17.0 上下边缘与任务栏
+
+新增天依上沿抓边、下沿托腮及各自微笑图，人物支持四向贴边，额度保持固定。任务栏正常显示时贴在工作区底边；未预留任务栏高度时额外留 12 个逻辑像素底部空间。工作区 / DPI 改变后保持方向重新对齐，区域过小时安全退出。新增 edge-top-idle / edge-top-peek / edge-bottom-idle / edge-bottom-peek 与两个纵向接触线字段，旧角色包兼容。594 项窗口 / 功能检查、14 项额度协议测试通过；真实鼠标、多屏和任务栏显隐仍需试用。完整行为、限制、素材和像素上限见 [屏幕边缘互动](screen-edge.md)。

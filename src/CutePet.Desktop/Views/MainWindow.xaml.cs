@@ -42,7 +42,8 @@ public partial class MainWindow : Window
     internal bool ScreenEdgeActive => edgeMotion.Active;
     internal EdgeAttachment? ScreenEdgeAttachment => edgeMotion.Attachment;
     internal double ScreenEdgePeekOffset => edgeMotion.PeekOffset;
-    internal void StartEdgePose() => characterPresenter.AttachEdge();
+    internal void StartEdgePose(string baseAction) => characterPresenter.AttachEdge(baseAction);
+    internal void RefreshScreenEdgeBounds(Rect area, Size size) => edgeMotion.Reanchor(area, size);
     internal void StartEdgePeek() => characterPresenter.PeekEdge();
     internal void PeekScreenEdge() => edgeMotion.Peek();
     internal void CancelScreenEdge() => edgeMotion.Cancel();
@@ -152,8 +153,8 @@ public partial class MainWindow : Window
         };
         DpiChanged += (_, _) => Dispatcher.BeginInvoke(() =>
         {
-            var bounds = NativePlacement.RoamingBounds(this);
-            if (ScreenEdgeAttachment is { } edge && (edge.Area != bounds.Area || edge.PetSize != bounds.Size)) WakeCharacterImmediately();
+            var bounds = NativePlacement.EdgeBounds(this);
+            if (ScreenEdgeActive && !dragging.Dragged) RefreshScreenEdgeBounds(bounds.Area, bounds.Size);
             CancelCloud();
             if (loaded)
             {

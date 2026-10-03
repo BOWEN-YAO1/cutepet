@@ -27,7 +27,7 @@ internal sealed class PetDragController
         finally
         {
             mouseStart = null;
-            var bounds = NativePlacement.RoamingBounds(window);
+            var bounds = NativePlacement.EdgeBounds(window);
             window.CompletePetDrag(bounds.Area, bounds.Size, bounds.Origin,
                 System.Windows.Media.VisualTreeHelper.GetDpi(window).DpiScaleX);
             dragged = false;

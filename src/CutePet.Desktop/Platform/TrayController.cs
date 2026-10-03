@@ -65,7 +65,7 @@ internal sealed class TrayController : IDisposable
                 && !window.CharacterRestPose && !window.CloudActive && !(window.Model.IsLow && !window.Model.IsStale);
             autoCloud.Enabled = window.SelectedCharacter.CloudImage is not null;
             autoCloud.Checked = window.Settings.AutoCloud;
-            edge.Enabled = window.SelectedCharacter.Actions.ContainsKey("edge-idle");
+            edge.Enabled = EdgeActions.Available(window.SelectedCharacter);
             edge.Checked = window.Settings.EdgeInteraction;
             foreach (Forms.ToolStripMenuItem item in details.DropDownItems)
                 item.Checked = (DetailsMode)item.Tag! == window.Settings.Details;
