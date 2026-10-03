@@ -15,11 +15,14 @@ public partial class ControlCenterWindow : Window
     internal string SelectedPage { get; private set; } = "overview";
     internal bool IsCharactersPage => IsVisible && SelectedPage == "characters";
     internal bool Released { get; private set; }
+    private string? themeColor, fontColor;
     internal ControlCenterWindow(MainWindow host, bool verification)
     {
         this.host = host;
         Model = new CenterViewModel(host, () => host.SelectCodexPath(this));
         InitializeComponent(); Icon = AppIcon.WindowIcon; DataContext = Model;
+        ApplyColors();
+        Model.PropertyChanged += OnModelChanged;
         if (verification) { Opacity = 0; ShowInTaskbar = false; WindowStartupLocation = WindowStartupLocation.Manual; Left = Top = -10000; }
         statusClock.Tick += (_, _) => Model.Refresh();
         IsVisibleChanged += (_, _) => { if (IsVisible && !verification) statusClock.Start(); else statusClock.Stop(); };
@@ -27,11 +30,18 @@ public partial class ControlCenterWindow : Window
         if (!verification) Loaded += (_, _) => FitWorkArea();
         Closed += (_, _) =>
         {
-            statusClock.Stop(); Model.Dispose();
+            statusClock.Stop(); Model.PropertyChanged -= OnModelChanged; Model.Dispose();
             foreach (var page in pages.Values) if (page is IDisposable disposable) disposable.Dispose();
             Released = true;
         };
         Navigate("overview");
+    }
+    private void OnModelChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e) => ApplyColors();
+    private void ApplyColors()
+    {
+        if (themeColor == host.Settings.ThemeColor && fontColor == host.Settings.FontColor) return;
+        themeColor = host.Settings.ThemeColor; fontColor = host.Settings.FontColor;
+        CenterColors.Apply(Resources, host.Settings);
     }
     internal void Navigate(string page)
     {

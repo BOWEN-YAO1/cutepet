@@ -3,7 +3,7 @@
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <StackPanel Margin="0,0,8,0">
       <TextBlock Text="{Binding ActivityText}" Style="{StaticResource CenterNote}" Margin="0,0,0,24"/>
-      <Border Background="#FDFEF9" CornerRadius="14" Padding="24">
+      <Border Background="{DynamicResource CenterSurface}" CornerRadius="14" Padding="24">
         <StackPanel>
           <DockPanel Margin="0,0,0,20">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0"><TextBlock Text="自由乘云活动" VerticalAlignment="Center" Margin="0,0,8,0"/>
@@ -11,14 +11,14 @@
             <TextBlock Text="乘云游动" Style="{StaticResource CenterSection}" ToolTip="{Binding CloudHint}"/>
           </DockPanel>
           <WrapPanel><Button x:Name="RoamButton" Content="乘云去逛逛" Command="{Binding RoamCommand}" Style="{StaticResource CenterPrimary}" ToolTip="{Binding CloudHint}" ToolTipService.ShowOnDisabled="True"/><Button Content="召回到额度旁" Command="{Binding RecallCommand}"/></WrapPanel>
-          <Border BorderBrush="#E3E9DF" BorderThickness="0,1,0,0" Margin="0,24,0,22"/>
+          <Border BorderBrush="{DynamicResource CenterLine}" BorderThickness="0,1,0,0" Margin="0,24,0,22"/>
           <DockPanel Margin="0,0,0,20">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0"><TextBlock Text="自动坐下休息" VerticalAlignment="Center" Margin="0,0,8,0"/>
               <CheckBox x:Name="AutoRestSwitch" IsChecked="{Binding AutoRest, Mode=TwoWay}" IsEnabled="{Binding CanAutoRest}" Style="{StaticResource CenterToggle}" AutomationProperties.Name="自动坐下休息"/></StackPanel>
             <TextBlock Text="王座休息" Style="{StaticResource CenterSection}" ToolTip="{Binding RestHint}"/>
           </DockPanel>
           <Button x:Name="RestButton" Content="{Binding RestAction}" Command="{Binding RestCommand}" HorizontalAlignment="Left" ToolTip="{Binding RestHint}" ToolTipService.ShowOnDisabled="True"/>
-          <Border BorderBrush="#E3E9DF" BorderThickness="0,1,0,0" Margin="0,24,0,22"/>
+          <Border BorderBrush="{DynamicResource CenterLine}" BorderThickness="0,1,0,0" Margin="0,24,0,22"/>
           <DockPanel>
             <CheckBox x:Name="EdgeSwitch" DockPanel.Dock="Right" IsChecked="{Binding EdgeInteraction, Mode=TwoWay}" IsEnabled="{Binding CanEdge}" Style="{StaticResource CenterToggle}" AutomationProperties.Name="屏幕边缘互动" Margin="20,0,0,0"/>
             <TextBlock Text="屏幕边缘互动" Style="{StaticResource CenterSection}" ToolTip="拖到屏幕边缘后松开。上沿荡秋千，下沿托腮，左右探头。"/>

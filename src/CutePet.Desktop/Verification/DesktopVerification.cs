@@ -54,6 +54,17 @@ internal static class DesktopVerification
             Check(new Preferences(double.MaxValue, double.NaN, double.PositiveInfinity).Validated() == new Preferences(),
                 "invalid coordinates and scale recover");
             store.Save(new Preferences());
+            var colors = new Preferences(ThemeColor: "#12aB90", FontColor: "#234567").Validated();
+            Check(colors.ThemeColor == "#12AB90" && colors.FontColor == "#234567" && store.Save(colors)
+                && store.Load() == colors, "custom RGB colors normalize and round trip through preferences");
+            foreach (var invalidColor in new[] { "pink", "#123", "#00000000", "#GG0000", "", null })
+                Check(new Preferences(ThemeColor: invalidColor!, FontColor: invalidColor!).Validated().ThemeColor == CenterColors.DefaultTheme
+                    && new Preferences(ThemeColor: invalidColor!, FontColor: invalidColor!).Validated().FontColor == CenterColors.DefaultFont,
+                    "invalid stored color falls back to safe defaults: " + (invalidColor ?? "null"));
+            File.WriteAllText(Path.Combine(settingsDirectory, "settings.json"), "{\"Scale\":1.2,\"ThemeColor\":null,\"FontColor\":\"invalid\"}");
+            Check(store.Load().ThemeColor == CenterColors.DefaultTheme && store.Load().FontColor == CenterColors.DefaultFont
+                && store.Load().Scale == 1.2, "damaged color fields recover while legacy settings remain intact");
+            store.Save(new Preferences());
             window = new MainWindow(store, verification: true);
             Check(window.Settings.AutoCloud && store.Load().AutoCloud, "legacy settings enable the cloud option");
             window.ToggleAutoCloud(); // Keep existing animation regression clocks isolated from movement.

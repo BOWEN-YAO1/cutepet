@@ -1,12 +1,9 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <SolidColorBrush x:Key="CenterInk" Color="#293C32" />
-  <SolidColorBrush x:Key="CenterMuted" Color="#667A6C" />
-  <SolidColorBrush x:Key="CenterAccent" Color="#527F66" />
   <Style x:Key="CenterHeading" TargetType="TextBlock"><Setter Property="FontSize" Value="27"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Margin" Value="0,0,0,8"/></Style>
-  <Style x:Key="CenterNote" TargetType="TextBlock"><Setter Property="Foreground" Value="{StaticResource CenterMuted}"/><Setter Property="FontSize" Value="12"/><Setter Property="TextWrapping" Value="Wrap"/><Setter Property="LineHeight" Value="20"/></Style>
+  <Style x:Key="CenterNote" TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource CenterMuted}"/><Setter Property="FontSize" Value="12"/><Setter Property="TextWrapping" Value="Wrap"/><Setter Property="LineHeight" Value="20"/></Style>
   <Style x:Key="CenterSection" TargetType="TextBlock"><Setter Property="FontSize" Value="17"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Margin" Value="0,0,0,12"/></Style>
   <Style TargetType="Button">
-    <Setter Property="Background" Value="#E7EEE6"/><Setter Property="Foreground" Value="{StaticResource CenterInk}"/>
+    <Setter Property="Background" Value="{DynamicResource CenterSoft}"/><Setter Property="Foreground" Value="{DynamicResource CenterInk}"/>
     <Setter Property="Padding" Value="16,10"/><Setter Property="Cursor" Value="Hand"/><Setter Property="FontSize" Value="13"/>
     <Setter Property="Margin" Value="0,0,8,0"/><Setter Property="MinHeight" Value="36"/>
     <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
@@ -16,24 +13,24 @@
       <ControlTemplate.Triggers>
         <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Opacity" Value="0.82"/></Trigger>
         <Trigger Property="IsPressed" Value="True"><Setter TargetName="Surface" Property="Opacity" Value="0.65"/></Trigger>
-        <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="#355A45"/></Trigger>
+        <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource CenterFocus}"/></Trigger>
         <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Surface" Property="Opacity" Value="0.38"/></Trigger>
       </ControlTemplate.Triggers>
     </ControlTemplate></Setter.Value></Setter>
   </Style>
-  <Style x:Key="CenterPrimary" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Background" Value="{StaticResource CenterAccent}"/><Setter Property="Foreground" Value="#FFFFFF"/></Style>
-  <Style x:Key="CenterQuiet" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="{StaticResource CenterMuted}"/></Style>
+  <Style x:Key="CenterPrimary" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Background" Value="{DynamicResource CenterPrimaryFill}"/><Setter Property="Foreground" Value="{DynamicResource CenterInk}"/></Style>
+  <Style x:Key="CenterQuiet" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="{DynamicResource CenterMuted}"/></Style>
   <Style x:Key="CenterNav" TargetType="RadioButton">
     <Setter Property="Padding" Value="20,11"/><Setter Property="Cursor" Value="Hand"/><Setter Property="FontSize" Value="14"/>
-    <Setter Property="Foreground" Value="{StaticResource CenterMuted}"/>
+    <Setter Property="Foreground" Value="{DynamicResource CenterMuted}"/>
     <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="RadioButton">
       <Border x:Name="NavSurface" Background="Transparent" BorderThickness="0,0,0,2" BorderBrush="Transparent" Padding="{TemplateBinding Padding}">
         <ContentPresenter RecognizesAccessKey="True"/>
       </Border>
       <ControlTemplate.Triggers>
-        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="NavSurface" Property="Background" Value="#E8EEE6"/></Trigger>
-        <Trigger Property="IsChecked" Value="True"><Setter TargetName="NavSurface" Property="BorderBrush" Value="{StaticResource CenterAccent}"/><Setter Property="Foreground" Value="{StaticResource CenterInk}"/><Setter Property="FontWeight" Value="SemiBold"/></Trigger>
-        <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="NavSurface" Property="Background" Value="#DFE8DC"/></Trigger>
+        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="NavSurface" Property="Background" Value="{DynamicResource CenterSoft}"/></Trigger>
+        <Trigger Property="IsChecked" Value="True"><Setter TargetName="NavSurface" Property="BorderBrush" Value="{DynamicResource CenterAccent}"/><Setter Property="Foreground" Value="{DynamicResource CenterInk}"/><Setter Property="FontWeight" Value="SemiBold"/></Trigger>
+        <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="NavSurface" Property="Background" Value="{DynamicResource CenterSoft}"/></Trigger>
       </ControlTemplate.Triggers>
     </ControlTemplate></Setter.Value></Setter>
   </Style>
@@ -42,17 +39,20 @@
     <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="CheckBox">
       <Border x:Name="Focus" BorderThickness="2" BorderBrush="Transparent" CornerRadius="16" Padding="2">
         <Grid Width="42" Height="24">
-          <Border x:Name="Track" Background="#C9D3C8" CornerRadius="12"/>
+          <Border x:Name="Track" Background="{DynamicResource CenterTrack}" CornerRadius="12"/>
           <Ellipse x:Name="Knob" Width="18" Height="18" Fill="White" HorizontalAlignment="Left" Margin="3,0,0,0"/>
         </Grid>
       </Border>
       <ControlTemplate.Triggers>
-        <Trigger Property="IsChecked" Value="True"><Setter TargetName="Track" Property="Background" Value="{StaticResource CenterAccent}"/><Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right"/><Setter TargetName="Knob" Property="Margin" Value="0,0,3,0"/></Trigger>
+        <Trigger Property="IsChecked" Value="True"><Setter TargetName="Track" Property="Background" Value="{DynamicResource CenterAccent}"/><Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right"/><Setter TargetName="Knob" Property="Margin" Value="0,0,3,0"/></Trigger>
         <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Track" Property="Opacity" Value="0.8"/></Trigger>
-        <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Focus" Property="BorderBrush" Value="#355A45"/></Trigger>
+        <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Focus" Property="BorderBrush" Value="{DynamicResource CenterFocus}"/></Trigger>
         <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Focus" Property="Opacity" Value="0.4"/></Trigger>
       </ControlTemplate.Triggers>
     </ControlTemplate></Setter.Value></Setter>
   </Style>
-  <Style TargetType="ComboBox"><Setter Property="Padding" Value="10,7"/><Setter Property="MinHeight" Value="36"/><Setter Property="FontSize" Value="13"/><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
+  <Style TargetType="ComboBox"><Setter Property="Foreground" Value="{DynamicResource CenterInk}"/><Setter Property="Background" Value="{DynamicResource CenterInput}"/><Setter Property="Padding" Value="10,7"/><Setter Property="MinHeight" Value="36"/><Setter Property="FontSize" Value="13"/><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
+  <Style TargetType="TextBox"><Setter Property="Foreground" Value="{DynamicResource CenterInk}"/><Setter Property="CaretBrush" Value="{DynamicResource CenterInk}"/><Setter Property="Background" Value="{DynamicResource CenterInput}"/><Setter Property="BorderBrush" Value="{DynamicResource CenterLine}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="Padding" Value="8,7"/><Setter Property="MinHeight" Value="36"/><Setter Property="VerticalContentAlignment" Value="Center"/><Setter Property="FontFamily" Value="Consolas"/></Style>
+  <Style TargetType="Expander"><Setter Property="Foreground" Value="{DynamicResource CenterInk}"/></Style>
+  <Style TargetType="ProgressBar"><Setter Property="Height" Value="8"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ProgressBar"><Grid x:Name="PART_Track" Background="{DynamicResource CenterTrack}" ClipToBounds="True"><Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" HorizontalAlignment="Left" CornerRadius="4"/></Grid></ControlTemplate></Setter.Value></Setter></Style>
 </ResourceDictionary>

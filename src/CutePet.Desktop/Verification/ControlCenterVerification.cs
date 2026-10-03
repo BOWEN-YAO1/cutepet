@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using System.Windows.Media;
 using System.Windows.Threading;
 using CutePet.Core;
 
@@ -42,6 +43,54 @@ internal static class ControlCenterVerification
 
             center.Navigate("settings"); await Settle();
             var settings = (SettingsPage)center.PageHost.Content;
+            check(host.Settings.ThemeColor == CenterColors.DefaultTheme && host.Settings.FontColor == CenterColors.DefaultFont
+                && center.Foreground == center.FindResource("CenterInk"), "existing settings open with the default pink palette and dark rose text");
+            check(settings.ResetColorsButton.Background is SolidColorBrush defaultFill && defaultFill.Color == Color.FromRgb(232,161,182),
+                "primary button fill resolves to the pink brush rather than a similarly named style");
+            settings.ThemeEditor.RedInput.Text = "48"; settings.ThemeEditor.GreenInput.Text = "124"; settings.ThemeEditor.BlueInput.Text = "165";
+            settings.FontEditor.RedInput.Text = "28"; settings.FontEditor.GreenInput.Text = "43"; settings.FontEditor.BlueInput.Text = "56";
+            await Settle();
+            check(host.Settings.ThemeColor == "#307CA5" && host.Settings.FontColor == "#1C2B38"
+                && ((SolidColorBrush)center.FindResource("CenterAccent")).Color == Color.FromRgb(48,124,165)
+                && ((SolidColorBrush)settings.ResetColorsButton.Background).Color == Color.FromRgb(48,124,165)
+                && ((SolidColorBrush)settings.FontEditor.RedInput.Foreground).Color == Color.FromRgb(28,43,56),
+                "RGB text inputs apply exact theme and font colors to the real WPF interface immediately");
+            var storedColors = new PreferencesStore(Path.Combine(directory, "isolated-settings")).Load();
+            check(storedColors.ThemeColor == "#307CA5" && storedColors.FontColor == "#1C2B38",
+                "valid RGB changes are persisted without altering other preferences");
+            center.Navigate("overview"); await Settle();
+            check(((SolidColorBrush)((Grid)center.Content).Background).Color != Color.FromRgb(243,245,240)
+                && ((SolidColorBrush)overview.QuotaStatus.Foreground).Color == ((SolidColorBrush)center.FindResource("CenterMuted")).Color,
+                "previously created pages pick up new backgrounds and secondary text colors");
+            Render(center, directory, "app-custom-colors");
+            center.Navigate("settings"); await Settle();
+            foreach (var invalid in new[] {"256", "abc", "-1", ""})
+            {
+                settings.ThemeEditor.RedInput.Text = invalid; center.Model.Refresh(); await Settle();
+                check(center.Model.ThemeColor.HasError && host.Settings.ThemeColor == "#307CA5"
+                    && settings.ThemeEditor.RedInput.Text == invalid,
+                    "invalid RGB draft " + (invalid == "" ? "empty" : invalid) + " preserves the last color without being erased by refresh");
+            }
+            settings.ThemeEditor.RedInput.Text = "0"; settings.FontEditor.BlueInput.Text = "255"; await Settle();
+            check(host.Settings.ThemeColor == "#007CA5" && host.Settings.FontColor == "#1C2BFF",
+                "RGB channels accept both endpoints without changing the other color group");
+            settings.FontEditor.GreenInput.Text = "";
+            settings.ResetColorsButton.Command.Execute(null); await Settle();
+            check(host.Settings.ThemeColor == CenterColors.DefaultTheme && host.Settings.FontColor == CenterColors.DefaultFont
+                && !center.Model.ThemeColor.HasError && !center.Model.FontColor.HasError,
+                "restore-default button resets both live colors and unfinished drafts");
+            settings.ThemeEditor.BlueInput.Text = "";
+            settings.ResetColorsButton.Command.Execute(null); await Settle();
+            check(!center.Model.ThemeColor.HasError && settings.ThemeEditor.BlueInput.Text == "182",
+                "restore-default also clears invalid drafts when saved colors are already default");
+            host.SetInterfaceColors("#557799", "#223344"); await Settle();
+            check(settings.ThemeEditor.RedInput.Text == "85" && settings.FontEditor.BlueInput.Text == "68",
+                "external preference updates synchronize both RGB editors");
+            host.SetInterfaceColors("#FFFFFF", "#FFFFFF"); await Settle();
+            check(((SolidColorBrush)settings.ResetColorsButton.Background).Color != Colors.White
+                && ((SolidColorBrush)settings.FontEditor.RedInput.Background).Color != Colors.White,
+                "white font retains contrasting RGB input fields and a usable restore button");
+            center.Model.ResetColorsCommand.Execute(null); await Settle();
             settings.LockSwitch.IsChecked = true; await Settle();
             check(host.Settings.PositionLocked && !center.Model.RoamCommand.CanExecute(null),
                 "setting switch updates the real position lock and disables cloud commands");
@@ -124,12 +173,17 @@ internal static class ControlCenterVerification
             check(((FrameworkElement)center.Content).ActualWidth > 700 && !trace.Errors.Any(),
                 "all control-center pages render at the minimum size without binding errors");
             var visible = host.IsVisible;
+            host.SetInterfaceColors("#307CA5", "#1C2B38");
             center.Close(); await Settle();
             check(host.ControlCenter is null && center.Released && host.IsVisible == visible,
                 "closing the application interface releases timers and subscriptions while desktop pet keeps running");
             host.OpenControlCenter("activity"); await Settle();
             check(host.ControlCenter != center && host.ControlCenter!.SelectedPage == "activity",
                 "closed interface can be reopened directly on a requested feature page");
+            check(((SolidColorBrush)host.ControlCenter!.FindResource("CenterAccent")).Color == Color.FromRgb(48,124,165)
+                && host.ControlCenter.Model.FontColor.Blue == "56",
+                "reopened interface reconstructs its saved custom palette and RGB editor values");
+            host.ControlCenter.Model.ResetColorsCommand.Execute(null);
             host.HidePet(); host.OpenControlCenter(); await Settle();
             check(!host.IsVisible && host.ControlCenter!.IsVisible,
                 "opening the main interface works while the independent pet remains hidden");

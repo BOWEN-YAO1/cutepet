@@ -62,9 +62,20 @@ internal sealed class CenterViewModel : INotifyPropertyChanged, IDisposable
     public ICommand ResetCommand { get; }
     public ICommand DockCommand { get; }
     public ICommand ExitCommand { get; }
+    public ICommand ResetColorsCommand { get; }
+    public RgbColorEditor ThemeColor { get; }
+    public RgbColorEditor FontColor { get; }
     public CenterViewModel(MainWindow host, Action choosePath)
     {
         this.host = host;
+        ThemeColor = new(host.Settings.ThemeColor, color => host.SetInterfaceColors(color, host.Settings.FontColor));
+        FontColor = new(host.Settings.FontColor, color => host.SetInterfaceColors(host.Settings.ThemeColor, color));
+        ResetColorsCommand = Command(() =>
+        {
+            host.SetInterfaceColors(CenterColors.DefaultTheme, CenterColors.DefaultFont);
+            ThemeColor.Sync(host.Settings.ThemeColor, force: true);
+            FontColor.Sync(host.Settings.FontColor, force: true);
+        });
         RefreshCommand = Command(host.RefreshQuota, () => host.Model.CanRefresh);
         VisibilityCommand = Command(() => { if (host.IsVisible) host.HidePet(); else host.RestorePet(); });
         RecallCommand = Command(() => { host.RestorePet(); host.RecallPet(); });
@@ -82,6 +93,8 @@ internal sealed class CenterViewModel : INotifyPropertyChanged, IDisposable
     private void ModelChanged(object? sender, PropertyChangedEventArgs e) => Refresh();
     internal void Refresh()
     {
+        ThemeColor.Sync(host.Settings.ThemeColor);
+        FontColor.Sync(host.Settings.FontColor);
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
         CommandsChanged?.Invoke();
     }

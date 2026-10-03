@@ -14,7 +14,7 @@ public sealed record Preferences(double? Left = null, double? Top = null, double
     double? CharacterScale = null, double? QuotaScale = null,
     bool PositionLocked = false, bool StartWithWindows = false, string? CharacterPackId = null, bool AutoRest = true,
     bool AutoCloud = true, double? QuotaLeft = null, double? QuotaTop = null, bool IndependentWindows = false,
-    bool EdgeInteraction = true)
+    bool EdgeInteraction = true, string ThemeColor = CenterColors.DefaultTheme, string FontColor = CenterColors.DefaultFont)
 {
     // Older settings used Scale for the entire widget. Missing independent values inherit that size.
     [JsonIgnore] public double EffectiveCharacterScale => CharacterScale ?? Scale;
@@ -33,6 +33,8 @@ public sealed record Preferences(double? Left = null, double? Top = null, double
         QuotaPosition = Enum.IsDefined(QuotaPosition) ? QuotaPosition : QuotaDock.Left,
         Character = Enum.IsDefined(Character) ? Character : PetCharacter.Cat,
         CharacterPackId = CharacterPackLoader.ValidId(CharacterPackId) ? CharacterPackId : null,
+        ThemeColor = CenterColors.Validate(ThemeColor, CenterColors.DefaultTheme),
+        FontColor = CenterColors.Validate(FontColor, CenterColors.DefaultFont),
         CharacterScale = CharacterScale is double character ? ValidateIndependentScale(character) : null,
         QuotaScale = QuotaScale is double quota ? ValidateIndependentScale(quota) : null
     };

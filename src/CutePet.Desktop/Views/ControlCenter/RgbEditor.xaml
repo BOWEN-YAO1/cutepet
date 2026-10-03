@@ -1,0 +1,16 @@
+<UserControl x:Class="CutePet.Desktop.RgbEditor" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel>
+    <WrapPanel>
+      <Border Width="40" Height="36" CornerRadius="6" Background="{Binding Preview}" BorderBrush="{DynamicResource CenterLine}" BorderThickness="1" Margin="0,0,16,0" AutomationProperties.Name="颜色预览"/>
+      <TextBlock Text="R" VerticalAlignment="Center" Margin="0,0,7,0"/>
+      <TextBox x:Name="RedInput" Text="{Binding Red, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Margin="0,0,14,0" MaxLength="3" AutomationProperties.Name="红色 RGB 0 至 255"/>
+      <TextBlock Text="G" VerticalAlignment="Center" Margin="0,0,7,0"/>
+      <TextBox x:Name="GreenInput" Text="{Binding Green, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Margin="0,0,14,0" MaxLength="3" AutomationProperties.Name="绿色 RGB 0 至 255"/>
+      <TextBlock Text="B" VerticalAlignment="Center" Margin="0,0,7,0"/>
+      <TextBox x:Name="BlueInput" Text="{Binding Blue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" MaxLength="3" AutomationProperties.Name="蓝色 RGB 0 至 255"/>
+    </WrapPanel>
+    <TextBlock Text="请输入 0～255 的整数" Foreground="{DynamicResource CenterInk}" Margin="0,7,0,0">
+      <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding HasError}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+    </TextBlock>
+  </StackPanel>
+</UserControl>

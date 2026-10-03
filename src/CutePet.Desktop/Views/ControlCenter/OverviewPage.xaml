@@ -6,7 +6,7 @@
       <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
       <Grid Grid.Row="1">
         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="280"/></Grid.ColumnDefinitions>
-        <Border Background="#FDFEF9" CornerRadius="14" Padding="20" Margin="0,0,20,0">
+        <Border Background="{DynamicResource CenterSurface}" CornerRadius="14" Padding="20" Margin="0,0,20,0">
           <StackPanel>
             <DockPanel Margin="0,0,0,12"><Button DockPanel.Dock="Right" x:Name="RefreshButton" Content="刷新额度" Command="{Binding RefreshCommand}" Margin="0" Padding="12,6" MinHeight="32"/>
               <TextBlock Text="Codex 剩余额度" Style="{StaticResource CenterSection}" VerticalAlignment="Center" Margin="0"/></DockPanel>
@@ -16,19 +16,19 @@
               <ItemsControl.ItemTemplate><DataTemplate>
                 <Grid Margin="0,4,0,12">
                   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="8"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-                  <DockPanel Margin="0,0,0,8"><TextBlock DockPanel.Dock="Right" Text="{Binding RemainingText}" FontFamily="Consolas" FontSize="30" FontWeight="SemiBold" Foreground="{Binding Accent}"/>
+                  <DockPanel Margin="0,0,0,8"><TextBlock DockPanel.Dock="Right" Text="{Binding RemainingText}" FontFamily="Consolas" FontSize="30" FontWeight="SemiBold" Foreground="{DynamicResource CenterInk}"/>
                     <TextBlock Text="{Binding Label}" TextWrapping="Wrap" FontSize="14" VerticalAlignment="Center" Margin="0,0,14,0"/></DockPanel>
-                  <ProgressBar Grid.Row="1" Value="{Binding Progress}" Maximum="100" Foreground="{Binding Accent}" Opacity="{Binding Opacity}"/>
+                  <ProgressBar Grid.Row="1" Value="{Binding Progress}" Maximum="100" Foreground="{DynamicResource CenterAccent}" Opacity="{Binding Opacity}"/>
                   <TextBlock Grid.Row="2" Text="{Binding ResetText}" Style="{StaticResource CenterNote}" Margin="0,7,0,0"/>
                 </Grid>
               </DataTemplate></ItemsControl.ItemTemplate>
             </ItemsControl>
-            <Border BorderBrush="#E3E9DF" BorderThickness="0,1,0,0" Padding="0,13,0,0">
+            <Border BorderBrush="{DynamicResource CenterLine}" BorderThickness="0,1,0,0" Padding="0,13,0,0">
               <TextBlock Text="{Binding Quota.FooterText}" Style="{StaticResource CenterNote}"/>
             </Border>
           </StackPanel>
         </Border>
-        <Border Grid.Column="1" Background="#E3EBDD" CornerRadius="14" Padding="20">
+        <Border Grid.Column="1" Background="{DynamicResource CenterSoft}" CornerRadius="14" Padding="20">
           <StackPanel>
             <Image x:Name="PetPreview" Source="{Binding CharacterImage}" Height="160" Stretch="Uniform" Margin="0,8,0,10" RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="当前角色预览"/>
             <TextBlock Text="{Binding CharacterName}" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap"/>

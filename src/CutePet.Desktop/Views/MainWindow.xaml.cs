@@ -392,6 +392,13 @@ public partial class MainWindow : Window
         Model.CharacterMessage = "已保存，下次启动生效";
     }
 
+    internal void SetInterfaceColors(string theme, string font)
+    {
+        Settings = (Settings with { ThemeColor = theme, FontColor = font }).Validated();
+        if (!store.Save(Settings)) Model.CharacterMessage = "设置暂时无法保存";
+        DesktopStateChanged?.Invoke();
+    }
+
     internal void SavePlacement()
     {
         if (dragging.IsDragging) return; // Persist quota coordinates only after the gesture commits.

@@ -1,8 +1,18 @@
-<UserControl x:Class="CutePet.Desktop.SettingsPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<UserControl x:Class="CutePet.Desktop.SettingsPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:CutePet.Desktop">
   <UserControl.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary Source="CenterTheme.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary></UserControl.Resources>
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <StackPanel Margin="0,0,8,0">
-      <Border Background="#FDFEF9" CornerRadius="14" Padding="24">
+      <Border Background="{DynamicResource CenterSurface}" CornerRadius="14" Padding="24" Margin="0,0,0,16">
+        <StackPanel>
+          <DockPanel Margin="0,0,0,18"><Button x:Name="ResetColorsButton" DockPanel.Dock="Right" Content="恢复默认粉色" Command="{Binding ResetColorsCommand}" Style="{StaticResource CenterPrimary}" Margin="16,0,0,0"/>
+            <TextBlock Text="颜色" Style="{StaticResource CenterSection}" Margin="0" VerticalAlignment="Center"/></DockPanel>
+          <TextBlock Text="界面主色" Margin="0,0,0,8"/>
+          <local:RgbEditor x:Name="ThemeEditor" DataContext="{Binding ThemeColor}"/>
+          <TextBlock Text="字体颜色" Margin="0,18,0,8"/>
+          <local:RgbEditor x:Name="FontEditor" DataContext="{Binding FontColor}"/>
+        </StackPanel>
+      </Border>
+      <Border Background="{DynamicResource CenterSurface}" CornerRadius="14" Padding="24">
         <StackPanel>
           <TextBlock Text="桌面显示" Style="{StaticResource CenterSection}"/>
           <DockPanel Margin="0,4,0,18"><CheckBox x:Name="TopmostSwitch" DockPanel.Dock="Right" IsChecked="{Binding AlwaysOnTop, Mode=TwoWay}" Style="{StaticResource CenterToggle}" AutomationProperties.Name="桌宠与额度始终置顶" Margin="20,0,0,0"/>
@@ -20,7 +30,7 @@
             <ItemsControl.ItemTemplate><DataTemplate><Button Content="{Binding Label}" Command="{Binding DataContext.DockCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding Value}" Margin="0,0,8,7"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
         </StackPanel>
       </Border>
-      <Border Background="#FDFEF9" CornerRadius="14" Padding="24" Margin="0,16,0,0">
+      <Border Background="{DynamicResource CenterSurface}" CornerRadius="14" Padding="24" Margin="0,16,0,0">
         <StackPanel>
           <TextBlock Text="启动与连接" Style="{StaticResource CenterSection}"/>
           <DockPanel Margin="0,4,0,20"><CheckBox x:Name="StartupSwitch" DockPanel.Dock="Right" IsChecked="{Binding StartWithWindows, Mode=TwoWay}" Style="{StaticResource CenterToggle}" AutomationProperties.Name="开机启动" Margin="20,0,0,0"/>

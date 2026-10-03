@@ -6,16 +6,16 @@
       <TextBlock x:Name="CurrentUseText" FontSize="14" VerticalAlignment="Center"/></DockPanel>
     <Grid Grid.Row="1">
       <Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-      <ListBox x:Name="CharacterList" SelectionChanged="OnSelectionChanged" Background="#FDFEF9" Foreground="#293C32" BorderThickness="0" Padding="8" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+      <ListBox x:Name="CharacterList" SelectionChanged="OnSelectionChanged" Background="{DynamicResource CenterSurface}" Foreground="{DynamicResource CenterInk}" BorderThickness="0" Padding="8" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
         <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem"><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Padding" Value="9,12"/><Setter Property="Margin" Value="0,0,0,4"/>
           <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Border x:Name="Surface" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}"><ContentPresenter/></Border>
-            <ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="Surface" Property="Background" Value="#E2EBDB"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="#A6BCA7"/></Trigger><Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="#527F66"/></Trigger></ControlTemplate.Triggers>
+            <ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="Surface" Property="Background" Value="{DynamicResource CenterSoft}"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource CenterAccent}"/></Trigger><Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource CenterAccent}"/></Trigger></ControlTemplate.Triggers>
           </ControlTemplate></Setter.Value></Setter></Style></ListBox.ItemContainerStyle>
         <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap"/></DataTemplate></ListBox.ItemTemplate>
       </ListBox>
       <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="22,0,0,0">
         <StackPanel>
-          <Border Background="#E3EBDD" CornerRadius="14" Height="170">
+          <Border Background="{DynamicResource CenterSoft}" CornerRadius="14" Height="170">
             <Grid><Image x:Name="CloudPreview" Width="140" Height="32" VerticalAlignment="Bottom" Margin="0,0,0,12" Opacity="0" Stretch="Uniform"/>
               <Image x:Name="Preview" Margin="16,12,16,24" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="所选角色动作预览"/></Grid>
           </Border>
@@ -29,7 +29,7 @@
         </StackPanel>
       </ScrollViewer>
     </Grid>
-    <TextBlock x:Name="StatusText" Grid.Row="2" TextWrapping="Wrap" Foreground="{StaticResource CenterMuted}" Margin="0,16,0,0">
+    <TextBlock x:Name="StatusText" Grid.Row="2" TextWrapping="Wrap" Foreground="{DynamicResource CenterMuted}" Margin="0,16,0,0">
       <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed"/></Trigger></Style.Triggers></Style></TextBlock.Style>
     </TextBlock>
   </Grid>
