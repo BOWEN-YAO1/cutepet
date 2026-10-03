@@ -448,18 +448,6 @@
           "image": "top-sequence-v2.png",
           "durationMs": 200,
           "region": {
-            "x": 768,
-            "y": 0,
-            "width": 384,
-            "height": 512
-          },
-          "edgeAnchorY": 0.078125,
-          "swingSeatAnchorY": 0.693359375
-        },
-        {
-          "image": "top-sequence-v2.png",
-          "durationMs": 640,
-          "region": {
             "x": 1152,
             "y": 512,
             "width": 384,
@@ -470,7 +458,7 @@
         },
         {
           "image": "top-sequence-v2.png",
-          "durationMs": 200,
+          "durationMs": 640,
           "region": {
             "x": 768,
             "y": 0,
@@ -479,6 +467,18 @@
           },
           "edgeAnchorY": 0.078125,
           "swingSeatAnchorY": 0.693359375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 200,
+          "region": {
+            "x": 1152,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.015625,
+          "swingSeatAnchorY": 0.630859375
         },
         {
           "image": "top-sequence-v2.png",
