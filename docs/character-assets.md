@@ -114,3 +114,7 @@ Use case: identity-preserve. Edit target: supplied transparent Luo Tianyi fan-ar
 ## 0.22.0 秋千两侧云莲小景
 
 秋千两侧新增错位漂浮的云莲配景，细飘带连接悬绳，四点星光缓慢闪烁。人物和额度保持原有布局。角色包新增可选 `topSwing.scenery`，独立 PNG 图层支持导入 / 导出，右侧镜像复用同一素材，旧角色不配置时保留原有效果。当前引用 28 张 PNG，总解码像素 44,013,894，继续沿用 44,040,192 上限。666 项窗口 / 功能检查、14 项额度协议测试通过。完整提示词和来源见天依包 `SCENERY-PROMPTS.md` / `SOURCE.md`；配置见 [屏幕边缘互动](screen-edge.md)。
+
+## 0.32.0 完整左右贴边人物
+
+内置 image_gen 以 idle.png 与旧贴边图为参考补绘完整身体，再以新基准图生成微笑帧。edge-full-v2.png 与 edge-full-smile-v2.png 均为 1024×1535 RGBA 原始输出，原样接入，保留旧图。来源和完整提示词见 [FULL-SIDE-PROMPTS.md](../src/CutePet.Desktop/Characters/Packs/tianyi/FULL-SIDE-PROMPTS.md) / SOURCE.md，角色权利说明沿用此前记录。

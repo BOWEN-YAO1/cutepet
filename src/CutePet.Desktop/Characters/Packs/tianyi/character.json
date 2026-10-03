@@ -250,7 +250,7 @@
       "loop": true,
       "frames": [
         {
-          "image": "edge-v1.png",
+          "image": "edge-full-v2.png",
           "durationMs": 1000
         }
       ]
@@ -259,15 +259,15 @@
       "loop": false,
       "frames": [
         {
-          "image": "edge-v1.png",
+          "image": "edge-full-v2.png",
           "durationMs": 300
         },
         {
-          "image": "edge-smile-v1.png",
+          "image": "edge-full-smile-v2.png",
           "durationMs": 400
         },
         {
-          "image": "edge-v1.png",
+          "image": "edge-full-v2.png",
           "durationMs": 300
         }
       ]
@@ -328,15 +328,15 @@
       "loop": false,
       "frames": [
         {
-          "image": "edge-v1.png",
+          "image": "edge-full-v2.png",
           "durationMs": 880
         },
         {
-          "image": "edge-smile-v1.png",
+          "image": "edge-full-smile-v2.png",
           "durationMs": 940
         },
         {
-          "image": "edge-v1.png",
+          "image": "edge-full-v2.png",
           "durationMs": 380
         }
       ]
@@ -345,15 +345,15 @@
       "loop": false,
       "frames": [
         {
-          "image": "edge-v1.png",
+          "image": "edge-full-v2.png",
           "durationMs": 300
         },
         {
-          "image": "edge-smile-v1.png",
+          "image": "edge-full-smile-v2.png",
           "durationMs": 1200
         },
         {
-          "image": "edge-v1.png",
+          "image": "edge-full-v2.png",
           "durationMs": 300
         }
       ]
@@ -362,15 +362,15 @@
       "loop": false,
       "frames": [
         {
-          "image": "edge-v1.png",
+          "image": "edge-full-v2.png",
           "durationMs": 240
         },
         {
-          "image": "edge-smile-v1.png",
+          "image": "edge-full-smile-v2.png",
           "durationMs": 920
         },
         {
-          "image": "edge-v1.png",
+          "image": "edge-full-v2.png",
           "durationMs": 240
         }
       ]
@@ -383,7 +383,7 @@
     "displayWidth": 140,
     "displayHeight": 32
   },
-  "edgeAnchorX": 0.06,
+  "edgeAnchorX": 0.095,
   "edgeTopAnchorY": 0,
   "edgeBottomAnchorY": 0.9,
   "topSwing": {

@@ -100,7 +100,7 @@ internal static class CharacterPackVerification
         check(player.Action == "greeting", "old four-action packs retain their greeting on either click choice");
         var tianyi = library.Find("tianyi");
         using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
-            check(edgeArchive.GetEntry("edge-v1.png") is not null && edgeArchive.GetEntry("edge-smile-v1.png") is not null,
+            check(edgeArchive.GetEntry("edge-full-v2.png") is not null && edgeArchive.GetEntry("edge-full-smile-v2.png") is not null,
                 "Tianyi export carries both new screen-edge artwork frames");
         var edgeFiles = new Dictionary<string, byte[]>();
         using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
@@ -108,7 +108,7 @@ internal static class CharacterPackVerification
             { using var input = entry.Open(); using var bytes = new MemoryStream(); input.CopyTo(bytes); edgeFiles.Add(entry.FullName, bytes.ToArray()); }
         var edgeRoundTrip = other.Import(Zip("edge-roundtrip", tianyi.Manifest with { Id = "edge-roundtrip" }, edgeFiles));
         check(edgeRoundTrip.Actions.ContainsKey("edge-idle") && edgeRoundTrip.Actions.ContainsKey("edge-peek")
-            && edgeRoundTrip.Manifest.EdgeAnchorX == 0.06, "edge poses and anchor survive actual package export and import");
+            && edgeRoundTrip.Manifest.EdgeAnchorX == tianyi.Manifest.EdgeAnchorX, "edge poses and anchor survive actual package export and import");
         check(SideEdgeMotion.Responses.All(edgeRoundTrip.Actions.ContainsKey)
             && ReferenceEquals(edgeRoundTrip.Actions["edge-shy"].Frames[0].Image,edgeRoundTrip.Actions["edge-idle"].Frames[0].Image),
             "all side gestures export and import while deduplicating their shared artwork");

@@ -20,6 +20,16 @@ internal static class SideEdgeVerification
         var leftAngles = new Dictionary<string,double>();
         var samples = new List<BitmapSource>();
         var labels = new[] { "微笑探头", "缩回再探出", "探头轻摇", "探头点头" };
+        foreach (var image in new[] {window.SelectedCharacter.Actions["edge-idle"].Frames[0].Image,
+            window.SelectedCharacter.Actions["edge-peek"].Frames[1].Image})
+        {
+            var rgba = new FormatConvertedBitmap(image,PixelFormats.Bgra32,null,0);
+            var stride = rgba.PixelWidth * 4;
+            var pixels = new byte[stride * rgba.PixelHeight]; rgba.CopyPixels(pixels,stride,0);
+            check(Alpha(.28125,.94) > 200 && Alpha(.402,.94) > 200,
+                "side artwork contains both complete boots below the connected skirt and legs");
+            byte Alpha(double x,double y) => pixels[(int)(y * rgba.PixelHeight) * stride + (int)(x * rgba.PixelWidth) * 4 + 3];
+        }
         foreach (var side in new[] { ScreenEdge.Left, ScreenEdge.Right })
         {
             window.WakeCharacterImmediately();
@@ -29,6 +39,7 @@ internal static class SideEdgeVerification
             {
                 var action = SideEdgeMotion.Responses[index];
                 var duration = window.SelectedCharacter.Actions[action].Duration;
+                var maximumOutward = 0.0;
                 window.PlayCharacterInteraction();
                 check(window.ScreenEdgeResponse == action, "side responses rotate through supported package actions " + side + action);
                 for (var step = 0; step < 20; step++)
@@ -37,6 +48,7 @@ internal static class SideEdgeVerification
                     encoder.Frames.Add(BitmapFrame.Create(frame)); delays.Add((int)Math.Round(duration / 200));
                     if (step == 7) samples.Add(frame);
                     window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(duration / 20));
+                    maximumOutward = Math.Max(maximumOutward,window.ScreenEdgePeekOffset);
                     if (step == 4 && action == "edge-shy")
                         check(window.ScreenEdgePeekOffset < -20, "shy response withdraws behind the border before emerging " + side);
                     if (step == 9)
@@ -58,6 +70,7 @@ internal static class SideEdgeVerification
                     && window.CurrentCharacterFrame == CharacterFrame.EdgeIdle && window.QuotaHost.Position == quota
                     && area.Contains(new Rect(window.ScreenEdgeAttachment!.Position,size)),
                     "finite side gesture returns to its base with fixed quota and safe HWND bounds " + side + action);
+                check(maximumOutward <= 2.0001, "side gesture keeps the grip close to the border while revealing a complete lower body " + side + action);
             }
             window.PlayCharacterInteraction();
             check(window.ScreenEdgeResponse == "edge-peek", "side gesture sequence wraps without accumulating input " + side);

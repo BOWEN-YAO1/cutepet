@@ -54,11 +54,11 @@ internal static class ScreenEdgeVerification
         window.PlayCharacterInteraction();
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
         var smile = window.CharacterArt.Source;
-        check(window.CurrentCharacterFrame == CharacterFrame.EdgePeek && Math.Abs(window.ScreenEdgePeekOffset - 8) < 0.001,
+        check(window.CurrentCharacterFrame == CharacterFrame.EdgePeek && Math.Abs(window.ScreenEdgePeekOffset - 2) < 0.001,
             "click reaches finite smile and smoothly eased peek midpoint");
         window.BeginDetailsMenu();
         window.AdvanceCharacterAnimation(TimeSpan.FromMinutes(1));
-        check(ReferenceEquals(smile, window.CharacterArt.Source) && window.ScreenEdgePeekOffset == 8,
+        check(ReferenceEquals(smile, window.CharacterArt.Source) && window.ScreenEdgePeekOffset == 2,
             "menu pauses both edge expression and movement clocks");
         window.EndDetailsMenu();
         window.PlayCharacterInteraction();

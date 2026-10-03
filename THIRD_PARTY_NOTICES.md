@@ -36,3 +36,7 @@
 ## 0.17.0 上下边缘素材
 
 2026-10-02：新增 edge-top-v1.png、edge-top-smile-v1.png、edge-bottom-v1.png、edge-bottom-smile-v1.png，由内置 image_gen 工具编辑项目现有同人图生成；原图保留，四张图均为 1024×1535 透明 PNG，原样纳入角色包。完整提示词在 VERTICAL-EDGE-PROMPTS.md / SOURCE.md，原角色权利说明继续适用。验证边界见 docs/screen-edge.md。
+
+## 0.32.0 完整左右贴边素材
+
+2026-10-03：内置 image_gen 编辑现有同人图，补绘完整裙摆、双腿及鞋，并生成匹配的微笑帧。新增 edge-full-v2.png / edge-full-smile-v2.png 均为 1024×1535 透明 PNG，原样接入，旧图保留。提示词与生成记录位于天依包 FULL-SIDE-PROMPTS.md / SOURCE.md，原角色权利说明继续适用。
