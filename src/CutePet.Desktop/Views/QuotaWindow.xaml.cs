@@ -28,6 +28,7 @@ public partial class QuotaWindow : Window
         this.host = host;
         this.verification = verification;
         InitializeComponent();
+        Icon = AppIcon.WindowIcon;
         if (verification) { Opacity = 0; Left = Top = -10000; }
         DataContext = host.Model;
         DetailsViewport.DataContext = host.Model;
@@ -48,6 +49,7 @@ public partial class QuotaWindow : Window
         UpdateLayout();
         if (IsLoaded) MoveTo(Position);
     }
+    private void OnOpenCenter(object sender, RoutedEventArgs e) => host.OpenControlCenter();
     internal void MoveTo(Point point)
     {
         RequestedPosition = point;

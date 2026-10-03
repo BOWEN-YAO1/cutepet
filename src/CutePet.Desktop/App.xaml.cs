@@ -19,14 +19,16 @@ public partial class App : Application
             return;
         }
         instance = new SingleInstance("CutePet.Desktop.v1");
-        if (!instance.IsFirst) { instance.RequestShow(); Shutdown(); return; }
+        if (!instance.IsFirst) { if (ShouldOpenControlCenter(e.Args)) instance.RequestShow(); Shutdown(); return; }
         var window = new MainWindow(new PreferencesStore());
         MainWindow = window;
         window.ExitRequested += ExitPet;
         tray = new(window, ExitPet);
-        instance.Listen(() => Dispatcher.BeginInvoke(window.RestorePet));
+        instance.Listen(() => Dispatcher.BeginInvoke(() => { window.RestorePet(); window.OpenControlCenter(); }));
         window.Show();
+        if (ShouldOpenControlCenter(e.Args)) window.OpenControlCenter();
     }
+    internal static bool ShouldOpenControlCenter(string[] args) => Array.IndexOf(args, "--autostart") < 0;
 
     private async void ExitPet()
     {

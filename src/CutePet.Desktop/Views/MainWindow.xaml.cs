@@ -70,7 +70,7 @@ public partial class MainWindow : Window
     internal double CloudTripDuration => cloudMotion.TripDuration;
     internal Point? LastRecallPosition { get; private set; }
     internal bool CanCloudMove => CanPlayAmbient && !cloudPointerInside && !DetailsVisible
-        && characterManager?.IsVisible != true && (verification || !NativePlacement.PointerNear(this, 28));
+        && ControlCenter?.IsCharactersPage != true && (verification || !NativePlacement.PointerNear(this, 28));
     public void SummonCloud() { if (ScreenEdgeActive) WakeCharacterImmediately(); cloudMotion.Start(); }
     public void RoamDesktop() { if (ScreenEdgeActive) WakeCharacterImmediately(); cloudMotion.Start(roam: true); }
     public void RecallPet()
@@ -110,6 +110,8 @@ public partial class MainWindow : Window
     private Task? syncTask;
     private bool loaded, exiting;
     public event Action? ExitRequested;
+    internal event Action? DesktopStateChanged;
+    internal ControlCenterWindow? ControlCenter { get; private set; }
     internal void RequestExit() => ExitRequested?.Invoke();
 
     public MainWindow(PreferencesStore store, bool verification = false, IStartupRegistration? startup = null)
@@ -122,6 +124,7 @@ public partial class MainWindow : Window
         Settings = store.Load();
         Characters = new CharacterLibrary(store.CharacterDirectory);
         InitializeComponent();
+        Icon = AppIcon.WindowIcon;
         if (verification) { Opacity = 0; Left = Top = -10000; }
         QuotaHost = new QuotaWindow(this, verification);
         dragging = new PetDragController(this, verification);
@@ -150,6 +153,7 @@ public partial class MainWindow : Window
             Animate(IsVisible && !verification);
             if (!IsVisible) { QuotaHost.Hide(); cloudPointerInside = false; details.ResetHover(); StopDetailsTimers(); ShowDetails(false); }
             else if (loaded) { QuotaHost.ShowAt(QuotaHost.Position); ShowDetails(Settings.Details == DetailsMode.Always); }
+            DesktopStateChanged?.Invoke();
         };
         DpiChanged += (_, _) => Dispatcher.BeginInvoke(() =>
         {
@@ -245,13 +249,20 @@ public partial class MainWindow : Window
         characterPresenter.ApplyPack();
     }
 
-    private CharacterManagerWindow? characterManager;
-    public void ManageCharacters()
+    public void ManageCharacters() => OpenControlCenter("characters");
+    public void OpenControlCenter() => OpenControlCenter("overview");
+    internal void OpenControlCenter(string page)
     {
-        if (characterManager is not null) { characterManager.Activate(); return; }
-        characterManager = new CharacterManagerWindow(this) { Owner = this };
-        characterManager.Closed += (_, _) => characterManager = null;
-        characterManager.Show();
+        if (exiting) return;
+        if (ControlCenter is null)
+        {
+            ControlCenter = new ControlCenterWindow(this, verification);
+            ControlCenter.Closed += (_, _) => ControlCenter = null;
+        }
+        ControlCenter.Navigate(page);
+        if (!ControlCenter.IsVisible) ControlCenter.Show();
+        if (ControlCenter.WindowState == WindowState.Minimized) ControlCenter.WindowState = WindowState.Normal;
+        if (!verification) ControlCenter.Activate();
     }
 
     internal CharacterPack ImportCharacter(string path)
@@ -367,14 +378,15 @@ public partial class MainWindow : Window
         SavePlacement();
     }
 
-    public void SelectCodexPath()
+    public void SelectCodexPath() => SelectCodexPath(this);
+    internal void SelectCodexPath(Window owner)
     {
         var picker = new Microsoft.Win32.OpenFileDialog
         {
             Title = "选择官方 Codex 原生程序", Filter = "Codex 原生程序 (codex.exe)|codex.exe",
             CheckFileExists = true, Multiselect = false
         };
-        if (picker.ShowDialog(this) != true) return;
+        if (picker.ShowDialog(owner) != true) return;
         Settings = Settings with { CodexPath = picker.FileName };
         SavePlacement();
         Model.CharacterMessage = "已保存，下次启动生效";
@@ -390,6 +402,7 @@ public partial class MainWindow : Window
         }
         Settings = Settings with { QuotaLeft = QuotaHost.Position.X, QuotaTop = QuotaHost.Position.Y };
         if (!store.Save(Settings)) Model.CharacterMessage = "设置暂时无法保存";
+        DesktopStateChanged?.Invoke();
     }
 
     internal void CollapseDetails() => details.Collapse();
@@ -446,7 +459,7 @@ public partial class MainWindow : Window
     {
         if (exiting) return;
         if (dragging.IsDragging) EndQuotaDrag(cancel: true);
-        characterManager?.Close();
+        ControlCenter?.Close();
         exiting = true;
         SavePlacement();
         countdown.Stop();

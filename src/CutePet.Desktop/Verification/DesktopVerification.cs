@@ -576,6 +576,7 @@ internal static class DesktopVerification
             ScreenEdgeVerification.Run(window, directory, Check, low => window.Model.Apply(Snapshot(low ? 8 : 72, 48), demo: true));
             VerticalEdgeVerification.Run(window, directory, Check, low => window.Model.Apply(Snapshot(low ? 8 : 72, 48), demo: true));
             SwingVerification.Run(window, directory, Check);
+            await ControlCenterVerification.RunAsync(window, directory, Check);
 
             if (live)
             {

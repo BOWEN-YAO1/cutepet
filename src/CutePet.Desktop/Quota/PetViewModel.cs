@@ -40,7 +40,7 @@ public sealed class PetViewModel : INotifyPropertyChanged
         ? row with { RemainingText = "—", Accent = Brushes.Gray } : row);
     public string MoreWindowsText => Windows.Count > 2 ? $" +{Windows.Count - 2}" : "";
     private string statusText = "正在连接 Codex…";
-    private string footerText = "拖动角色移动 · 右键更多";
+    private string footerText = "正在等待首次额度同步";
     private Brush statusBrush = Brushes.DarkSeaGreen;
     private bool canRefresh = true;
     private string characterMessage = "我来帮你看额度";
@@ -99,7 +99,7 @@ public sealed class PetViewModel : INotifyPropertyChanged
         CompactChanged();
         IsLow = snapshot.Buckets.SelectMany(b => b.Windows).Any(w => w.RemainingPercent < 20);
         StatusText = demo ? "演示数据 · 用于界面验证" : snapshot.OrdinaryUsageAllowed == false ? "官方提示：当前使用受限" : "已同步官方额度";
-        FooterText = demo ? "占位角色 · 非正式形象" : $"更新于 {snapshot.LastSuccessfulSyncUtc.ToLocalTime():HH:mm:ss}";
+        FooterText = demo ? "界面预览 · 当前为演示额度" : $"更新于 {snapshot.LastSuccessfulSyncUtc.ToLocalTime():HH:mm:ss}";
         StatusBrush = Brush(IsLow ? "#C18651" : "#568B70");
         CanRefresh = true;
         RestoreCharacterMessage();

@@ -6,9 +6,11 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>disable</ImplicitUsings>
     <AssemblyName>CutePet</AssemblyName>
-    <Version>0.28.0</Version>
+    <Version>0.29.0</Version>
+    <ApplicationIcon>Assets/cutepet.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup><ProjectReference Include="../CutePet.Codex/CutePet.Codex.csproj" /></ItemGroup>
   <ItemGroup><Resource Include="Characters/Packs/**/*.png" /><Resource Include="Characters/Packs/**/character.json" /><Resource Include="Characters/Packs/**/*.txt" /><Resource Include="Characters/Packs/**/SOURCE.md" /></ItemGroup>
+  <ItemGroup><Resource Include="Assets/cutepet.ico" /><Resource Include="Assets/cutepet.png" /></ItemGroup>
 </Project>

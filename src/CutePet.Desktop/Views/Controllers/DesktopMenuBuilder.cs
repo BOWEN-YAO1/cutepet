@@ -8,6 +8,8 @@ internal static class DesktopMenuBuilder
     internal static ContextMenu Create(MainWindow window)
     {
         var menu = new ContextMenu();
+        Add("打开主界面…", window.OpenControlCenter);
+        menu.Items.Add(new Separator());
         Add("刷新额度", window.RefreshQuota);
         var pin = Add("始终置顶", window.ToggleTopmost);
         pin.IsCheckable = true;

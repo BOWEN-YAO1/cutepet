@@ -1,126 +1,21 @@
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Threading;
-
 namespace CutePet.Desktop;
 
+// Compatibility host for the reusable characters page; the main application opens it in its control center.
 public partial class CharacterManagerWindow : Window
 {
-    private readonly MainWindow host;
-    private readonly CharacterAnimation animation = new();
-    private readonly CloudFlight cloudPreview = new();
-    private readonly Stopwatch clock = new();
-    private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(40) };
-    private CharacterPack? Selected => CharacterList.SelectedItem as CharacterPack;
-    private sealed record ActionChoice(string Key, string Label);
+    private readonly CharactersPage page;
+    internal ListBox CharacterList => page.CharacterList;
+    internal Button RemoveButton => page.RemoveButton;
+    internal Button PreviewButton => page.PreviewButton;
+    internal Button UseButton => page.UseButton;
+    internal ComboBox PreviewAction => page.PreviewAction;
+    internal Image Preview => page.Preview;
     public CharacterManagerWindow(MainWindow host)
     {
-        this.host = host;
-        InitializeComponent();
-        host.Characters.Reload();
-        host.SetCharacterPackage(host.SelectedCharacter.Id);
-        RefreshList(host.SelectedCharacter.Id);
-        StatusText.Text = host.Characters.Warning ?? "导入只在本机保存，不会上传图片。内置角色始终保留。";
-        timer.Tick += (_, _) =>
-        {
-            var elapsed = clock.Elapsed;
-            clock.Restart();
-            animation.Advance(elapsed);
-            cloudPreview.Advance(elapsed);
-            CloudPreview.Opacity = cloudPreview.Opacity;
-            Preview.Source = animation.Image;
-        };
-        IsVisibleChanged += (_, _) =>
-        {
-            if (IsVisible) { clock.Restart(); timer.Start(); }
-            else { timer.Stop(); clock.Reset(); }
-        };
-        Closed += (_, _) => { timer.Stop(); clock.Stop(); };
-    }
-    private void RefreshList(string? selected)
-    {
-        CharacterList.ItemsSource = host.Characters.Packs.ToArray();
-        CharacterList.SelectedItem = host.Characters.Find(selected);
-    }
-    private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (Selected is not CharacterPack pack) return;
-        animation.Configure(pack);
-        cloudPreview.Cancel();
-        CloudPreview.Opacity = 0;
-        CloudPreview.Source = pack.CloudImage;
-        CloudPreview.Width = pack.Manifest.Cloud?.DisplayWidth ?? 140;
-        CloudPreview.Height = pack.Manifest.Cloud?.DisplayHeight ?? 32;
-        Preview.Source = animation.Image;
-        var labels = new[] { ("idle", "待机"), ("blink", "眨眼"), ("greeting", "打招呼"), ("low", "低额度"),
-            ("look", "张望"), ("hover", "悬停"), ("happy", "开心"), ("conjure", "召唤王座"), ("sit", "坐下休息"), ("stand", "起身收起"), ("summon-cloud", "召唤小云"),
-            ("sit-blink", "坐姿眨眼"), ("sit-greeting", "坐姿挥手"), ("sit-happy", "坐姿微笑"),
-            ("edge-idle", "左右贴边"), ("edge-peek", "左右探头微笑"), ("edge-top-idle", "上沿悬挂"),
-            ("edge-top-peek", "上沿探头微笑"), ("edge-bottom-idle", "下沿托腮"), ("edge-bottom-peek", "下沿抬头微笑") };
-        CharacterInfo.Text = $"{(pack.BuiltIn ? "内置角色" : "自定义角色")} · {pack.Name}\n动作："
-            + string.Join("、", labels.Where(pair => pack.Actions.ContainsKey(pair.Item1)).Select(pair => pair.Item2));
-        RightsInfo.Text = $"作者：{(string.IsNullOrWhiteSpace(pack.Manifest.Author) ? "未填写" : pack.Manifest.Author)}\n"
-            + (string.IsNullOrWhiteSpace(pack.Manifest.License) ? "未填写素材许可，请确认图片的使用权限。" : pack.Manifest.License);
-        RemoveButton.IsEnabled = !pack.BuiltIn;
-        PreviewAction.ItemsSource = labels.Where(pair => pack.Actions.ContainsKey(pair.Item1))
-            .Select(pair => new ActionChoice(pair.Item1, pair.Item2)).ToArray();
-        PreviewAction.SelectedValue = pack.Actions.ContainsKey("greeting") ? "greeting" : "idle";
-        PreviewButton.IsEnabled = true;
-    }
-    private void OnUse(object sender, RoutedEventArgs e)
-    {
-        if (Selected is not CharacterPack pack) return;
-        host.SetCharacterPackage(pack.Id);
-        StatusText.Text = $"已使用「{pack.Name}」，重启后会保留。";
-    }
-    private void OnPreview(object sender, RoutedEventArgs e)
-    {
-        cloudPreview.Cancel();
-        if (PreviewAction.SelectedValue is string action)
-        { animation.Preview(action); if (action == "summon-cloud") cloudPreview.Start(Selected!.Actions[action].Duration); }
-        CloudPreview.Opacity = 0;
-        Preview.Source = animation.Image;
-    }
-    private void OnImport(object sender, RoutedEventArgs e)
-    {
-        var picker = new Microsoft.Win32.OpenFileDialog { Title = "导入自定义角色",
-            Filter = "角色图片与角色包|*.png;*.zip|透明 PNG 图片|*.png|CutePet 角色包|*.zip", CheckFileExists = true };
-        if (picker.ShowDialog(this) != true) return;
-        TryAction(() =>
-        {
-            var imported = host.ImportCharacter(picker.FileName);
-            RefreshList(imported.Id);
-            StatusText.Text = $"已导入并使用「{imported.Name}」。";
-        });
-    }
-    private void OnExport(object sender, RoutedEventArgs e)
-    {
-        if (Selected is not CharacterPack pack) return;
-        var picker = new Microsoft.Win32.SaveFileDialog { Title = "导出角色包", FileName = pack.Id + ".cutepet.zip",
-            Filter = "CutePet 角色包|*.zip", DefaultExt = ".zip", AddExtension = true, OverwritePrompt = true };
-        if (picker.ShowDialog(this) != true) return;
-        TryAction(() => { host.Characters.Export(pack, picker.FileName); StatusText.Text = "角色包已导出，包含图片、动作配置和素材说明。"; });
-    }
-    private void OnRemove(object sender, RoutedEventArgs e)
-    {
-        if (Selected is not CharacterPack pack) return;
-        TryAction(() =>
-        {
-            host.RemoveCharacter(pack);
-            RefreshList(host.SelectedCharacter.Id);
-            StatusText.Text = "已移除，原文件保留在角色目录的 .removed 文件夹。";
-        });
-    }
-    private void TryAction(Action action)
-    {
-        try { action(); }
-        catch (Exception ex) when (CharacterLibrary.IsPackageError(ex))
-        {
-            StatusText.Text = ex is InvalidDataException ? ex.Message : "操作未完成，请检查文件格式和目录权限。";
-        }
+        InitializeComponent(); Icon = AppIcon.WindowIcon;
+        page = new CharactersPage(host); PageHost.Content = page;
+        Closed += (_, _) => page.Dispose();
     }
 }

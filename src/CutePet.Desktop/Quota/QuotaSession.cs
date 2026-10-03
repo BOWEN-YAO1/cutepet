@@ -44,7 +44,7 @@ internal sealed class QuotaSession(string? codexPath)
                     var clear = ex.Failure is not (QuotaFailure.Timeout or QuotaFailure.ServiceError);
                     Failed?.Invoke(ex.Failure switch
                     {
-                        QuotaFailure.MissingDependency => "未找到 Codex · 右键选择程序路径",
+                        QuotaFailure.MissingDependency => "未找到 Codex · 请在主界面设置中选择程序路径",
                         QuotaFailure.NeedsLogin => "请先在官方 Codex 中登录",
                         QuotaFailure.UnsupportedAuth => "请使用 ChatGPT 登录读取订阅额度",
                         QuotaFailure.IncompatibleProtocol => "接口不兼容 · 请核对 Codex 版本",

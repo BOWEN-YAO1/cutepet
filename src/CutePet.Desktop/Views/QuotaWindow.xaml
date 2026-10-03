@@ -31,6 +31,7 @@
         <Grid Margin="17,15,17,13">
           <Grid.RowDefinitions><RowDefinition Height="25" /><RowDefinition Height="25" /><RowDefinition Height="*" /><RowDefinition Height="33" /></Grid.RowDefinitions>
           <DockPanel>
+            <Button DockPanel.Dock="Right" Content="主界面" FontSize="10" Padding="6,3" Background="Transparent" Click="OnOpenCenter" ToolTip="查看额度、角色、活动和设置" />
             <Button DockPanel.Dock="Right" Content="收起" FontSize="10" Padding="6,3" Background="Transparent" Click="OnCollapseDetails" ToolTip="收起详情，返回悬停模式" />
             <Button x:Name="PinDetailsButton" DockPanel.Dock="Right" Content="固定" FontSize="10" Padding="6,3" Background="Transparent" Click="OnPinDetails" ToolTip="固定显示详情，或恢复悬停显示" />
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
