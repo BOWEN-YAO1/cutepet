@@ -5,14 +5,9 @@
   <Grid Background="#F3F5F0">
     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
     <DockPanel Margin="30,23,28,14">
-      <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center">
-        <TextBlock Text="{Binding VersionText}" Foreground="{StaticResource CenterMuted}" FontSize="11" HorizontalAlignment="Right"/>
-        <TextBlock Text="{Binding VisibilityText}" Foreground="{StaticResource CenterMuted}" FontSize="11" Margin="0,4,0,0"/>
-      </StackPanel>
       <StackPanel Orientation="Horizontal">
         <Image Source="{StaticResource BrandIcon}" Width="42" Height="42" Margin="0,0,12,0" AutomationProperties.Name="CutePet 小猫图标"/>
-        <StackPanel VerticalAlignment="Center"><TextBlock Text="CutePet" FontFamily="Segoe UI" FontSize="21" FontWeight="SemiBold"/>
-          <TextBlock Text="桌面陪伴，额度心中有数" Style="{StaticResource CenterNote}" FontSize="11"/></StackPanel>
+        <TextBlock Text="CutePet" FontFamily="Segoe UI" FontSize="21" FontWeight="SemiBold" VerticalAlignment="Center"/>
       </StackPanel>
     </DockPanel>
     <Border Grid.Row="1" BorderBrush="#DBE3D7" BorderThickness="0,0,0,1" Margin="28,0">
@@ -25,8 +20,8 @@
     </Border>
     <ContentControl x:Name="PageHost" Grid.Row="2" Margin="30,24,30,18" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
     <Border Grid.Row="3" BorderBrush="#DBE3D7" BorderThickness="0,1,0,0" Padding="30,12" Background="#EDF1E9">
-      <DockPanel><TextBlock DockPanel.Dock="Right" Text="双击托盘图标，随时打开" Foreground="{StaticResource CenterMuted}" FontSize="11" Margin="20,0,0,0"/>
-        <TextBlock Text="{Binding Notice}" Foreground="{StaticResource CenterMuted}" FontSize="11" TextWrapping="Wrap"/></DockPanel>
+      <Border.Style><Style TargetType="Border"><Style.Triggers><DataTrigger Binding="{Binding Notice}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Border.Style>
+      <TextBlock Text="{Binding Notice}" Foreground="{StaticResource CenterMuted}" FontSize="13" TextWrapping="Wrap"/>
     </Border>
   </Grid>
 </Window>

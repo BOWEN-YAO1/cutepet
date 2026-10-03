@@ -4,8 +4,6 @@
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <Grid Margin="0,0,8,0">
       <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-      <StackPanel Margin="0,0,0,23"><TextBlock Text="今天也有好好陪着你" Style="{StaticResource CenterHeading}"/>
-        <TextBlock Text="看一眼额度，再决定接下来做什么。" Style="{StaticResource CenterNote}"/></StackPanel>
       <Grid Grid.Row="1">
         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="280"/></Grid.ColumnDefinitions>
         <Border Background="#FDFEF9" CornerRadius="14" Padding="20" Margin="0,0,20,0">
@@ -14,7 +12,6 @@
               <TextBlock Text="Codex 剩余额度" Style="{StaticResource CenterSection}" VerticalAlignment="Center" Margin="0"/></DockPanel>
             <StackPanel Orientation="Horizontal" Margin="0,0,0,7"><Ellipse Width="6" Height="6" Fill="{Binding Quota.StatusBrush}" Margin="0,0,7,0" VerticalAlignment="Center"/>
               <TextBlock x:Name="QuotaStatus" Text="{Binding Quota.StatusText}" Style="{StaticResource CenterNote}"/></StackPanel>
-            <TextBlock Text="{Binding DataNote}" Style="{StaticResource CenterNote}" Margin="0,0,0,10"/>
             <ItemsControl x:Name="QuotaRows" ItemsSource="{Binding Quota.Windows}">
               <ItemsControl.ItemTemplate><DataTemplate>
                 <Grid Margin="0,4,0,12">
@@ -33,7 +30,6 @@
         </Border>
         <Border Grid.Column="1" Background="#E3EBDD" CornerRadius="14" Padding="20">
           <StackPanel>
-            <TextBlock Text="桌面上的伙伴" FontSize="12" Foreground="{StaticResource CenterMuted}"/>
             <Image x:Name="PetPreview" Source="{Binding CharacterImage}" Height="160" Stretch="Uniform" Margin="0,8,0,10" RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="当前角色预览"/>
             <TextBlock Text="{Binding CharacterName}" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap"/>
             <TextBlock Text="{Binding ActivityText}" Style="{StaticResource CenterNote}" Margin="0,6,0,14"/>

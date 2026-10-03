@@ -25,8 +25,8 @@ internal sealed class CenterViewModel : INotifyPropertyChanged, IDisposable
     public string DataNote => host.Model.IsStale && host.Model.HasData ? "同步尚未恢复。下方如有数值，为上次读取的记录。"
         : !host.Model.HasData ? "连接后会显示官方剩余百分比和重置时间。" : "使用后自动同步官方额度。";
     public string CodexPathText => host.Settings.CodexPath ?? "自动查找已安装的 Codex";
-    public string Notice => host.Model.CharacterMessage is "我来帮你看额度" or "等连接恢复再看哦" or "额度快用完啦"
-        ? "设置即时生效并保存。关闭此界面后，桌宠仍继续运行。" : host.Model.CharacterMessage;
+    public string Notice => host.Model.CharacterMessage is "我来帮你看额度" or "等连接恢复再看哦" or "额度快用完啦" or "收到！我会看着的"
+        ? "" : host.Model.CharacterMessage;
     public bool CanCloud => host.SelectedCharacter.CloudImage is not null;
     public bool CanAutoRest => host.SelectedCharacter.Manifest.RestAfterMs > 0;
     public bool CanEdge => EdgeActions.Available(host.SelectedCharacter);

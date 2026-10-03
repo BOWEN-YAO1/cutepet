@@ -25,7 +25,7 @@ public partial class CharactersPage : UserControl, IDisposable
         host.Characters.Reload();
         host.SetCharacterPackage(host.SelectedCharacter.Id);
         RefreshList(host.SelectedCharacter.Id);
-        StatusText.Text = host.Characters.Warning ?? "导入只在本机保存，不会上传图片。内置角色始终保留。";
+        StatusText.Text = host.Characters.Warning ?? "";
         timer.Tick += (_, _) =>
         {
             var elapsed = clock.Elapsed;
@@ -47,7 +47,7 @@ public partial class CharactersPage : UserControl, IDisposable
     {
         CurrentUseText.Text = "当前使用：" + host.SelectedCharacter.Name;
         if (lastUsedId is not null && lastUsedId != host.SelectedCharacter.Id)
-            StatusText.Text = "桌宠已切换为「" + host.SelectedCharacter.Name + "」。";
+            StatusText.Text = "";
         lastUsedId = host.SelectedCharacter.Id;
         var installed = host.Characters.Packs.ToArray();
         if (CharacterList.ItemsSource is not CharacterPack[] shown || !shown.SequenceEqual(installed))
@@ -74,7 +74,7 @@ public partial class CharactersPage : UserControl, IDisposable
             ("sit-blink", "坐姿眨眼"), ("sit-greeting", "坐姿挥手"), ("sit-happy", "坐姿微笑"),
             ("edge-idle", "左右贴边"), ("edge-peek", "左右探头微笑"), ("edge-top-idle", "花藤秋千"),
             ("edge-top-peek", "秋千轻摆"), ("edge-bottom-idle", "下沿托腮"), ("edge-bottom-peek", "下沿抬头微笑") };
-        CharacterInfo.Text = $"{(pack.BuiltIn ? "内置角色" : "自定义角色")} · {pack.Name}\n支持 {pack.Actions.Count} 个动作，在下方选择预览。";
+        CharacterInfo.Text = pack.Name;
         RightsInfo.Text = $"作者：{(string.IsNullOrWhiteSpace(pack.Manifest.Author) ? "未填写" : pack.Manifest.Author)}\n"
             + (string.IsNullOrWhiteSpace(pack.Manifest.License) ? "未填写素材许可，请确认图片的使用权限。" : pack.Manifest.License);
         RemoveButton.IsEnabled = !pack.BuiltIn;
@@ -87,7 +87,7 @@ public partial class CharactersPage : UserControl, IDisposable
     {
         if (Selected is not CharacterPack pack) return;
         host.SetCharacterPackage(pack.Id);
-        StatusText.Text = $"已使用「{pack.Name}」，重启后会保留。";
+        StatusText.Text = "";
     }
     private void OnPreview(object sender, RoutedEventArgs e)
     {
@@ -115,7 +115,7 @@ public partial class CharactersPage : UserControl, IDisposable
         var picker = new Microsoft.Win32.SaveFileDialog { Title = "导出角色包", FileName = pack.Id + ".cutepet.zip",
             Filter = "CutePet 角色包|*.zip", DefaultExt = ".zip", AddExtension = true, OverwritePrompt = true };
         if (picker.ShowDialog(Window.GetWindow(this)) != true) return;
-        TryAction(() => { host.Characters.Export(pack, picker.FileName); StatusText.Text = "角色包已导出，包含图片、动作配置和素材说明。"; });
+        TryAction(() => { host.Characters.Export(pack, picker.FileName); StatusText.Text = "角色包已导出。"; });
     }
     private void OnRemove(object sender, RoutedEventArgs e)
     {
@@ -124,7 +124,7 @@ public partial class CharactersPage : UserControl, IDisposable
         {
             host.RemoveCharacter(pack);
             RefreshList(host.SelectedCharacter.Id);
-            StatusText.Text = "已移除，原文件保留在角色目录的 .removed 文件夹。";
+            StatusText.Text = "角色已移除。";
         });
     }
     private void TryAction(Action action)
