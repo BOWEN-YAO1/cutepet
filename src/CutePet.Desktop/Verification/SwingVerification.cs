@@ -150,10 +150,12 @@ internal static class SwingVerification
         check(trails.Select(TrailRoot).Zip(trailRoots).All(p => (p.First - p.Second).Length < 1e-9),
             "vine breeze moves foliage while both desktop roots stay fixed");
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(300));
-        window.PlayCharacterInteraction(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
-        check(Math.Abs(window.EdgeSwing.Angle - 4) < 0.00001,
+        window.PlayCharacterInteraction();
+        var responseDuration=window.SelectedCharacter.Actions["edge-top-peek"].Duration;
+        window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(responseDuration/2));
+        check(Math.Abs(window.EdgeSwing.Angle - (4*Math.Sin(2*Math.PI*(300+responseDuration/2)/3200))) < 0.00001,
             "click smoothly increases swing amplitude at the finite response midpoint");
-        window.PlayCharacterInteraction(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
+        window.PlayCharacterInteraction(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(responseDuration/2));
         check(window.ScreenEdgePeekOffset == 0 && Math.Abs(window.EdgeSwing.Angle) <= 3,
             "repeated click does not accumulate swing pushes");
         angle = window.EdgeSwing.Angle;
@@ -311,7 +313,7 @@ internal static class SwingVerification
             foreach (var (rope, sign) in new[] { (window.SwingRopeLeft, -1), (window.SwingRopeRight, 1) })
             {
                 // Compare against WPF's composed artwork transform, rather than duplicating the renderer's trigonometry.
-                var local = new Point(sign * width * swing.SeatHalfWidth, (art.Height - height) / 2 + height * swing.SeatAnchorY - art.Height / 2);
+                var local = new Point(sign * width * swing.SeatHalfWidth, (art.Height - height) / 2 + height * (window.CurrentSpriteFrame.SwingSeatAnchorY ?? swing.SeatAnchorY) - art.Height / 2);
                 var actual = art.RenderTransform.Transform(local);
                 actual.Offset(115, 16 + 148 - art.Height / 2);
                 check(Math.Abs(actual.X - rope.X2) < 0.00001 && Math.Abs(actual.Y - rope.Y2) < 0.00001,

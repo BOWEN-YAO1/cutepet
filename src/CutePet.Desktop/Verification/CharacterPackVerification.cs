@@ -17,7 +17,7 @@ internal static class CharacterPackVerification
         Directory.CreateDirectory(area);
         var library = new CharacterLibrary(Path.Combine(area, "installed"));
         var cat = library.Find("cat");
-        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 24 && cat.Actions.Count == 4,
+        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 26 && cat.Actions.Count == 4,
             "both built-in characters load from independent manifests and PNG clips");
         foreach (var builtIn in library.Packs)
         {
@@ -138,8 +138,17 @@ internal static class CharacterPackVerification
             && edgeRoundTrip.Actions["edge-bottom-peek"].Frames[0].Image == edgeRoundTrip.Actions["edge-bottom-idle"].Frames[0].Image
             && edgeFiles.ContainsKey("bottom-sequence-v4.png") && !edgeFiles.ContainsKey("edge-bottom-v1.png"),
             "bottom atlas responses export and import with shared cached views instead of old body-stretch sprites");
-        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 120,
-            "new bottom clips fit within the existing total 120-frame package limit");
+        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 138,
+            "three top responses stay within the 160-frame package limit");
+        foreach (var response in EdgeActions.TopResponses.Skip(1))
+        {
+            var orphan = tianyi.Manifest with {Id="top-orphan",Actions=new() {
+                ["idle"]=Clip(true,("idle.png",100)),[response]=Clip(false,("idle.png",100))}};
+            Reject(() => other.Import(Zip("top-orphan",orphan,edgeFiles)), "top response requires its own base " + response);
+            var looping=tianyi.Manifest with {Id="top-loop",Actions=new(tianyi.Manifest.Actions)};
+            looping.Actions[response]=looping.Actions[response] with {Loop=true};
+            Reject(() => other.Import(Zip("top-loop",looping,edgeFiles)), "top response cannot loop indefinitely " + response);
+        }
         foreach (var response in EdgeActions.BottomResponses.Skip(1))
         {
             var orphan = tianyi.Manifest with {Id="bottom-orphan",Actions=new() {
@@ -149,6 +158,24 @@ internal static class CharacterPackVerification
             looping.Actions[response] = looping.Actions[response] with {Loop=true};
             Reject(() => other.Import(Zip("bottom-loop",looping,edgeFiles)), "bottom response cannot loop indefinitely " + response);
         }
+        check(EdgeActions.TopResponses.All(edgeRoundTrip.Actions.ContainsKey)
+            && edgeFiles.ContainsKey("top-sequence-v2.png") && !edgeFiles.ContainsKey("swing-jade-v2.png")
+            && edgeRoundTrip.Manifest.Actions["edge-top-smile"].Frames.All(f=>f.Region is not null&&f.SwingSeatAnchorY is not null),
+            "top atlas and per-frame suspension anchors survive actual export and import");
+        foreach(var seatY in new[] {double.NaN,.05,.96})
+        {
+            var invalid=tianyi.Manifest with {Id="top-seat-invalid",Actions=new(tianyi.Manifest.Actions)};
+            invalid.Actions["edge-top-idle"]=new() {Loop=true,Frames=new() {
+                tianyi.Manifest.Actions["edge-top-idle"].Frames[0] with {SwingSeatAnchorY=seatY}}};
+            Reject(()=>other.Import(Zip("top-seat-invalid",invalid,edgeFiles)),"top atlas rejects invalid seat registration");
+        }
+        var badTopAnchor=tianyi.Manifest with {Id="top-anchor",Actions=new(tianyi.Manifest.Actions)};
+        badTopAnchor.Actions["edge-top-idle"]=new() {Loop=true,Frames=new() {
+            tianyi.Manifest.Actions["edge-top-idle"].Frames[0] with {EdgeAnchorY=.51}}};
+        Reject(()=>other.Import(Zip("top-anchor",badTopAnchor,edgeFiles)),"top virtual suspension anchor remains in the upper half");
+        var tooMany=tianyi.Manifest with {Id="frame-limit",Actions=new() {
+            ["idle"]=Clip(true,Enumerable.Range(0,161).Select(_=>("idle.png",100)).ToArray())}};
+        Reject(()=>other.Import(Zip("frame-limit",tooMany,edgeFiles)),"160 frame package cap still bounds repeated references");
         var badBottomAnchor=tianyi.Manifest with {Id="bottom-anchor",Actions=new(tianyi.Manifest.Actions)};
         badBottomAnchor.Actions["edge-bottom-idle"]=new() {Loop=true,Frames=new() {
             tianyi.Manifest.Actions["edge-bottom-idle"].Frames[0] with {EdgeAnchorY=.49}}};
@@ -157,7 +184,7 @@ internal static class CharacterPackVerification
             && edgeRoundTrip.Manifest.EdgeTopAnchorY == tianyi.Manifest.EdgeTopAnchorY && edgeRoundTrip.Manifest.EdgeBottomAnchorY == tianyi.Manifest.EdgeBottomAnchorY,
             "all vertical actions and contact anchors survive actual package export and import");
         other.Remove(edgeRoundTrip);
-        check(edgeRoundTrip.Manifest.TopSwing is { SeatAnchorY: 0.69, SeatHalfWidth: 0.36, RopeColor: "#77B4A8" },
+        check(edgeRoundTrip.Manifest.TopSwing == tianyi.Manifest.TopSwing,
             "swing configuration survives real export and import");
         check(edgeRoundTrip.Manifest.TopSwing?.Ornament is { Image: "rope-ornament-v1.png", DisplayWidth: 18, DisplayHeight: 27 }
             && edgeRoundTrip.SwingOrnamentImage is { IsFrozen: true } && edgeFiles.ContainsKey("rope-ornament-v1.png"),

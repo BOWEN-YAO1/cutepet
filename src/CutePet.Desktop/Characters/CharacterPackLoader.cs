@@ -11,7 +11,7 @@ namespace CutePet.Desktop;
 
 internal static class CharacterPackLoader
 {
-    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-shy", "edge-sway", "edge-nod", "edge-top-idle", "edge-top-peek", "edge-bottom-idle", "edge-bottom-peek", "edge-bottom-look", "edge-bottom-smile" };
+    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-shy", "edge-sway", "edge-nod", "edge-top-idle", "edge-top-peek", "edge-top-look", "edge-top-smile", "edge-bottom-idle", "edge-bottom-peek", "edge-bottom-look", "edge-bottom-smile" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true, WriteIndented = true };
     public static bool ValidId(string? id) => id is not null && Regex.IsMatch(id, "\\A[a-z][a-z0-9-]{0,63}\\z");
@@ -67,6 +67,8 @@ internal static class CharacterPackLoader
                 throw new InvalidDataException("探头回应需要配套 " + baseAction + " 贴边姿势。");
         if (SideEdgeMotion.Responses.Any(action => manifest.Actions.ContainsKey(action)) && !manifest.Actions.ContainsKey("edge-idle"))
             throw new InvalidDataException("左右贴边回应需要配套 edge-idle 姿势。");
+        if (EdgeActions.TopResponses.Any(action => manifest.Actions.ContainsKey(action)) && !manifest.Actions.ContainsKey("edge-top-idle"))
+            throw new InvalidDataException("上沿回应需要配套 edge-top-idle 姿势。");
         if (EdgeActions.BottomResponses.Any(action => manifest.Actions.ContainsKey(action)) && !manifest.Actions.ContainsKey("edge-bottom-idle"))
             throw new InvalidDataException("下沿回应需要配套 edge-bottom-idle 姿势。");
         if (!manifest.Actions.ContainsKey("sit") && (manifest.RestAfterMs != 0 || manifest.Actions.ContainsKey("conjure") || manifest.Actions.ContainsKey("stand")
@@ -82,8 +84,8 @@ internal static class CharacterPackLoader
         foreach (var (name, action) in manifest.Actions)
         {
             if (action is null || action.Frames is null || action.Frames.Count == 0
-                || (frameCount += action.Frames.Count) > 120 || action.Loop != (name is "idle" or "low" or "sit" || EdgeActions.BaseOf(name) == name))
-                throw new InvalidDataException("待机、低额度、坐姿和贴边姿势必须循环；其他动作必须有限播放，最多 120 帧。");
+                || (frameCount += action.Frames.Count) > 160 || action.Loop != (name is "idle" or "low" or "sit" || EdgeActions.BaseOf(name) == name))
+                throw new InvalidDataException("待机、低额度、坐姿和贴边姿势必须循环；其他动作必须有限播放，最多 160 帧。");
             var loaded = new List<LoadedFrame>();
             foreach (var frame in action.Frames)
             {
@@ -98,14 +100,15 @@ internal static class CharacterPackLoader
                     var decoder = new PngBitmapDecoder(bytes, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
                     var decoded = decoder.Frames[0];
                     if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
-                        || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 44_040_192)
-                        throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，总解码像素最大 44,040,192。");
+                        || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 45_875_200)
+                        throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，总解码像素最大 45,875,200。");
                     decoded.Freeze();
                     images.Add(frame.Image, image = decoded);
                 }
                 var side = EdgeActions.BaseOf(name) == "edge-idle";
                 var bottom = EdgeActions.BaseOf(name) == "edge-bottom-idle";
-                var edge = side || bottom;
+                var top = EdgeActions.BaseOf(name) == "edge-top-idle";
+                var edge = side || bottom || top;
                 var edgeBase = EdgeActions.BaseOf(name)!;
                 if (edge && edgeCanvases.TryGetValue(edgeBase, out var prior) && prior.Regions != (frame.Region is not null))
                 {
@@ -114,8 +117,11 @@ internal static class CharacterPackLoader
                 if (frame.EdgeAnchorX is not null && (!side || frame.Region is null)
                     || frame.EdgeAnchorY is not null && (!edge || frame.Region is null)
                     || frame.EdgeAnchorX is double x && (!double.IsFinite(x) || x < 0 || x > 0.5)
-                    || frame.EdgeAnchorY is double y && (!double.IsFinite(y) || y < (bottom ? .5 : 0) || y > 1))
-                    throw new InvalidDataException("逐帧扶边点用于左右或下沿图集：左右 X 为 0–0.5、Y 为 0–1，下沿 Y 为 0.5–1。");
+                    || frame.EdgeAnchorY is double y && (!double.IsFinite(y) || y < (bottom ? .5 : 0) || y > (top ? .5 : 1)))
+                    throw new InvalidDataException("逐帧锚点用于边缘图集：左右 X 为 0–0.5、Y 为 0–1，上沿 Y 为 0–0.5，下沿 Y 为 0.5–1。");
+                if (frame.SwingSeatAnchorY is double seatY && (!top || frame.Region is null || manifest.TopSwing is null
+                    || !double.IsFinite(seatY) || seatY <= (frame.EdgeAnchorY ?? manifest.EdgeTopAnchorY) + .1 || seatY > .95))
+                    throw new InvalidDataException("逐帧坐板锚点需要上沿秋千图集，位于悬挂点下方并不超过画布高度的 95%。");
                 if (frame.Region is { } region)
                 {
                     if (region.X < 0 || region.Y < 0 || region.Width < 1 || region.Height < 1
@@ -125,7 +131,7 @@ internal static class CharacterPackLoader
                     if (!regions.TryGetValue(key, out var cropped))
                     {
                         // Count both the atlas and each distinct view conservatively; repeated frames share one view.
-                        if ((pixels += (long)region.Width * region.Height) > 44_040_192)
+                        if ((pixels += (long)region.Width * region.Height) > 45_875_200)
                             throw new InvalidDataException("图集及帧区域合计超过总解码像素限制。");
                         cropped = new CroppedBitmap(image, new Int32Rect(region.X, region.Y, region.Width, region.Height));
                         cropped.Freeze(); regions.Add(key, cropped);
@@ -144,7 +150,7 @@ internal static class CharacterPackLoader
                         throw new InvalidDataException("同一角色的普通动作帧需要保持相同画布大小。");
                 }
                 if (edge) edgeCanvases.TryAdd(edgeBase, (image.PixelWidth,image.PixelHeight,frame.Region is not null));
-                loaded.Add(new(image, frame.DurationMs, frame.EdgeAnchorX, frame.EdgeAnchorY));
+                loaded.Add(new(image, frame.DurationMs, frame.EdgeAnchorX, frame.EdgeAnchorY, frame.SwingSeatAnchorY));
             }
             var clip = new LoadedAction(action.Loop, loaded);
             if (clip.Duration > 30000) throw new InvalidDataException("一个动作最多持续 30 秒。");
@@ -166,7 +172,7 @@ internal static class CharacterPackLoader
                 var decoder = new PngBitmapDecoder(bytes, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
                 var decoded = decoder.Frames[0];
                 if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
-                    || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 44_040_192)
+                    || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 45_875_200)
                     throw new InvalidDataException("角色附加图层超过解码大小限制。");
                 decoded.Freeze();
                 images.Add(name, image = decoded);

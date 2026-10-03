@@ -17,6 +17,7 @@ public partial class CharactersPage : UserControl, IDisposable
     private readonly RotateTransform sidePreviewTilt = new();
     private readonly TranslateTransform sidePreviewShift = new();
     private readonly Stopwatch clock = new();
+    private double swingPreviewElapsed;
     private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(40) };
     private CharacterPack? Selected => CharacterList.SelectedItem as CharacterPack;
     private string? lastUsedId;
@@ -37,6 +38,7 @@ public partial class CharactersPage : UserControl, IDisposable
             var elapsed = clock.Elapsed;
             clock.Restart();
             animation.Advance(elapsed);
+            swingPreviewElapsed = (swingPreviewElapsed + elapsed.TotalMilliseconds) % 3200;
             cloudPreview.Advance(elapsed);
             CloudPreview.Opacity = cloudPreview.Opacity;
             Preview.Source = animation.Image;
@@ -70,6 +72,7 @@ public partial class CharactersPage : UserControl, IDisposable
     {
         if (Selected is not CharacterPack pack) return;
         animation.Configure(pack);
+        swingPreviewElapsed = 0;
         cloudPreview.Cancel();
         CloudPreview.Opacity = 0;
         CloudPreview.Source = pack.CloudImage;
@@ -82,7 +85,7 @@ public partial class CharactersPage : UserControl, IDisposable
             ("sit-blink", "坐姿眨眼"), ("sit-greeting", "坐姿挥手"), ("sit-happy", "坐姿微笑"),
             ("edge-idle", "左右贴边"), ("edge-peek", "左右探头微笑"), ("edge-top-idle", "花藤秋千"),
             ("edge-shy", "缩回再探出"), ("edge-sway", "探头轻摇"), ("edge-nod", "探头点头"),
-            ("edge-top-peek", "秋千轻摆"), ("edge-bottom-idle", "下沿托腮"), ("edge-bottom-peek", "下沿抬头微笑"),
+            ("edge-top-peek", "秋千闭眼微笑"), ("edge-top-look", "秋千左右张望"), ("edge-top-smile", "秋千歪头微笑"), ("edge-bottom-idle", "下沿托腮"), ("edge-bottom-peek", "下沿抬头微笑"),
             ("edge-bottom-look", "下沿左右张望"), ("edge-bottom-smile", "下沿歪头微笑") };
         CharacterInfo.Text = pack.Name;
         RightsInfo.Text = $"作者：{(string.IsNullOrWhiteSpace(pack.Manifest.Author) ? "未填写" : pack.Manifest.Author)}\n"
@@ -101,6 +104,7 @@ public partial class CharactersPage : UserControl, IDisposable
     }
     private void OnPreview(object sender, RoutedEventArgs e)
     {
+        swingPreviewElapsed = 0;
         cloudPreview.Cancel();
         if (PreviewAction.SelectedValue is string action)
         { animation.Preview(action); if (action == "summon-cloud") cloudPreview.Start(Selected!.Actions[action].Duration); }
@@ -111,6 +115,34 @@ public partial class CharactersPage : UserControl, IDisposable
     private void RefreshSidePreview()
     {
         BottomPreviewEdge.Visibility = Visibility.Collapsed;
+        TopPreviewRopes.Visibility = Visibility.Collapsed;
+        sidePreviewTilt.CenterY = 0;
+        if (Selected is { Manifest.TopSwing: { } swing } top && EdgeActions.BaseOf(animation.Action) == "edge-top-idle"
+            && animation.Image is System.Windows.Media.Imaging.CroppedBitmap)
+        {
+            SidePreviewEdge.Visibility = Visibility.Collapsed;
+            TopPreviewRopes.Visibility = Visibility.Visible;
+            Preview.Clip = null;
+            var frame = animation.SpriteFrame;
+            var height = Math.Min(Preview.ActualHeight,Preview.ActualWidth * frame.Image.PixelHeight / frame.Image.PixelWidth);
+            var width = Math.Min(Preview.ActualWidth,Preview.ActualHeight * frame.Image.PixelWidth / frame.Image.PixelHeight);
+            var anchor = frame.EdgeAnchorY ?? top.Manifest.EdgeTopAnchorY;
+            var responding = EdgeActions.TopResponses.Contains(animation.Action);
+            var amplitude = 3 + (responding ? Math.Pow(Math.Sin(Math.PI * animation.ActionProgress),2) : 0);
+            sidePreviewTilt.CenterY = height * (anchor - .5);
+            sidePreviewTilt.Angle = amplitude * Math.Sin(2*Math.PI*swingPreviewElapsed/3200);
+            sidePreviewShift.X = 0;
+            sidePreviewShift.Y = -(Preview.ActualHeight-height)/2 - height*anchor;
+            foreach(var (rope,sign) in new[] {(TopPreviewLeft,-1),(TopPreviewRight,1)})
+            {
+                var span=sign*width*swing.SeatHalfWidth;
+                var point=Preview.TranslatePoint(new Point(Preview.ActualWidth/2+span,(Preview.ActualHeight-height)/2
+                    + height*(frame.SwingSeatAnchorY ?? swing.SeatAnchorY)),TopPreviewRopes);
+                rope.X1=TopPreviewRopes.ActualWidth/2+span;rope.Y1=0;
+                rope.X2=point.X;rope.Y2=point.Y;
+            }
+            return;
+        }
         if (Selected is { } bottom && EdgeActions.BaseOf(animation.Action) == "edge-bottom-idle"
             && animation.Image is System.Windows.Media.Imaging.CroppedBitmap)
         {

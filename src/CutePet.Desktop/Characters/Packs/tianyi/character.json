@@ -404,8 +404,16 @@
       "loop": true,
       "frames": [
         {
-          "image": "swing-jade-v2.png",
-          "durationMs": 1000
+          "image": "top-sequence-v2.png",
+          "durationMs": 1000,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
         }
       ]
     },
@@ -413,16 +421,88 @@
       "loop": false,
       "frames": [
         {
-          "image": "swing-jade-v2.png",
-          "durationMs": 300
+          "image": "top-sequence-v2.png",
+          "durationMs": 140,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
         },
         {
-          "image": "swing-jade-v2.png",
-          "durationMs": 400
+          "image": "top-sequence-v2.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
         },
         {
-          "image": "swing-jade-v2.png",
-          "durationMs": 300
+          "image": "top-sequence-v2.png",
+          "durationMs": 200,
+          "region": {
+            "x": 768,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 640,
+          "region": {
+            "x": 1152,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.015625,
+          "swingSeatAnchorY": 0.630859375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 200,
+          "region": {
+            "x": 768,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 140,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
         }
       ]
     },
@@ -1170,6 +1250,184 @@
           "edgeAnchorY": 0.91015625
         }
       ]
+    },
+    "edge-top-look": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 140,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 360,
+          "region": {
+            "x": 1152,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 160,
+          "region": {
+            "x": 1152,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.015625,
+          "swingSeatAnchorY": 0.630859375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 600,
+          "region": {
+            "x": 0,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.015625,
+          "swingSeatAnchorY": 0.630859375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 160,
+          "region": {
+            "x": 1152,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.015625,
+          "swingSeatAnchorY": 0.630859375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 360,
+          "region": {
+            "x": 1152,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 140,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
+        }
+      ]
+    },
+    "edge-top-smile": {
+      "loop": false,
+      "frames": [
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 140,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 180,
+          "region": {
+            "x": 1152,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.015625,
+          "swingSeatAnchorY": 0.630859375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 240,
+          "region": {
+            "x": 384,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.017578125,
+          "swingSeatAnchorY": 0.6328125
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 640,
+          "region": {
+            "x": 768,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.017578125,
+          "swingSeatAnchorY": 0.6328125
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 240,
+          "region": {
+            "x": 384,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.017578125,
+          "swingSeatAnchorY": 0.6328125
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 180,
+          "region": {
+            "x": 1152,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.015625,
+          "swingSeatAnchorY": 0.630859375
+        },
+        {
+          "image": "top-sequence-v2.png",
+          "durationMs": 140,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorY": 0.078125,
+          "swingSeatAnchorY": 0.693359375
+        }
+      ]
     }
   },
   "restAfterMs": 30000,
@@ -1180,11 +1438,11 @@
     "displayHeight": 32
   },
   "edgeAnchorX": 0.4244791666666667,
-  "edgeTopAnchorY": 0,
+  "edgeTopAnchorY": 0.078125,
   "edgeBottomAnchorY": 0.91015625,
   "topSwing": {
-    "seatAnchorY": 0.69,
-    "seatHalfWidth": 0.36,
+    "seatAnchorY": 0.693359375,
+    "seatHalfWidth": 0.33,
     "ropeColor": "#77B4A8",
     "ornament": {
       "image": "rope-ornament-v1.png",

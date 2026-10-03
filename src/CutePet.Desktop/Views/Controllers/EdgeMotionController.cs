@@ -32,7 +32,6 @@ internal sealed class EdgeMotionController
     internal EdgeAttachment? Attachment { get; private set; }
     internal bool Active => Attachment is not null;
     private string BaseAction => EdgeActions.Base(Attachment!.Side);
-    private string PeekAction => EdgeActions.Peek(BaseAction);
     internal double PeekOffset { get; private set; }
     internal EdgeMotionController(MainWindow window, bool verification)
     {
@@ -95,7 +94,7 @@ internal sealed class EdgeMotionController
         var choices = Attachment!.Side is ScreenEdge.Left or ScreenEdge.Right
             ? SideEdgeMotion.Responses.Where(window.SelectedCharacter.Actions.ContainsKey).ToArray()
             : Attachment.Side == ScreenEdge.Bottom ? EdgeActions.BottomResponses.Where(window.SelectedCharacter.Actions.ContainsKey).ToArray()
-            : window.SelectedCharacter.Actions.ContainsKey(PeekAction) ? new[] { PeekAction } : Array.Empty<string>();
+            : EdgeActions.TopResponses.Where(window.SelectedCharacter.Actions.ContainsKey).ToArray();
         if (choices.Length == 0) return;
         response = choices[nextResponse % choices.Length];
         nextResponse = (nextResponse + 1) % choices.Length;
@@ -183,14 +182,15 @@ internal sealed class EdgeMotionController
             ? (right ? 1 : -1) * (anchor * entry - PeekOffset) : 0;
         var imageTop = 16 + 148 - window.CharacterArt.Height + (window.CharacterArt.Height - renderedHeight) / 2;
         var bottomAnchor = bottomArticulated ? current.EdgeAnchorY ?? window.SelectedCharacter.Manifest.EdgeBottomAnchorY : window.SelectedCharacter.Manifest.EdgeBottomAnchorY;
-        var verticalAnchor = Attachment.Side == ScreenEdge.Top ? window.SelectedCharacter.Manifest.EdgeTopAnchorY : bottomAnchor;
+        var topAnchor = current.EdgeAnchorY ?? window.SelectedCharacter.Manifest.EdgeTopAnchorY;
+        var verticalAnchor = Attachment.Side == ScreenEdge.Top ? topAnchor : bottomAnchor;
         // Top may swing independently; bottom keeps a small elbow-anchored lift.
         var vertical = Attachment.Side is ScreenEdge.Top or ScreenEdge.Bottom;
         window.EdgeStretch.CenterY = vertical ? renderedHeight * (verticalAnchor - 0.5) : 0;
         window.EdgeStretch.ScaleY = Attachment.Side == ScreenEdge.Bottom ? 1 + 0.04 * PeekOffset / 8 : 1;
         window.EdgeShift.Y = Attachment.Side switch
         {
-            ScreenEdge.Top => -(imageTop + renderedHeight * window.SelectedCharacter.Manifest.EdgeTopAnchorY) * entry,
+            ScreenEdge.Top => -(imageTop + renderedHeight * topAnchor) * entry,
             ScreenEdge.Bottom => (178 - imageTop - renderedHeight * bottomAnchor) * entry,
             _ => 0
         };
@@ -222,13 +222,13 @@ internal sealed class EdgeMotionController
             HideScenery();
             return;
         }
-        var anchor = window.SelectedCharacter.Manifest.EdgeTopAnchorY;
+        var anchor = window.CurrentSpriteFrame.EdgeAnchorY ?? window.SelectedCharacter.Manifest.EdgeTopAnchorY;
         var angle = (3 + PeekOffset / 8) * Math.Sin(2 * Math.PI * swingElapsed / 3200) * entry;
         window.EdgeSwing.CenterY = height * (anchor - 0.5);
         window.EdgeSwing.Angle = angle;
         var radians = angle * Math.PI / 180;
         var span = width * swing.SeatHalfWidth;
-        var drop = height * (swing.SeatAnchorY - anchor);
+        var drop = height * ((window.CurrentSpriteFrame.SwingSeatAnchorY ?? swing.SeatAnchorY) - anchor);
         var pivotY = imageTop + height * anchor + window.EdgeShift.Y;
         if (ropeColor != swing.RopeColor)
         {

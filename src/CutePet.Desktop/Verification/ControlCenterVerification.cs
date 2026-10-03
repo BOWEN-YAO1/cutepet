@@ -138,9 +138,21 @@ internal static class ControlCenterVerification
                 && characters.SidePreviewEdge.Visibility == Visibility.Collapsed,
                 "bottom preview clips below the fixed elbow support instead of using the side mask");
             Render(center,directory,"app-bottom-preview");
+            characters.PreviewAction.SelectedValue="edge-top-look";
+            characters.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+            await Settle();
+            check(characters.TopPreviewRopes.Visibility==Visibility.Visible&&characters.Preview.Clip is null
+                &&characters.BottomPreviewEdge.Visibility==Visibility.Collapsed&&characters.SidePreviewEdge.Visibility==Visibility.Collapsed,
+                "top character-page preview shows attached suspension without bottom or side masks");
+            check(characters.TopPreviewLeft.X1>characters.TopPreviewRopes.ActualWidth/3
+                && characters.TopPreviewRight.X1<2*characters.TopPreviewRopes.ActualWidth/3
+                &&Math.Abs(characters.TopPreviewLeft.X2-characters.TopPreviewLeft.X1)<15
+                &&Math.Abs(characters.TopPreviewRight.X2-characters.TopPreviewRight.X1)<15,
+                "top preview suspension is centered over the rendered character instead of the image's tight layout origin");
+            Render(center,directory,"app-top-preview");
             characters.CharacterList.SelectedItem = host.Characters.Find("cat");
             check(characters.Preview.Clip is null && characters.SidePreviewEdge.Visibility == Visibility.Collapsed
-                && characters.BottomPreviewEdge.Visibility == Visibility.Collapsed,
+                && characters.BottomPreviewEdge.Visibility == Visibility.Collapsed && characters.TopPreviewRopes.Visibility == Visibility.Collapsed,
                 "switching characters clears the side-only mask and border preview");
             characters.UseButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
             await Settle();

@@ -277,3 +277,9 @@ region 使用源 PNG 的整数像素坐标，宽高为正，必须完整位于�
 新增可选有限动作 edge-bottom-look / edge-bottom-smile，与 edge-bottom-peek 一样必须提供循环基础动作 edge-bottom-idle，播放后返回基础托腮。下侧可使用 region 和逐帧 edgeAnchorY（0.5–1），不能提供 edgeAnchorX；缺省使用包级 edgeBottomAnchorY。左右与下侧分别保持区域画布一致，同方向不能混用完整 PNG 与区域帧。旧完整 PNG 包继续兼容。角色页支持固定下沿参考线和裁切预览。新增动作需 CutePet 0.34.0 或更高版本。
 
 内置天依三组下侧回应共用八张 384×512 姿势，每组七帧引用、1.68～1.92 秒。总计 24 动作 / 120 帧引用 / 26 张活跃 PNG，原图 40,872,262 像素，含 16 个不同区域缓存为 44,017,990，原有限额不变。导出只带实际引用图集、完整 SOURCE.md 和许可证；SOURCE-HISTORY-v033.md 保留在匹配源码包中。
+
+## 0.35.0 秋千姿势图集
+
+新增 edge-top-look / edge-top-smile，必须配套循环 edge-top-idle，有限回应后回到秋千坐姿。上沿图集帧支持 edgeAnchorY（0–0.5）与 swingSeatAnchorY（需 topSwing，大于该帧悬挂点 0.1，不超过 0.95）；不接受逐帧 edgeAnchorX。缺省沿用包级锚点；保持每帧 swingSeatAnchorY − edgeAnchorY 一致，坐板便保持同一悬挂距离，绳顶固定，绳底跟随真实坐板变换。上沿区域拥有自己的统一画布大小。角色页显示悬绳，帧元数据完整导入导出。旧 PNG 秋千包兼容。新动作和元数据需 0.35.0 或更新版本。
+
+内置天依八张秋千坐姿组成三组七帧回应，总计 26 动作 / 138 帧引用 / 26 张活跃 PNG。原图 40,873,286 像素，含 24 个不同区域缓存为 45,591,878。总预算上限 45,875,200 像素（175 MiB BGRA），总帧上限 160，其他文件与 ZIP 限额保持。导出只含实际引用 PNG、SOURCE.md 和许可证，历史档案随匹配源码 ZIP 保留。

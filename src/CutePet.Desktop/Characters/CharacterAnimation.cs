@@ -47,7 +47,7 @@ internal sealed class CharacterAnimation
         "conjure" => CharacterFrame.Conjure, "sit" => CharacterFrame.Sit, "stand" => CharacterFrame.Rise,
         "sit-blink" => CharacterFrame.SeatedBlink, "sit-greeting" => CharacterFrame.SeatedWave, "sit-happy" => CharacterFrame.SeatedHappy,
         "edge-idle" or "edge-top-idle" or "edge-bottom-idle" => CharacterFrame.EdgeIdle,
-        "edge-peek" or "edge-shy" or "edge-sway" or "edge-nod" or "edge-top-peek" or "edge-bottom-peek" or "edge-bottom-look" or "edge-bottom-smile" => CharacterFrame.EdgePeek,
+        "edge-peek" or "edge-shy" or "edge-sway" or "edge-nod" or "edge-top-peek" or "edge-top-look" or "edge-top-smile" or "edge-bottom-peek" or "edge-bottom-look" or "edge-bottom-smile" => CharacterFrame.EdgePeek,
         _ => CharacterFrame.Idle };
     public void Configure(CharacterPack selected) { pack = selected; low = false; baseElapsed = 0; Reset(); }
     public void Blink() { if (transient is null && !Low && !onEdge) Start(resting ? "sit-blink" : "blink"); }

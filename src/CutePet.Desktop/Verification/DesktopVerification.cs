@@ -534,7 +534,7 @@ internal static class DesktopVerification
             Check(manager.Preview.Source == window.SelectedCharacter.Actions["greeting"].Frames[0].Image,
                 "manager greeting preview uses the selected package's real frames");
             manager.CharacterList.SelectedItem = window.Characters.Find("tianyi");
-            Check(manager.PreviewAction.Items.Count == 24, "manager exposes twenty-four Tianyi actions including varied side and bottom responses");
+            Check(manager.PreviewAction.Items.Count == 26, "manager exposes twenty-six Tianyi actions including varied gestures on every edge");
             manager.PreviewAction.SelectedValue = "happy";
             manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
             Check(manager.Preview.Source == window.Characters.Find("tianyi").Actions["happy"].Frames[0].Image,

@@ -68,7 +68,7 @@ internal static class VerticalEdgeVerification
             var expression = window.CharacterArt.Source;
             check(ReferenceEquals(expression, pack.Actions[EdgeActions.Peek(EdgeActions.Base(side))].At(duration / 2))
                 && window.ScreenEdgePeekOffset == (side == ScreenEdge.Top ? 8 : 0), "vertical response selects its package pose at midpoint " + side);
-            check((side == ScreenEdge.Top ? window.EdgeShift.Y == contactShift : window.EdgeShift.Y >= contactShift)
+            check((side == ScreenEdge.Top ? window.EdgeShift.Y <= 0 : window.EdgeShift.Y >= contactShift)
                 && window.EdgeStretch.ScaleY == 1,
                 "vertical response keeps the hand or elbow contact line fixed " + side);
             var movedArea = new Rect(100, 40, 1600, 900);
@@ -108,6 +108,7 @@ internal static class VerticalEdgeVerification
             .ToDictionary(pair => pair.Key, pair => pair.Value) };
         check(EdgeActions.Supported(legacy).SequenceEqual(new[] { ScreenEdge.Left, ScreenEdge.Right }),
             "legacy side-only packages retain exactly their original supported sides");
+        TopEdgeVerification.Run(window,directory,check);
         BottomEdgeVerification.Run(window,directory,check);
         Record(window, directory, check);
         window.WakeCharacterImmediately();
