@@ -276,7 +276,7 @@
       "loop": true,
       "frames": [
         {
-          "image": "swing-v1.png",
+          "image": "swing-jade-v2.png",
           "durationMs": 1000
         }
       ]
@@ -285,15 +285,15 @@
       "loop": false,
       "frames": [
         {
-          "image": "swing-v1.png",
+          "image": "swing-jade-v2.png",
           "durationMs": 300
         },
         {
-          "image": "swing-v1.png",
+          "image": "swing-jade-v2.png",
           "durationMs": 400
         },
         {
-          "image": "swing-v1.png",
+          "image": "swing-jade-v2.png",
           "durationMs": 300
         }
       ]
@@ -338,6 +338,6 @@
   "topSwing": {
     "seatAnchorY": 0.69,
     "seatHalfWidth": 0.36,
-    "ropeColor": "#897055"
+    "ropeColor": "#77B4A8"
   }
 }

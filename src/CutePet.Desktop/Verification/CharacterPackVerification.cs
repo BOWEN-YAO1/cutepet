@@ -113,7 +113,7 @@ internal static class CharacterPackVerification
             && edgeRoundTrip.Manifest.EdgeTopAnchorY == 0 && edgeRoundTrip.Manifest.EdgeBottomAnchorY == 0.9,
             "all vertical actions and contact anchors survive actual package export and import");
         other.Remove(edgeRoundTrip);
-        check(edgeRoundTrip.Manifest.TopSwing is { SeatAnchorY: 0.69, SeatHalfWidth: 0.36, RopeColor: "#897055" },
+        check(edgeRoundTrip.Manifest.TopSwing is { SeatAnchorY: 0.69, SeatHalfWidth: 0.36, RopeColor: "#77B4A8" },
             "swing configuration survives real export and import");
         foreach (var (config, reason) in new[] {
             (new CharacterTopSwing { SeatAnchorY = 0.05 }, "seat above suspension anchor"),
