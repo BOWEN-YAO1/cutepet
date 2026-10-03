@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>disable</ImplicitUsings>
     <AssemblyName>CutePet</AssemblyName>
-    <Version>0.32.0</Version>
+    <Version>0.33.0</Version>
     <ApplicationIcon>Assets/cutepet.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>

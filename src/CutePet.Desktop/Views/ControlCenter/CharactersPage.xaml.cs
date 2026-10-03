@@ -109,6 +109,22 @@ public partial class CharactersPage : UserControl, IDisposable
     }
     private void RefreshSidePreview()
     {
+        if (Selected is { } pack && EdgeActions.BaseOf(animation.Action) == "edge-idle"
+            && animation.Image is System.Windows.Media.Imaging.CroppedBitmap)
+        {
+            SidePreviewEdge.Visibility = Visibility.Visible;
+            var frame = animation.SpriteFrame;
+            var width = Math.Min(Preview.ActualWidth, Preview.ActualHeight * frame.Image.PixelWidth / frame.Image.PixelHeight);
+            var height = Math.Min(Preview.ActualHeight, Preview.ActualWidth * frame.Image.PixelHeight / frame.Image.PixelWidth);
+            var anchor = (Preview.ActualWidth - width) / 2 + width * (frame.EdgeAnchorX ?? pack.Manifest.EdgeAnchorX);
+            Preview.Clip = new RectangleGeometry(new Rect(anchor, 0, Math.Max(0,Preview.ActualWidth - anchor), Preview.ActualHeight));
+            sidePreviewTilt.Angle = 0;
+            sidePreviewShift.X = Preview.ActualWidth / 2 - anchor;
+            sidePreviewShift.Y = height * ((pack.Actions["edge-idle"].Frames[0].EdgeAnchorY ?? .58) - (frame.EdgeAnchorY ?? .58));
+            return;
+        }
+        Preview.Clip = null;
+        SidePreviewEdge.Visibility = Visibility.Collapsed;
         var pose = SideEdgeMotion.Responses.Contains(animation.Action) ? SideEdgeMotion.Sample(animation.Action, animation.ActionProgress) : default;
         sidePreviewTilt.Angle = pose.Angle; sidePreviewShift.X = pose.Peek; sidePreviewShift.Y = pose.Lift;
     }

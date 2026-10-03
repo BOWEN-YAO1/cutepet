@@ -124,7 +124,16 @@ internal static class ControlCenterVerification
             var characters = (CharactersPage)center.PageHost.Content;
             check(characters.CharacterList.Items.Count == host.Characters.Packs.Count && center.IsCharactersPage,
                 "characters page embeds the shared pack library and pauses desktop cloud travel while visible");
+            characters.CharacterList.SelectedItem = host.Characters.Find("tianyi");
+            characters.PreviewAction.SelectedValue = "edge-peek";
+            characters.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+            await Settle();
+            check(characters.Preview.Clip is RectangleGeometry && characters.SidePreviewEdge.Visibility == Visibility.Visible,
+                "character-page articulated preview masks the hidden body and shows the fixed border");
+            Render(center,directory,"app-side-preview");
             characters.CharacterList.SelectedItem = host.Characters.Find("cat");
+            check(characters.Preview.Clip is null && characters.SidePreviewEdge.Visibility == Visibility.Collapsed,
+                "switching characters clears the side-only mask and border preview");
             characters.UseButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
             await Settle();
             check(host.SelectedCharacter.Id == "cat" && !center.Model.CanCloud && !characters.RemoveButton.IsEnabled,

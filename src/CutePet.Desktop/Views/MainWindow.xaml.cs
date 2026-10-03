@@ -95,6 +95,7 @@ public partial class MainWindow : Window
     internal void StartCloudSpell() => characterPresenter.StartCloudSpell();
     internal void CancelCloudSpell() => characterPresenter.CancelCloudSpell();
     internal CharacterFrame CurrentCharacterFrame => characterPresenter.CurrentFrame;
+    internal LoadedFrame CurrentSpriteFrame => characterPresenter.SpriteFrame;
     internal bool CharacterResting => characterPresenter.Resting;
     internal bool CharacterRestPose => characterPresenter.RestPose;
     public void ToggleCharacterRest() => characterPresenter.ToggleRest();

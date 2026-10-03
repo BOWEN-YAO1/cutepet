@@ -38,7 +38,8 @@ internal sealed class CharacterAnimation
     }
     public string Action => transient ?? (Low && pack.Actions.ContainsKey("low") ? "low" : onEdge ? edgeBase : resting ? "sit" : "idle");
     internal double ActionProgress => (transient is null ? baseElapsed : transientElapsed) / pack.Actions[Action].Duration;
-    public BitmapSource Image => pack.Actions[Action].At(transient is null ? baseElapsed : transientElapsed);
+    internal LoadedFrame SpriteFrame => pack.Actions[Action].Frames[pack.Actions[Action].PositionAt(transient is null ? baseElapsed : transientElapsed).Index];
+    public BitmapSource Image => SpriteFrame.Image;
     public CharacterFrame Frame => Action switch
     { "low" => CharacterFrame.Low, "blink" => CharacterFrame.Closed,
         "greeting" => ReferenceEquals(Image, pack.Idle.Frames[0].Image) ? CharacterFrame.Idle : CharacterFrame.Wave,

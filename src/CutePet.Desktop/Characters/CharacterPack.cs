@@ -57,8 +57,14 @@ public sealed record CharacterAction
     public bool Loop { get; init; }
     public List<CharacterActionFrame> Frames { get; init; } = new();
 }
-public sealed record CharacterActionFrame(string Image, int DurationMs = 180);
-internal sealed record LoadedFrame(BitmapSource Image, int DurationMs);
+public sealed record CharacterFrameRegion(int X, int Y, int Width, int Height);
+public sealed record CharacterActionFrame(string Image, int DurationMs = 180)
+{
+    public CharacterFrameRegion? Region { get; init; }
+    public double? EdgeAnchorX { get; init; }
+    public double? EdgeAnchorY { get; init; }
+}
+internal sealed record LoadedFrame(BitmapSource Image, int DurationMs, double? EdgeAnchorX = null, double? EdgeAnchorY = null);
 internal sealed record LoadedAction(bool Loop, IReadOnlyList<LoadedFrame> Frames)
 {
     public double Duration => Frames.Sum(frame => frame.DurationMs);

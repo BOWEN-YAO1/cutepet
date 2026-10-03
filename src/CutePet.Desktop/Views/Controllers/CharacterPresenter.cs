@@ -25,6 +25,7 @@ internal sealed class CharacterPresenter
     internal bool Idle => characterAnimation.Action == "idle";
     private static double NextLook() => Random.Shared.Next(8000, 16001);
     internal CharacterFrame CurrentFrame => characterAnimation.Frame;
+    internal LoadedFrame SpriteFrame => characterAnimation.SpriteFrame;
     public CharacterPresenter(MainWindow window, bool verification)
     {
         this.window = window;

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace CutePet.Desktop;
@@ -70,10 +71,13 @@ internal static class CharacterPackLoader
             || manifest.Actions.Keys.Any(key => key.StartsWith("sit-", StringComparison.Ordinal))))
             throw new InvalidDataException("召唤、起身、坐姿回应或自动休息需要配套 sit 动作。");
         var images = new Dictionary<string, BitmapSource>(StringComparer.OrdinalIgnoreCase);
+        var regions = new Dictionary<(string, CharacterFrameRegion), BitmapSource>();
         var actions = new Dictionary<string, LoadedAction>();
         long pixels = 0;
         var frameCount = 0;
         int? width = null, height = null;
+        int? sideWidth = null, sideHeight = null;
+        bool? sideRegions = null;
         foreach (var (name, action) in manifest.Actions)
         {
             if (action is null || action.Frames is null || action.Frames.Count == 0
@@ -95,14 +99,50 @@ internal static class CharacterPackLoader
                     if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
                         || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 44_040_192)
                         throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，总解码像素最大 44,040,192。");
-                    width ??= decoded.PixelWidth;
-                    height ??= decoded.PixelHeight;
-                    if (decoded.PixelWidth != width || decoded.PixelHeight != height)
-                        throw new InvalidDataException("同一角色的所有动作帧需要保持相同画布大小。");
                     decoded.Freeze();
                     images.Add(frame.Image, image = decoded);
                 }
-                loaded.Add(new(image, frame.DurationMs));
+                var side = EdgeActions.BaseOf(name) == "edge-idle";
+                if (side)
+                {
+                    sideRegions ??= frame.Region is not null;
+                    if (sideRegions != (frame.Region is not null))
+                        throw new InvalidDataException("左右姿势应统一使用图集区域或完整 PNG，不能混用两种画布。");
+                }
+                if ((frame.EdgeAnchorX is not null || frame.EdgeAnchorY is not null)
+                    && (!side || frame.Region is null)
+                    || frame.EdgeAnchorX is double x && (!double.IsFinite(x) || x < 0 || x > 0.5)
+                    || frame.EdgeAnchorY is double y && (!double.IsFinite(y) || y < 0 || y > 1))
+                    throw new InvalidDataException("逐帧扶边点只用于左右图集帧，X 范围 0–0.5，Y 范围 0–1。");
+                if (frame.Region is { } region)
+                {
+                    if (region.X < 0 || region.Y < 0 || region.Width < 1 || region.Height < 1
+                        || (long)region.X + region.Width > image.PixelWidth || (long)region.Y + region.Height > image.PixelHeight)
+                        throw new InvalidDataException("图集帧区域必须完整位于原 PNG 内。");
+                    var key = (frame.Image.ToLowerInvariant(), region);
+                    if (!regions.TryGetValue(key, out var cropped))
+                    {
+                        // Count both the atlas and each distinct view conservatively; repeated frames share one view.
+                        if ((pixels += (long)region.Width * region.Height) > 44_040_192)
+                            throw new InvalidDataException("图集及帧区域合计超过总解码像素限制。");
+                        cropped = new CroppedBitmap(image, new Int32Rect(region.X, region.Y, region.Width, region.Height));
+                        cropped.Freeze(); regions.Add(key, cropped);
+                    }
+                    image = cropped;
+                }
+                if (side && frame.Region is not null)
+                {
+                    sideWidth ??= image.PixelWidth; sideHeight ??= image.PixelHeight;
+                    if (image.PixelWidth != sideWidth || image.PixelHeight != sideHeight)
+                        throw new InvalidDataException("左右图集的所有姿势帧需要保持相同区域大小。");
+                }
+                else
+                {
+                    width ??= image.PixelWidth; height ??= image.PixelHeight;
+                    if (image.PixelWidth != width || image.PixelHeight != height)
+                        throw new InvalidDataException("同一角色的普通动作帧需要保持相同画布大小。");
+                }
+                loaded.Add(new(image, frame.DurationMs, frame.EdgeAnchorX, frame.EdgeAnchorY));
             }
             var clip = new LoadedAction(action.Loop, loaded);
             if (clip.Duration > 30000) throw new InvalidDataException("一个动作最多持续 30 秒。");

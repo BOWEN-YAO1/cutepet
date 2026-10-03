@@ -40,3 +40,7 @@
 ## 0.32.0 完整左右贴边素材
 
 2026-10-03：内置 image_gen 编辑现有同人图，补绘完整裙摆、双腿及鞋，并生成匹配的微笑帧。新增 edge-full-v2.png / edge-full-smile-v2.png 均为 1024×1535 透明 PNG，原样接入，旧图保留。提示词与生成记录位于天依包 FULL-SIDE-PROMPTS.md / SOURCE.md，原角色权利说明继续适用。
+
+## 0.33.0 逐帧左右探出素材
+
+2026-10-03：内置 image_gen 参考原同人图制作八姿势图集，最终 edge-sequence-v3.png 为 1536×1024 RGBA 原始输出，原样复制，运行时取区域帧。提示词及修正记录位于天依包 SIDE-SEQUENCE-PROMPTS.md / SOURCE.md，旧图保留、原角色权利说明继续适用。

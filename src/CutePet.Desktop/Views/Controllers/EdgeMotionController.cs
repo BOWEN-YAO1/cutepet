@@ -167,9 +167,12 @@ internal sealed class EdgeMotionController
         var renderedWidth = Math.Min(width, window.CharacterArt.Height * image.PixelWidth / image.PixelHeight);
         var renderedHeight = Math.Min(window.CharacterArt.Height, width * image.PixelHeight / image.PixelWidth);
         // The package artwork's left canvas edge is the virtual border. Hands may overlap it.
-        var anchor = (230 - renderedWidth) / 2 + renderedWidth * window.SelectedCharacter.Manifest.EdgeAnchorX;
+        var articulated = Attachment.Side is ScreenEdge.Left or ScreenEdge.Right && image is System.Windows.Media.Imaging.CroppedBitmap;
+        var current = window.CurrentSpriteFrame;
+        var anchorX = articulated ? current.EdgeAnchorX ?? window.SelectedCharacter.Manifest.EdgeAnchorX : window.SelectedCharacter.Manifest.EdgeAnchorX;
+        var anchor = (230 - renderedWidth) / 2 + renderedWidth * anchorX;
         var t = peekElapsed < 0 ? 0 : peekElapsed / window.SelectedCharacter.Actions[response].Duration;
-        var sidePose = SideEdgeMotion.Sample(response, t);
+        var sidePose = articulated ? default : SideEdgeMotion.Sample(response, t);
         PeekOffset = sidePose.Peek;
         window.EdgeMirror.ScaleX = right ? -1 : 1;
         var entry = entering / 320;
@@ -190,7 +193,14 @@ internal sealed class EdgeMotionController
             _ => 0
         };
         RenderSwing(imageTop, renderedWidth, renderedHeight, entry);
-        if (!vertical && SideEdgeMotion.Responses.Skip(1).Any(window.SelectedCharacter.Actions.ContainsKey))
+        if (articulated)
+        {
+            // Register the drawn grips; the poses themselves reveal the body. Do not slide or rotate the whole sprite.
+            var baseGrip = window.SelectedCharacter.Actions[BaseAction].Frames[0].EdgeAnchorY ?? .58;
+            window.EdgeShift.Y = renderedHeight * (baseGrip - (current.EdgeAnchorY ?? baseGrip)) * entry;
+            window.SideEdgeTilt.Angle = 0;
+        }
+        else if (!vertical && SideEdgeMotion.Responses.Skip(1).Any(window.SelectedCharacter.Actions.ContainsKey))
         {
             var phase = 2 * Math.PI * swingElapsed / 3200;
             window.SideEdgeTilt.CenterX = (right ? 1 : -1) * renderedWidth * (0.5 - window.SelectedCharacter.Manifest.EdgeAnchorX);

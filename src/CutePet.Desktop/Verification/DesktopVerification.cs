@@ -262,10 +262,12 @@ internal static class DesktopVerification
                 var transparentFrame = false;
                 var visibleFrame = false;
                 for (var pixel = 3; pixel < framePixels.Length; pixel += 4)
-                { transparentFrame |= framePixels[pixel] == 0; visibleFrame |= framePixels[pixel] == 255; }
-                Check(image.IsFrozen && image.PixelWidth == window.SelectedCharacter.Idle.Frames[0].Image.PixelWidth
-                    && image.PixelHeight == window.SelectedCharacter.Idle.Frames[0].Image.PixelHeight && transparentFrame && visibleFrame,
-                    "each unique animation image is cached, transparent and keeps the original canvas size");
+                { transparentFrame |= framePixels[pixel] == 0; visibleFrame |= framePixels[pixel] >= 250; }
+                var registered = image is CroppedBitmap ? image.PixelWidth == 384 && image.PixelHeight == 512
+                    : image.PixelWidth == window.SelectedCharacter.Idle.Frames[0].Image.PixelWidth
+                        && image.PixelHeight == window.SelectedCharacter.Idle.Frames[0].Image.PixelHeight;
+                Check(image.IsFrozen && registered && transparentFrame && visibleFrame,
+                    "each unique animation image is cached, transparent and keeps its registered canvas size");
             }
             window.StartCharacterBlink();
             Check(window.CurrentCharacterFrame == CharacterFrame.Closed

@@ -118,3 +118,7 @@ Use case: identity-preserve. Edit target: supplied transparent Luo Tianyi fan-ar
 ## 0.32.0 完整左右贴边人物
 
 内置 image_gen 以 idle.png 与旧贴边图为参考补绘完整身体，再以新基准图生成微笑帧。edge-full-v2.png 与 edge-full-smile-v2.png 均为 1024×1535 RGBA 原始输出，原样接入，保留旧图。来源和完整提示词见 [FULL-SIDE-PROMPTS.md](../src/CutePet.Desktop/Characters/Packs/tianyi/FULL-SIDE-PROMPTS.md) / SOURCE.md，角色权利说明沿用此前记录。
+
+## 0.33.0 逐帧侧身探出
+
+内置 image_gen 参考 idle.png 生成八姿势图集，随后修正细节。edge-sequence-v3.png 为 1536×1024 RGBA，原样接入，运行时按 384×512 区域播放。旧完整人物图保留在源码，停止引用。完整提示词见 [SIDE-SEQUENCE-PROMPTS.md](../src/CutePet.Desktop/Characters/Packs/tianyi/SIDE-SEQUENCE-PROMPTS.md) 和 SOURCE.md；原角色权利说明继续适用。

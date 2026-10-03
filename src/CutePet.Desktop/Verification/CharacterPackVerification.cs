@@ -100,8 +100,8 @@ internal static class CharacterPackVerification
         check(player.Action == "greeting", "old four-action packs retain their greeting on either click choice");
         var tianyi = library.Find("tianyi");
         using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
-            check(edgeArchive.GetEntry("edge-full-v2.png") is not null && edgeArchive.GetEntry("edge-full-smile-v2.png") is not null,
-                "Tianyi export carries both new screen-edge artwork frames");
+            check(edgeArchive.GetEntry("edge-sequence-v3.png") is not null && edgeArchive.GetEntry("edge-full-v2.png") is null,
+                "Tianyi export carries the articulated atlas without the superseded floating full-body sprites");
         var edgeFiles = new Dictionary<string, byte[]>();
         using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
             foreach (var entry in edgeArchive.Entries.Where(entry => entry.FullName.EndsWith(".png", StringComparison.OrdinalIgnoreCase)))
@@ -112,6 +112,28 @@ internal static class CharacterPackVerification
         check(SideEdgeMotion.Responses.All(edgeRoundTrip.Actions.ContainsKey)
             && ReferenceEquals(edgeRoundTrip.Actions["edge-shy"].Frames[0].Image,edgeRoundTrip.Actions["edge-idle"].Frames[0].Image),
             "all side gestures export and import while deduplicating their shared artwork");
+        check(edgeRoundTrip.Actions["edge-peek"].Frames.Select(f => f.Image).Distinct().Count() >= 6
+            && edgeRoundTrip.Manifest.Actions["edge-peek"].Frames.All(f => f.Region is not null && f.EdgeAnchorX is not null && f.EdgeAnchorY is not null),
+            "atlas regions and per-frame gripping anchors survive actual export and import");
+        foreach (var region in new[] {new CharacterFrameRegion(-1,0,384,512), new CharacterFrameRegion(0,0,0,512),
+            new CharacterFrameRegion(int.MaxValue,0,384,512), new CharacterFrameRegion(1500,0,384,512)})
+        {
+            var invalid = tianyi.Manifest with { Id = "bad-region", Actions = new(tianyi.Manifest.Actions) };
+            invalid.Actions["edge-idle"] = new() {Loop = true, Frames = new() {
+                tianyi.Manifest.Actions["edge-idle"].Frames[0] with {Region = region}}};
+            Reject(() => other.Import(Zip("bad-region",invalid,edgeFiles)), "atlas rejects negative, empty, overflowing or out-of-bounds rectangles");
+        }
+        var mixedRegion = tianyi.Manifest with {Id = "mixed-region", Actions = new(tianyi.Manifest.Actions)};
+        mixedRegion.Actions["edge-peek"] = new() {Frames = new() {
+            tianyi.Manifest.Actions["edge-peek"].Frames[0] with {Region = new(0,0,383,512)}}};
+        Reject(() => other.Import(Zip("mixed-region",mixedRegion,edgeFiles)), "atlas clips reject inconsistent pose canvas sizes");
+        var wrongAnchor = tianyi.Manifest with {Id = "bad-grip", Actions = new(tianyi.Manifest.Actions)};
+        wrongAnchor.Actions["edge-idle"] = new() {Loop = true,Frames = new() {
+            tianyi.Manifest.Actions["edge-idle"].Frames[0] with {EdgeAnchorX = .51}}};
+        Reject(() => other.Import(Zip("bad-grip",wrongAnchor,edgeFiles)), "atlas gripping anchors remain bounded");
+        var mixedMode = tianyi.Manifest with {Id = "mixed-mode", Actions = new(tianyi.Manifest.Actions)};
+        mixedMode.Actions["edge-peek"] = Clip(false,("idle.png",100));
+        Reject(() => other.Import(Zip("mixed-mode",mixedMode,edgeFiles)), "side clips cannot mix atlas views with unrelated full PNG canvases");
         check(edgeRoundTrip.Actions.ContainsKey("edge-top-peek") && edgeRoundTrip.Actions.ContainsKey("edge-bottom-peek")
             && edgeRoundTrip.Manifest.EdgeTopAnchorY == 0 && edgeRoundTrip.Manifest.EdgeBottomAnchorY == 0.9,
             "all vertical actions and contact anchors survive actual package export and import");

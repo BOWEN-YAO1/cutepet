@@ -250,8 +250,16 @@
       "loop": true,
       "frames": [
         {
-          "image": "edge-full-v2.png",
-          "durationMs": 1000
+          "image": "edge-sequence-v3.png",
+          "durationMs": 1000,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.4244791666666667,
+          "edgeAnchorY": 0.654296875
         }
       ]
     },
@@ -259,16 +267,136 @@
       "loop": false,
       "frames": [
         {
-          "image": "edge-full-v2.png",
-          "durationMs": 300
+          "image": "edge-sequence-v3.png",
+          "durationMs": 160,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.4244791666666667,
+          "edgeAnchorY": 0.654296875
         },
         {
-          "image": "edge-full-smile-v2.png",
-          "durationMs": 400
+          "image": "edge-sequence-v3.png",
+          "durationMs": 160,
+          "region": {
+            "x": 384,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3020833333333333,
+          "edgeAnchorY": 0.568359375
         },
         {
-          "image": "edge-full-v2.png",
-          "durationMs": 300
+          "image": "edge-sequence-v3.png",
+          "durationMs": 160,
+          "region": {
+            "x": 768,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3229166666666667,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 160,
+          "region": {
+            "x": 1152,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.22916666666666666,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 160,
+          "region": {
+            "x": 0,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.234375,
+          "edgeAnchorY": 0.57421875
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 160,
+          "region": {
+            "x": 384,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.25,
+          "edgeAnchorY": 0.572265625
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 160,
+          "region": {
+            "x": 0,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.234375,
+          "edgeAnchorY": 0.57421875
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 160,
+          "region": {
+            "x": 1152,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.22916666666666666,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 160,
+          "region": {
+            "x": 768,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3229166666666667,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 160,
+          "region": {
+            "x": 384,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3020833333333333,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 160,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.4244791666666667,
+          "edgeAnchorY": 0.654296875
         }
       ]
     },
@@ -328,16 +456,160 @@
       "loop": false,
       "frames": [
         {
-          "image": "edge-full-v2.png",
-          "durationMs": 880
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.4244791666666667,
+          "edgeAnchorY": 0.654296875
         },
         {
-          "image": "edge-full-smile-v2.png",
-          "durationMs": 940
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 1152,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.4322916666666667,
+          "edgeAnchorY": 0.65625
         },
         {
-          "image": "edge-full-v2.png",
-          "durationMs": 380
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.4244791666666667,
+          "edgeAnchorY": 0.654296875
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3020833333333333,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 768,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3229166666666667,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 1152,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.22916666666666666,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.234375,
+          "edgeAnchorY": 0.57421875
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.25,
+          "edgeAnchorY": 0.572265625
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 768,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3125,
+          "edgeAnchorY": 0.572265625
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 1152,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.22916666666666666,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 768,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3229166666666667,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3020833333333333,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.4244791666666667,
+          "edgeAnchorY": 0.654296875
         }
       ]
     },
@@ -345,16 +617,160 @@
       "loop": false,
       "frames": [
         {
-          "image": "edge-full-v2.png",
-          "durationMs": 300
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.4244791666666667,
+          "edgeAnchorY": 0.654296875
         },
         {
-          "image": "edge-full-smile-v2.png",
-          "durationMs": 1200
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3020833333333333,
+          "edgeAnchorY": 0.568359375
         },
         {
-          "image": "edge-full-v2.png",
-          "durationMs": 300
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 768,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3229166666666667,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 1152,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.22916666666666666,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.234375,
+          "edgeAnchorY": 0.57421875
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 768,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3125,
+          "edgeAnchorY": 0.572265625
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.234375,
+          "edgeAnchorY": 0.57421875
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 768,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3125,
+          "edgeAnchorY": 0.572265625
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.234375,
+          "edgeAnchorY": 0.57421875
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 1152,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.22916666666666666,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 768,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3229166666666667,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3020833333333333,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.4244791666666667,
+          "edgeAnchorY": 0.654296875
         }
       ]
     },
@@ -362,16 +778,160 @@
       "loop": false,
       "frames": [
         {
-          "image": "edge-full-v2.png",
-          "durationMs": 240
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.4244791666666667,
+          "edgeAnchorY": 0.654296875
         },
         {
-          "image": "edge-full-smile-v2.png",
-          "durationMs": 920
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3020833333333333,
+          "edgeAnchorY": 0.568359375
         },
         {
-          "image": "edge-full-v2.png",
-          "durationMs": 240
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 768,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3229166666666667,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 1152,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.22916666666666666,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.234375,
+          "edgeAnchorY": 0.57421875
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.25,
+          "edgeAnchorY": 0.572265625
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.234375,
+          "edgeAnchorY": 0.57421875
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.25,
+          "edgeAnchorY": 0.572265625
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 512,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.234375,
+          "edgeAnchorY": 0.57421875
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 1152,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.22916666666666666,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 768,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3229166666666667,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 384,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.3020833333333333,
+          "edgeAnchorY": 0.568359375
+        },
+        {
+          "image": "edge-sequence-v3.png",
+          "durationMs": 180,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "width": 384,
+            "height": 512
+          },
+          "edgeAnchorX": 0.4244791666666667,
+          "edgeAnchorY": 0.654296875
         }
       ]
     }
@@ -383,7 +943,7 @@
     "displayWidth": 140,
     "displayHeight": 32
   },
-  "edgeAnchorX": 0.095,
+  "edgeAnchorX": 0.4244791666666667,
   "edgeTopAnchorY": 0,
   "edgeBottomAnchorY": 0.9,
   "topSwing": {

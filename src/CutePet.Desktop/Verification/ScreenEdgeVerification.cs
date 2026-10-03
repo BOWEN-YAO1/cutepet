@@ -52,17 +52,18 @@ internal static class ScreenEdgeVerification
         check(window.EdgeShift.X < -65 && window.EdgeMirror.ScaleX == 1 && window.QuotaHost.Position == quota,
             "left edge aligns the package anchor while quota remains fixed");
         window.PlayCharacterInteraction();
-        window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
+        window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(window.SelectedCharacter.Actions["edge-peek"].Duration / 2));
         var smile = window.CharacterArt.Source;
-        check(window.CurrentCharacterFrame == CharacterFrame.EdgePeek && Math.Abs(window.ScreenEdgePeekOffset - 2) < 0.001,
-            "click reaches finite smile and smoothly eased peek midpoint");
+        check(window.CurrentCharacterFrame == CharacterFrame.EdgePeek && window.ScreenEdgePeekOffset == 0
+            && !ReferenceEquals(smile,window.SelectedCharacter.Actions["edge-idle"].Frames[0].Image),
+            "click reaches a distinct drawn leaning pose without whole-body peeking translation");
         window.BeginDetailsMenu();
         window.AdvanceCharacterAnimation(TimeSpan.FromMinutes(1));
-        check(ReferenceEquals(smile, window.CharacterArt.Source) && window.ScreenEdgePeekOffset == 2,
+        check(ReferenceEquals(smile, window.CharacterArt.Source) && window.ScreenEdgePeekOffset == 0,
             "menu pauses both edge expression and movement clocks");
         window.EndDetailsMenu();
         window.PlayCharacterInteraction();
-        window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
+        window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(window.SelectedCharacter.Actions["edge-peek"].Duration / 2));
         check(window.CurrentCharacterFrame == CharacterFrame.EdgeIdle && window.ScreenEdgePeekOffset == 0,
             "repeat clicks do not accumulate responses and peek returns to edge base");
         window.StartCharacterBlink();
