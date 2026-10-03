@@ -54,12 +54,21 @@ internal static class SwingVerification
         var starOpacity = star.Opacity;
         var garden = window.SwingScenery.Children.OfType<Canvas>().Single();
         var leaves = garden.Children.OfType<System.Windows.Shapes.Path>().Where(p => p.Fill is not null).ToArray();
-        var flowers = garden.Children.OfType<Image>().ToArray();
+        var flowers = garden.Children.OfType<Image>().Where(p => p.Name.StartsWith("GardenFlower", StringComparison.Ordinal)).ToArray();
+        var ornaments = garden.Children.OfType<Image>().Except(flowers).ToArray();
         check(garden.Visibility == Visibility.Visible && leaves.Length == 36 && flowers.Length == 6
             && garden.Children.Cast<UIElement>().All(p => !p.IsHitTestVisible),
             "garden adds floral vines without intercepting gestures");
-        check(flowers.All(p => ReferenceEquals(p.Source, flowers[0].Source)) && flowers[0].Source is DrawingImage { IsFrozen: true },
-            "native flowers share one frozen drawing without additional PNG decoding");
+        check(flowers.Select(p => p.Source).Distinct().Count() == 3 && flowers.All(p => p.Source is DrawingImage { IsFrozen: true }),
+            "three native floral styles reuse frozen drawings without additional PNG decoding");
+        check(ornaments.Length == 4 && ornaments.Select(p => p.Source).Distinct().Count() == 3
+            && ornaments.All(p => p.Source is DrawingImage { IsFrozen: true } && !p.IsHitTestVisible),
+            "moon, wind chime and butterflies add distinct cached motifs without a pointer surface");
+        check(GardenInside(), "new charms and butterflies including their transformed corners fit the pet scene");
+        var charm = ornaments.Single(p => p.Name == "GardenMoon");
+        var butterfly = ornaments.Single(p => p.Name == "GardenButterfly0");
+        var charmAngle = ((RotateTransform)charm.RenderTransform).Angle;
+        var wingScale = ((ScaleTransform)((TransformGroup)butterfly.RenderTransform).Children[0]).ScaleX;
         check(scenery.All(p => p.Width < 42 && p.Opacity < 1), "garden lotus clusters remain smaller and softer than floating layout");
         var leafPoint = new Point(Canvas.GetLeft(leaves[0]), Canvas.GetTop(leaves[0]));
         var flowerAngle = ((RotateTransform)flowers[0].RenderTransform).Angle;
@@ -92,6 +101,9 @@ internal static class SwingVerification
             "menu freezes side-cloud floating and star twinkle");
         check(new Point(Canvas.GetLeft(leaves[0]), Canvas.GetTop(leaves[0])) == leafPoint
             && ((RotateTransform)flowers[0].RenderTransform).Angle == flowerAngle, "menu freezes the connected garden as well");
+        check(((RotateTransform)charm.RenderTransform).Angle == charmAngle
+            && ((ScaleTransform)((TransformGroup)butterfly.RenderTransform).Children[0]).ScaleX == wingScale,
+            "menu freezes hanging charm sway and butterfly flutter on the same clock");
         window.EndDetailsMenu();
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(1600));
         check(Math.Abs(window.EdgeSwing.Angle + 3) < 0.00001 && window.SwingRopeLeft.X1 == leftTop
@@ -105,6 +117,11 @@ internal static class SwingVerification
         check(Canvas.GetTop(scenery[0]) != sceneryTop && star.Opacity >= 0.25 && star.Opacity <= 0.85,
             "side clouds resume floating with bounded star brightness");
         check(new Point(Canvas.GetLeft(leaves[0]), Canvas.GetTop(leaves[0])) != leafPoint, "garden resumes on the shared swing clock");
+        // Half a swing cycle repeats the flutter phase; advance a quarter beat to verify resumption.
+        window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(100));
+        check(((RotateTransform)charm.RenderTransform).Angle != charmAngle
+            && ((ScaleTransform)((TransformGroup)butterfly.RenderTransform).Children[0]).ScaleX != wingScale
+            && GardenInside(), "new ornament motion resumes within the scene");
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(300));
         window.PlayCharacterInteraction(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
         check(Math.Abs(window.EdgeSwing.Angle - 4) < 0.00001,
@@ -183,6 +200,8 @@ internal static class SwingVerification
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(800));
         check(garden.Visibility == Visibility.Visible && Math.Abs(flowers[0].Width - 8 * 100.0 / 148) < 0.00001
             && window.QuotaHost.Position == quota, "opt-in garden scales with short custom artwork and keeps quota fixed");
+        check(Math.Abs(charm.Height - 25 * 100.0 / 148) < 0.00001 && GardenInside(),
+            "diverse garden ornaments scale with smaller custom characters");
         window.WakeCharacterImmediately();
         manifest = manifest with { TopSwing = manifest.TopSwing! with { Scenery = manifest.TopSwing.Scenery! with { DisplayWidth = 60, DisplayHeight = 60 } } };
         File.WriteAllText(Path.Combine(customDirectory, "character.json"), JsonSerializer.Serialize(manifest, CharacterPackLoader.Json));
@@ -210,6 +229,13 @@ internal static class SwingVerification
         {
             var bounds = art.RenderTransform.TransformBounds(new Rect(-art.Width / 2, -art.Height / 2, art.Width, art.Height));
             bounds.Offset(Canvas.GetLeft(art) + art.Width / 2, Canvas.GetTop(art) + art.Height / 2);
+            return new Rect(0, 0, 230, 178).Contains(bounds);
+        });
+        bool GardenInside() => ornaments.All(art =>
+        {
+            var origin = new Point(art.Width * art.RenderTransformOrigin.X, art.Height * art.RenderTransformOrigin.Y);
+            var bounds = art.RenderTransform.TransformBounds(new Rect(-origin.X, -origin.Y, art.Width, art.Height));
+            bounds.Offset(Canvas.GetLeft(art) + origin.X, Canvas.GetTop(art) + origin.Y);
             return new Rect(0, 0, 230, 178).Contains(bounds);
         });
 

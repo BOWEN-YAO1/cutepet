@@ -16,6 +16,8 @@ internal sealed class SwingGarden
     private readonly Ellipse[] pearls = new Ellipse[12];
     private readonly Path[] ropeVines = new Path[2];
     private readonly Ellipse[] haze = new Ellipse[6];
+    private readonly Image[] charms = new Image[2];
+    private readonly Image[] butterflies = new Image[2];
 
     internal SwingGarden(Canvas parent)
     {
@@ -40,10 +42,11 @@ internal sealed class SwingGarden
                 RenderTransformOrigin = new Point(0, 0.5), RenderTransform = new RotateTransform(), Opacity = 0.8 };
             layer.Children.Add(leaves[i]);
         }
-        var blossom = Blossom();
+        var blossoms = new[] { Blossom(6, Color.FromRgb(255, 253, 239)), Blossom(5, Color.FromRgb(248, 219, 228)),
+            Blossom(8, Color.FromRgb(221, 235, 250)) };
         for (var i = 0; i < flowers.Length; i++)
         {
-            flowers[i] = new Image { Source = blossom, IsHitTestVisible = false, Stretch = Stretch.Uniform,
+            flowers[i] = new Image { Name = "GardenFlower" + i, Source = blossoms[(i + i / 3) % 3], IsHitTestVisible = false, Stretch = Stretch.Uniform,
                 RenderTransformOrigin = new Point(0.5, 0.5), RenderTransform = new RotateTransform() };
             layer.Children.Add(flowers[i]);
         }
@@ -51,6 +54,19 @@ internal sealed class SwingGarden
         for (var i = 0; i < pearls.Length; i++)
         {
             pearls[i] = new Ellipse { Fill = pearl, Stroke = gold, IsHitTestVisible = false }; layer.Children.Add(pearls[i]);
+        }
+        var butterfly = Butterfly();
+        for (var i = 0; i < 2; i++)
+        {
+            charms[i] = new Image { Name = i == 0 ? "GardenMoon" : "GardenWindChime", Source = i == 0 ? Moon() : WindChime(),
+                Stretch = Stretch.Fill, IsHitTestVisible = false, RenderTransformOrigin = new Point(0.5, 0),
+                RenderTransform = new RotateTransform(), Opacity = 0.9 };
+            layer.Children.Add(charms[i]);
+            var transform = new TransformGroup();
+            transform.Children.Add(new ScaleTransform()); transform.Children.Add(new RotateTransform(i == 0 ? -18 : 22));
+            butterflies[i] = new Image { Name = "GardenButterfly" + i, Source = butterfly, Stretch = Stretch.Uniform,
+                IsHitTestVisible = false, RenderTransformOrigin = new Point(0.5, 0.5), RenderTransform = transform, Opacity = 0.85 };
+            layer.Children.Add(butterflies[i]);
         }
     }
 
@@ -106,6 +122,18 @@ internal sealed class SwingGarden
             bead.StrokeThickness = 0.25 * scale;
             Canvas.SetLeft(bead, p.X - bead.Width / 2); Canvas.SetTop(bead, p.Y - bead.Height / 2);
         }
+        var contact = Curve(start, a, b, end, side == 0 ? 0.34 : 0.38);
+        var charm = charms[side];
+        charm.Width = (side == 0 ? 12 : 13) * scale;
+        charm.Height = (side == 0 ? 25 : 27) * scale;
+        Canvas.SetLeft(charm, contact.X - charm.Width / 2); Canvas.SetTop(charm, contact.Y);
+        ((RotateTransform)charm.RenderTransform).Angle = 2.5 * Math.Sin(phase - 0.3 + side);
+        var flutter = butterflies[side];
+        var perch = Curve(start, a, b, end, side == 0 ? 0.67 : 0.82);
+        flutter.Width = 12 * scale; flutter.Height = 10 * scale;
+        Canvas.SetLeft(flutter, perch.X + sign * (12 + 0.8 * Math.Sin(phase + side)) * scale - flutter.Width / 2);
+        Canvas.SetTop(flutter, perch.Y - (7 + 0.7 * Math.Sin(phase + side)) * scale - flutter.Height / 2);
+        ((ScaleTransform)((TransformGroup)flutter.RenderTransform).Children[0]).ScaleX = 0.7 + 0.3 * Math.Pow(Math.Sin(4 * phase + side), 2);
     }
 
     private static Point Curve(Point p, Point a, Point b, Point end, double t)
@@ -115,18 +143,66 @@ internal sealed class SwingGarden
             s * s * s * p.Y + 3 * s * s * t * a.Y + 3 * s * t * t * b.Y + t * t * t * end.Y);
     }
 
-    private static DrawingImage Blossom()
+    private static DrawingImage Blossom(int petals, Color tint)
     {
         var drawing = new DrawingGroup();
-        var ivory = new LinearGradientBrush(Color.FromRgb(255, 253, 239), Color.FromRgb(212, 225, 201), 90);
+        var ivory = new LinearGradientBrush(tint, Color.FromRgb(212, 225, 201), 90);
         var petal = Geometry.Parse("M0,0 C-6,-3 -6,-11 0,-15 C6,-11 6,-3 0,0 Z");
-        for (var i = 0; i < 6; i++)
+        for (var i = 0; i < petals; i++)
         {
-            var group = new DrawingGroup { Transform = new RotateTransform(i * 60) };
+            var group = new DrawingGroup { Transform = new RotateTransform(i * 360.0 / petals) };
             group.Children.Add(new GeometryDrawing(ivory, new Pen(new SolidColorBrush(Color.FromRgb(206, 201, 167)), 0.45), petal));
             drawing.Children.Add(group);
         }
         drawing.Children.Add(new GeometryDrawing(new SolidColorBrush(Color.FromRgb(219, 184, 98)), null, new EllipseGeometry(new Point(), 2.3, 2.3)));
+        var image = new DrawingImage(drawing); image.Freeze(); return image;
+    }
+
+    private static DrawingImage Moon()
+    {
+        var drawing = new DrawingGroup();
+        drawing.Children.Add(new GeometryDrawing(Brushes.Transparent, null, new RectangleGeometry(new Rect(0, 0, 12, 28))));
+        var gold = new Pen(new SolidColorBrush(Color.FromRgb(191, 170, 111)), 0.55);
+        drawing.Children.Add(new GeometryDrawing(null, gold, Geometry.Parse("M6,0 L6,4")));
+        drawing.Children.Add(new GeometryDrawing(new LinearGradientBrush(Color.FromRgb(237, 245, 212), Color.FromRgb(143, 194, 166), 50), gold,
+            Geometry.Parse("M8,4 C-1,3 -2,17 8,18 C3,14 3,8 8,4 Z")));
+        drawing.Children.Add(new GeometryDrawing(null, gold, Geometry.Parse("M5,18 L5,22 M8,18 L8,24")));
+        drawing.Children.Add(new GeometryDrawing(Brushes.Ivory, gold, new EllipseGeometry(new Point(5, 22), 1, 1)));
+        drawing.Children.Add(new GeometryDrawing(new SolidColorBrush(Color.FromRgb(204, 185, 121)), null,
+            Geometry.Parse("M8,21 L9,23 L11,24 L9,25 L8,27 L7,25 L5,24 L7,23 Z")));
+        var image = new DrawingImage(drawing); image.Freeze(); return image;
+    }
+
+    private static DrawingImage WindChime()
+    {
+        var drawing = new DrawingGroup();
+        drawing.Children.Add(new GeometryDrawing(Brushes.Transparent, null, new RectangleGeometry(new Rect(-1, 0, 16, 31))));
+        var gold = new Pen(new SolidColorBrush(Color.FromRgb(184, 162, 106)), 0.5);
+        drawing.Children.Add(new GeometryDrawing(null, gold, Geometry.Parse("M7,0 L7,4 M2,12 L2,22 M7,12 L7,27 M12,12 L12,23")));
+        drawing.Children.Add(new GeometryDrawing(new LinearGradientBrush(Color.FromRgb(233, 248, 240), Color.FromRgb(117, 184, 170), 90), gold,
+            Geometry.Parse("M1,11 C1,1 13,1 13,11 Q7,14 1,11 Z")));
+        drawing.Children.Add(new GeometryDrawing(null, gold, Geometry.Parse("M1,11 Q7,9 13,11")));
+        foreach (var p in new[] { new Point(2, 22), new Point(7, 27), new Point(12, 23) })
+            drawing.Children.Add(new GeometryDrawing(new LinearGradientBrush(Colors.Ivory, Color.FromRgb(180, 209, 225), 90), gold,
+                Geometry.Parse(FormattableString.Invariant($"M{p.X},{p.Y - 2} Q{p.X - 3},{p.Y + 1} {p.X},{p.Y + 3} Q{p.X + 3},{p.Y + 1} {p.X},{p.Y - 2} Z"))));
+        var image = new DrawingImage(drawing); image.Freeze(); return image;
+    }
+
+    private static DrawingImage Butterfly()
+    {
+        var drawing = new DrawingGroup();
+        var outline = new Pen(new SolidColorBrush(Color.FromRgb(182, 167, 131)), 0.35);
+        var upper = new LinearGradientBrush(Color.FromRgb(226, 237, 254), Color.FromRgb(158, 195, 213), 90);
+        var lower = new LinearGradientBrush(Color.FromRgb(243, 227, 242), Color.FromRgb(183, 178, 213), 90);
+        foreach (var sign in new[] { -1, 1 })
+        {
+            var wing = new DrawingGroup { Transform = new ScaleTransform(sign, 1) };
+            wing.Children.Add(new GeometryDrawing(upper, outline, Geometry.Parse("M0,0 C3,-9 12,-7 8,-1 Q5,3 0,0 Z")));
+            wing.Children.Add(new GeometryDrawing(lower, outline, Geometry.Parse("M0,1 C8,-1 8,7 3,6 Q1,5 0,1 Z")));
+            drawing.Children.Add(wing);
+        }
+        drawing.Children.Add(new GeometryDrawing(new SolidColorBrush(Color.FromRgb(156, 160, 143)), null, new EllipseGeometry(new Point(0, 0), 0.6, 4)));
+        drawing.Children.Add(new GeometryDrawing(null, outline, Geometry.Parse("M0,-3 Q-2,-7 -3,-6 M0,-3 Q2,-7 3,-6")));
         var image = new DrawingImage(drawing); image.Freeze(); return image;
     }
 }
