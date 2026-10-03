@@ -57,6 +57,7 @@ internal static class CharacterPackLoader
             || !double.IsFinite(ornament.DisplayHeight) || ornament.DisplayHeight < 8 || ornament.DisplayHeight > 44))
             throw new InvalidDataException("秋千挂饰图片路径或显示大小不合法。");
         if (manifest.TopSwing?.Scenery is { } scenery && (scenery.Image is null || !SafeFile(scenery.Image)
+            || scenery.Layout is not ("floating" or "garden")
             || !double.IsFinite(scenery.DisplayWidth) || scenery.DisplayWidth < 12 || scenery.DisplayWidth > 60
             || !double.IsFinite(scenery.DisplayHeight) || scenery.DisplayHeight < 12 || scenery.DisplayHeight > 60))
             throw new InvalidDataException("秋千两侧装饰图片路径或显示大小不合法。");

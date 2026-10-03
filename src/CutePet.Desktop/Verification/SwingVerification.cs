@@ -50,6 +50,24 @@ internal static class SwingVerification
         var sceneryTop = Canvas.GetTop(scenery[0]);
         var star = window.SwingScenery.Children.OfType<System.Windows.Shapes.Path>().Last();
         var starOpacity = star.Opacity;
+        var garden = window.SwingScenery.Children.OfType<Canvas>().Single();
+        var leaves = garden.Children.OfType<System.Windows.Shapes.Path>().Where(p => p.Fill is not null).ToArray();
+        var flowers = garden.Children.OfType<Image>().ToArray();
+        check(garden.Visibility == Visibility.Visible && leaves.Length == 36 && flowers.Length == 6
+            && garden.Children.Cast<UIElement>().All(p => !p.IsHitTestVisible),
+            "garden adds floral vines without intercepting gestures");
+        check(flowers.All(p => ReferenceEquals(p.Source, flowers[0].Source)) && flowers[0].Source is DrawingImage { IsFrozen: true },
+            "native flowers share one frozen drawing without additional PNG decoding");
+        check(scenery.All(p => p.Width < 42 && p.Opacity < 1), "garden lotus clusters remain smaller and softer than floating layout");
+        var leafPoint = new Point(Canvas.GetLeft(leaves[0]), Canvas.GetTop(leaves[0]));
+        var flowerAngle = ((RotateTransform)flowers[0].RenderTransform).Angle;
+        // Include the WPF rotation origin when checking the outermost leaf tips.
+        check(leaves.All(leaf =>
+        {
+            var bounds = leaf.RenderTransform.TransformBounds(new Rect(0, -leaf.Height / 2, leaf.Width, leaf.Height));
+            bounds.Offset(Canvas.GetLeft(leaf), Canvas.GetTop(leaf) + leaf.Height / 2);
+            return new Rect(0, 0, 230, 178).Contains(bounds);
+        }), "garden foliage including rotated tips stays in the character canvas");
         check(window.SwingDecorations.Visibility == Visibility.Visible && pendants.Length == 4
             && pendants.All(p => ReferenceEquals(p.Source, window.SelectedCharacter.SwingOrnamentImage) && !p.IsHitTestVisible),
             "four cached ornaments decorate ropes without intercepting pet gestures");
@@ -69,6 +87,8 @@ internal static class SwingVerification
             "menu also freezes pendant placement and delayed sway");
         check(Canvas.GetTop(scenery[0]) == sceneryTop && star.Opacity == starOpacity,
             "menu freezes side-cloud floating and star twinkle");
+        check(new Point(Canvas.GetLeft(leaves[0]), Canvas.GetTop(leaves[0])) == leafPoint
+            && ((RotateTransform)flowers[0].RenderTransform).Angle == flowerAngle, "menu freezes the connected garden as well");
         window.EndDetailsMenu();
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(1600));
         check(Math.Abs(window.EdgeSwing.Angle + 3) < 0.00001 && window.SwingRopeLeft.X1 == leftTop
@@ -81,6 +101,7 @@ internal static class SwingVerification
             "pendants follow reversed ropes with a bounded separate sway");
         check(Canvas.GetTop(scenery[0]) != sceneryTop && star.Opacity >= 0.25 && star.Opacity <= 0.85,
             "side clouds resume floating with bounded star brightness");
+        check(new Point(Canvas.GetLeft(leaves[0]), Canvas.GetTop(leaves[0])) != leafPoint, "garden resumes on the shared swing clock");
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(300));
         window.PlayCharacterInteraction(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(500));
         check(Math.Abs(window.EdgeSwing.Angle - 4) < 0.00001,
@@ -103,6 +124,7 @@ internal static class SwingVerification
             "recall clears ornament references and their visual layer");
         check(window.SwingScenery.Visibility == Visibility.Collapsed && scenery.All(p => p.Source is null),
             "recall also removes side scenery and clears artwork references");
+        check(garden.Visibility == Visibility.Collapsed, "recall clears native garden decoration");
         foreach (var point in new[] { new Point(0, 350), new Point(800, 862) })
         {
             window.CompletePetDrag(screen, size, point, 1); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(800));
@@ -147,6 +169,15 @@ internal static class SwingVerification
         check(Math.Abs(scenery[0].Width - 42 * 100.0 / 148) < 0.00001 && window.SwingScenery.Visibility == Visibility.Visible
             && ReferenceEquals(window.SelectedCharacter.SwingSceneryImage, window.SelectedCharacter.SwingOrnamentImage),
             "custom side scenery scales with shorter artwork and shared PNGs decode once");
+        check(window.SelectedCharacter.Manifest.TopSwing!.Scenery!.Layout == "floating" && garden.Visibility == Visibility.Collapsed,
+            "old custom scenery keeps its floating layout without inherited flowers");
+        window.WakeCharacterImmediately();
+        manifest = manifest with { TopSwing = manifest.TopSwing! with { Scenery = manifest.TopSwing.Scenery! with { Layout = "garden" } } };
+        File.WriteAllText(Path.Combine(customDirectory, "character.json"), JsonSerializer.Serialize(manifest, CharacterPackLoader.Json));
+        window.Characters.Reload(); window.SetCharacterPackage(manifest.Id);
+        Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(800));
+        check(garden.Visibility == Visibility.Visible && Math.Abs(flowers[0].Width - 8 * 100.0 / 148) < 0.00001
+            && window.QuotaHost.Position == quota, "opt-in garden scales with short custom artwork and keeps quota fixed");
         var custom = window.SelectedCharacter;
         window.SetCharacter(PetCharacter.Tianyi); window.Characters.Remove(custom);
         Attach(); window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));

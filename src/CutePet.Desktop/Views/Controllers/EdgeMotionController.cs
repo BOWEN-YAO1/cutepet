@@ -21,6 +21,9 @@ internal sealed class EdgeMotionController
     private readonly Image[] sceneryImages = new Image[2];
     private readonly Path[] ribbons = new Path[2];
     private readonly Path[] stars = new Path[4];
+    private readonly SwingGarden garden;
+    private readonly SolidColorBrush vineBrush = new(Color.FromRgb(177, 171, 126));
+    private readonly SolidColorBrush ribbonBrush = new(Color.FromRgb(143, 199, 184));
     internal EdgeAttachment? Attachment { get; private set; }
     internal bool Active => Attachment is not null;
     private string BaseAction => EdgeActions.Base(Attachment!.Side);
@@ -49,6 +52,8 @@ internal sealed class EdgeMotionController
             window.SwingScenery.Children.Add(ribbons[i]);
             window.SwingScenery.Children.Add(sceneryImages[i]);
         }
+        garden = new SwingGarden(window.SwingScenery);
+        vineBrush.Freeze(); ribbonBrush.Freeze();
         var starGeometry = Geometry.Parse("M3,0 L4,2 L6,3 L4,4 L3,6 L2,4 L0,3 L2,2 Z");
         starGeometry.Freeze();
         for (var i = 0; i < stars.Length; i++)
@@ -244,6 +249,7 @@ internal sealed class EdgeMotionController
     private void HideScenery()
     {
         window.SwingScenery.Visibility = Visibility.Collapsed;
+        garden.Hide();
         foreach (var scenery in sceneryImages) scenery.Source = null;
     }
     private void RenderScenery(CharacterTopSwing swing, double height, double pivotY, double entry)
@@ -252,26 +258,34 @@ internal sealed class EdgeMotionController
         { HideScenery(); return; }
         var scale = height / 148;
         var phase = 2 * Math.PI * swingElapsed / 3200;
+        var natural = scenery.Layout == "garden";
+        if (!natural) garden.Hide();
         for (var side = 0; side < sceneryImages.Length; side++)
         {
             var sign = side == 0 ? -1 : 1;
-            var x = 115 + sign * 74 * scale;
-            var y = pivotY + height * (side == 0 ? 0.62 : 0.48) + 1.8 * scale * Math.Sin(phase + side * Math.PI);
+            var x = 115 + sign * (natural ? 77 : 74) * scale;
+            var y = pivotY + height * (natural ? (side == 0 ? 0.73 : 0.68) : (side == 0 ? 0.62 : 0.48))
+                + (natural ? 0.7 : 1.8) * scale * Math.Sin(phase + side * Math.PI);
             var art = sceneryImages[side];
             art.Source = image;
-            art.Width = scenery.DisplayWidth * scale;
-            art.Height = scenery.DisplayHeight * scale;
+            art.Width = scenery.DisplayWidth * scale * (natural ? 0.76 : 1);
+            art.Height = scenery.DisplayHeight * scale * (natural ? 0.76 : 1);
+            art.Opacity = natural ? 0.9 : 1;
             Canvas.SetLeft(art, x - art.Width / 2);
             Canvas.SetTop(art, y - art.Height / 2);
             var rope = side == 0 ? window.SwingRopeLeft : window.SwingRopeRight;
             var figure = new PathFigure { IsFilled = false, StartPoint = new Point(
                 rope.X1 + (rope.X2 - rope.X1) * 0.07, rope.Y1 + (rope.Y2 - rope.Y1) * 0.07) };
-            figure.Segments.Add(new BezierSegment(new Point(115 + sign * 104 * scale, pivotY + 34 * scale),
-                new Point(115 + sign * 35 * scale, y - 24 * scale), new Point(x, y), true));
+            var control1 = new Point(115 + sign * (natural ? 58 : 104) * scale, pivotY + 30 * scale);
+            var control2 = new Point(115 + sign * (natural ? 90 : 35) * scale, y - 24 * scale);
+            figure.Segments.Add(new BezierSegment(control1, control2, new Point(x, y), true));
             var geometry = new PathGeometry(new[] { figure });
             geometry.Freeze();
             ribbons[side].Data = geometry;
-            ribbons[side].StrokeThickness = 1.7 * scale;
+            ribbons[side].Stroke = natural ? vineBrush : ribbonBrush;
+            ribbons[side].StrokeThickness = (natural ? 0.75 : 1.7) * scale;
+            ribbons[side].Opacity = natural ? 0.7 : 0.65;
+            if (natural) garden.RenderSide(side, figure.StartPoint, control1, control2, new Point(x, y), rope, scale, phase);
             for (var level = 0; level < 2; level++)
             {
                 var star = stars[side * 2 + level];

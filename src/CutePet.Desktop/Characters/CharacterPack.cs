@@ -36,6 +36,7 @@ public sealed record CharacterTopSwing
 public sealed record CharacterSwingScenery
 {
     public string Image { get; init; } = "";
+    public string Layout { get; init; } = "floating";
     public double DisplayWidth { get; init; } = 42;
     public double DisplayHeight { get; init; } = 42;
 }

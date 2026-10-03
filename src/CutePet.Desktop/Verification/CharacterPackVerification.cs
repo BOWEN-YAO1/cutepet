@@ -118,13 +118,15 @@ internal static class CharacterPackVerification
         check(edgeRoundTrip.Manifest.TopSwing?.Ornament is { Image: "rope-ornament-v1.png", DisplayWidth: 18, DisplayHeight: 27 }
             && edgeRoundTrip.SwingOrnamentImage is { IsFrozen: true } && edgeFiles.ContainsKey("rope-ornament-v1.png"),
             "ornament artwork and size survive actual built-in export and package import");
-        check(edgeRoundTrip.Manifest.TopSwing?.Scenery is { Image: "scenery-lotus-v1.png", DisplayWidth: 42, DisplayHeight: 42 }
+        check(edgeRoundTrip.Manifest.TopSwing?.Scenery is { Image: "scenery-lotus-v1.png", Layout: "garden", DisplayWidth: 42, DisplayHeight: 42 }
             && edgeRoundTrip.SwingSceneryImage is { PixelWidth: 1254, PixelHeight: 1254, IsFrozen: true }
             && edgeFiles.ContainsKey("scenery-lotus-v1.png"), "side scenery survives actual export and import");
         foreach (var scenery in new[] {
             new CharacterSwingScenery { Image = "../scenery.png" },
             new CharacterSwingScenery { Image = "scenery-lotus-v1.png", DisplayWidth = 61 },
             new CharacterSwingScenery { Image = "scenery-lotus-v1.png", DisplayHeight = 0 },
+            new CharacterSwingScenery { Image = "scenery-lotus-v1.png", Layout = "unknown" },
+            new CharacterSwingScenery { Image = "scenery-lotus-v1.png", Layout = null! },
             new CharacterSwingScenery { Image = "missing-scenery.png" } })
             Reject(() => library.Import(Zip("scenery-invalid", tianyi.Manifest with { Id = "scenery-invalid",
                 TopSwing = tianyi.Manifest.TopSwing! with { Scenery = scenery } }, edgeFiles)),

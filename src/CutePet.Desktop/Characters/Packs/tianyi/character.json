@@ -347,7 +347,8 @@
     "scenery": {
       "image": "scenery-lotus-v1.png",
       "displayWidth": 42,
-      "displayHeight": 42
+      "displayHeight": 42,
+      "layout": "garden"
     }
   }
 }

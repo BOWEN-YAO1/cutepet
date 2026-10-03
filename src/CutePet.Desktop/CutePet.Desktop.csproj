@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>disable</ImplicitUsings>
     <AssemblyName>CutePet</AssemblyName>
-    <Version>0.22.0</Version>
+    <Version>0.23.0</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup><ProjectReference Include="../CutePet.Codex/CutePet.Codex.csproj" /></ItemGroup>
