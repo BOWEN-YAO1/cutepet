@@ -14,6 +14,9 @@ internal static class CharacterPackLoader
 {
     internal const int MaxFrameReferences = 768;
     internal const int MaxManifestBytes = 256 * 1024;
+    // Dense drawn transition sets need more cached source/canvas pixels. Keep a
+    // finite 224 MiB conservative package budget; repeated views still share it.
+    internal const long MaxDecodedPixels = 58_720_256;
     internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "cloud-idle", "cloud-blink", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-shy", "edge-sway", "edge-nod", "edge-top-idle", "edge-top-peek", "edge-top-look", "edge-top-smile", "edge-bottom-idle", "edge-bottom-peek", "edge-bottom-look", "edge-bottom-smile" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true, WriteIndented = true,
@@ -106,8 +109,8 @@ internal static class CharacterPackLoader
                     var decoder = new PngBitmapDecoder(bytes, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
                     var decoded = decoder.Frames[0];
                     if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
-                        || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 45_875_200)
-                        throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，总解码像素最大 45,875,200。");
+                        || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > MaxDecodedPixels)
+                        throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，图集、区域及画布总预算为 224 MiB。");
                     decoded.Freeze();
                     images.Add(frame.Image, image = decoded);
                 }
@@ -137,7 +140,7 @@ internal static class CharacterPackLoader
                     if (!regions.TryGetValue(key, out var cropped))
                     {
                         // Count both the atlas and each distinct view conservatively; repeated frames share one view.
-                        if ((pixels += (long)region.Width * region.Height) > 45_875_200)
+                        if ((pixels += (long)region.Width * region.Height) > MaxDecodedPixels)
                             throw new InvalidDataException("图集及帧区域合计超过总解码像素限制。");
                         cropped = new CroppedBitmap(image, new Int32Rect(region.X, region.Y, region.Width, region.Height));
                         cropped.Freeze(); regions.Add(key, cropped);
@@ -157,7 +160,7 @@ internal static class CharacterPackLoader
                     var key = (frame.Image.ToLowerInvariant(), frame.Region, registration);
                     if (!canvases.TryGetValue(key, out var registered))
                     {
-                        if ((pixels += (long)registration.Width * registration.Height) > 45_875_200)
+                        if ((pixels += (long)registration.Width * registration.Height) > MaxDecodedPixels)
                             throw new InvalidDataException("图集、裁切区域及登记画布合计超过总解码像素限制。");
                         var visual = new DrawingVisual();
                         using (var drawing = visual.RenderOpen())
@@ -217,7 +220,7 @@ internal static class CharacterPackLoader
                 var decoder = new PngBitmapDecoder(bytes, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
                 var decoded = decoder.Frames[0];
                 if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
-                    || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > 45_875_200)
+                    || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > MaxDecodedPixels)
                     throw new InvalidDataException("角色附加图层超过解码大小限制。");
                 decoded.Freeze();
                 images.Add(name, image = decoded);

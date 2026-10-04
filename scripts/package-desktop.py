@@ -61,7 +61,7 @@ def main():
         for name in ('app-overview.png', 'app-characters.png', 'app-activity.png', 'app-settings.png', 'app-dialogue-settings.png'):
             shutil.copy2(args.verification_dir/name, stage/'previews/interface'/name)
         for name in ('side-edge-actions.gif', 'side-edge-contact-sheet.png', 'bottom-edge-actions.gif',
-                     'bottom-edge-contact-sheet.png', 'top-edge-actions.gif', 'top-edge-contact-sheet.png', 'cloud-landing.gif',
+                     'bottom-edge-contact-sheet.png', 'top-edge-actions.gif', 'top-edge-contact-sheet.png', 'top-drawn-keyframes.gif', 'cloud-landing.gif',
                      'pose-sequences.gif', 'pose-contact-sheet.png', 'throne-motion.gif', 'seated-motion.gif'):
             shutil.copy2(args.verification_dir/name, stage/'previews/animations'/name)
         shutil.copy2(args.verification_dir/'dialogue-preview.png', stage/'previews/dialogue/dialogue-preview.png')
@@ -91,8 +91,10 @@ def main():
 需要 Windows x64 和 .NET 8 Desktop Runtime；运行文件请保持在同一个目录。
 原有设置和已导入的角色包继续沿用，无需删除设置。以前导入的角色不会被自动覆盖。
 
-这版继续修复上侧秋千动作突然变大和抽搐的问题，天依共 145 个活跃绘图、28 个动作。
-上侧改用统一的 16 个坐姿，固定座椅与悬挂点，保留闭眼微笑、左右张望、歪头微笑和花藤绳饰。
+这版上侧实际绘图从16张增加至64张：闭眼、向左张望、向右张望、微笑歪头各16张。
+天依共193个活跃绘图、28个动作。固定座椅与悬挂点，保留花藤绳饰，动作沿原路倒放回收。
+previews/animations/top-drawn-keyframes.gif直接播放原绘图，不经过图片混合；top-edge-actions.gif展示实际窗口效果。
+新天依角色包需应用0.42.0。
 回应开始、结束和待机共用同一姿势，头部配准后的过渡不会拖动秋千板。
 左右回应继续采用 15 个连贯绘图，统一头部尺寸和双手支撑点；原始 PNG 不修改。
 运动段每帧 40 毫秒，目标每秒 25 个源帧时间段，并随屏幕绘制在相邻帧之间做短过渡。

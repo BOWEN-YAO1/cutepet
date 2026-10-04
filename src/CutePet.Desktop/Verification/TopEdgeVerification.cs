@@ -21,8 +21,19 @@ internal static class TopEdgeVerification
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
         var pack=window.SelectedCharacter;
         var frames=EdgeActions.TopResponses.SelectMany(a=>pack.Actions[a].Frames).GroupBy(f=>f.Image).Select(g=>g.First()).ToArray();
-        check(frames.Length==16&&frames.All(f=>f.Image.IsFrozen),
-            "top responses use one coherent sixteen-pose seated atlas");
+        check(frames.Length==64&&frames.All(f=>f.Image.IsFrozen),
+            "top responses use sixty-four drawn poses across four continuous sixteen-stage motions");
+        check(EdgeActions.TopResponses.All(a=>pack.Actions[a].Frames.Select(f=>f.Image).Distinct().Count()>=16),
+            "each top response contains at least sixteen actual source drawings, excluding repeats and interpolation");
+        var blinkFrames=pack.Actions["edge-top-peek"].Frames;
+        check(blinkFrames.Count==31&&blinkFrames.Take(16).Select(f=>f.Image).SequenceEqual(blinkFrames.TakeLast(16).Reverse().Select(f=>f.Image)),
+            "dense blink closes through all sixteen drawings and reopens with the exact reverse sequence");
+        var iris=blinkFrames.Take(16).Select(f=>VisibleIris(f.Image)).ToArray();
+        check(iris[0]>=50&&iris[^1]<=iris[0]*.05&&iris.Select(n=>n/10).Distinct().Count()>=8
+            &&iris.Zip(iris.Skip(1),(a,b)=>Math.Abs(a-b)).Max()<=iris[0]*.35,
+            "drawn eyelids progressively cover the green irises through at least eight visible openness levels: "+string.Join(",",iris));
+        check(iris.Zip(iris.Skip(1),(a,b)=>b-a).Max()<=iris[0]*.04,
+            "blink drawings close in measured openness order without reopening between closing stages");
         check(EdgeActions.TopResponses.All(a=>pack.Actions[a].SmoothFrames&&pack.Actions[a].Frames.All(f=>f.DurationMs==40)),
             "all top response keyframes use forty-millisecond samples with continuous presentation");
         var heads=frames.Select(f=>SideEdgeVerification.HeadHeight(f.Image)).ToArray();
@@ -39,6 +50,22 @@ internal static class TopEdgeVerification
             ReferenceEquals(pack.Actions[a].Frames[0].Image,pack.Actions["edge-top-idle"].Frames[0].Image)
             &&ReferenceEquals(pack.Actions[a].Frames[^1].Image,pack.Actions["edge-top-idle"].Frames[0].Image)),
             "all top responses start and finish at the exact same idle drawing");
+        // Show only painted keyframes, without the interpolator or swing transforms.
+        var drawn=new GifBitmapEncoder();var drawnDelays=new List<int>();
+        foreach(var action in EdgeActions.TopResponses)
+            foreach(var frame in pack.Actions[action].Frames)
+            {
+                var visualFrame=new DrawingVisual();
+                using(var draw=visualFrame.RenderOpen())
+                {
+                    draw.DrawRectangle(Brushes.WhiteSmoke,null,new Rect(0,0,256,352));
+                    draw.DrawImage(frame.Image,new Rect(0,0,256,352));
+                }
+                var capture=new RenderTargetBitmap(256,352,96,96,PixelFormats.Pbgra32);capture.Render(visualFrame);
+                drawn.Frames.Add(BitmapFrame.Create(capture));drawnDelays.Add(frame.DurationMs/10);
+            }
+        using(var bytes=new MemoryStream())
+        {drawn.Save(bytes);File.WriteAllBytes(Path.Combine(directory,"top-drawn-keyframes.gif"),ThroneMotionVerification.WithAnimationMetadata(bytes.ToArray(),drawnDelays));}
         CheckHeadInterpolation(check);
         foreach(var frame in frames)
         {
@@ -124,6 +151,19 @@ internal static class TopEdgeVerification
             check(player.Action=="low","low quota clears top preview "+action);
             player.Configure(pack);
         }
+    }
+
+    private static int VisibleIris(BitmapSource image)
+    {
+        var rgba=new FormatConvertedBitmap(image,PixelFormats.Bgra32,null,0);
+        var width=rgba.PixelWidth;var bytes=new byte[width*rgba.PixelHeight*4];rgba.CopyPixels(bytes,width*4,0);
+        var top=rgba.PixelHeight;var count=0;
+        for(var y=0;y<rgba.PixelHeight;y++)for(var x=0;x<width;x++)
+            if(bytes[(y*width+x)*4+3]>=200)top=Math.Min(top,y);
+        // Fixed registered eye band excludes forehead jade, earrings and seat.
+        for(var y=top+100;y<top+142;y++)for(var x=65;x<190;x++)
+        {var p=(y*width+x)*4;if(bytes[p+3]>=200&&bytes[p+1]>bytes[p+2]*1.15&&bytes[p+1]>bytes[p]*1.05)count++;}
+        return count;
     }
 
     private static void CheckHeadInterpolation(Action<bool,string> check)

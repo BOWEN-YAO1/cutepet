@@ -149,7 +149,7 @@ internal static class CharacterPackVerification
             && edgeRoundTrip.Actions["edge-bottom-peek"].Frames[0].Image == edgeRoundTrip.Actions["edge-bottom-idle"].Frames[0].Image
             && edgeFiles.ContainsKey("bottom-sequence-v6.png") && !edgeFiles.ContainsKey("edge-bottom-v1.png"),
             "bottom atlas responses export and import with shared cached views instead of old body-stretch sprites");
-        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 439,
+        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 506,
             "expanded sequences stay within the bounded 768-reference package limit");
         check(edgeRoundTrip.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)
             .SequenceEqual(tianyi.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)),
@@ -194,7 +194,8 @@ internal static class CharacterPackVerification
             Reject(() => other.Import(Zip("bottom-loop",looping,edgeFiles)), "bottom response cannot loop indefinitely " + response);
         }
         check(EdgeActions.TopResponses.All(edgeRoundTrip.Actions.ContainsKey)
-            && edgeFiles.ContainsKey("top-sequence-v5.png") && !edgeFiles.ContainsKey("top-sequence-v4.png")
+            && new[]{"top-blink-v6.png","top-left-v6.png","top-right-v6.png","top-smile-v6.png"}.All(edgeFiles.ContainsKey)
+            && !edgeFiles.ContainsKey("top-sequence-v5.png") && !edgeFiles.ContainsKey("top-sequence-v4.png")
             && !edgeFiles.ContainsKey("top-inbetweens-v1.png") && !edgeFiles.ContainsKey("swing-jade-v2.png")
             && edgeRoundTrip.Manifest.Actions["edge-top-smile"].Frames.All(f=>f.Region is not null&&f.SwingSeatAnchorY is not null),
             "top atlas and per-frame suspension anchors survive actual export and import");
@@ -457,19 +458,21 @@ internal static class CharacterPackVerification
             System.Windows.Media.PixelFormats.Bgra32, null, new byte[2048 * 2048 * 4], 2048 * 4)));
         using var largeBytes = new MemoryStream();
         largeEncoder.Save(largeBytes);
-        var largeFiles = Enumerable.Range(0, 11).ToDictionary(i => "large-" + i + ".png", _ => largeBytes.ToArray());
+        var largeCount = (int)(CharacterPackLoader.MaxDecodedPixels / (2048L * 2048));
+        var lastLarge = "large-" + largeCount + ".png";
+        var largeFiles = Enumerable.Range(0, largeCount + 1).ToDictionary(i => "large-" + i + ".png", _ => largeBytes.ToArray());
         Reject(() => library.Import(Zip("scenery-pixels", animated with { Id = "scenery-pixels",
-            TopSwing = new() { Scenery = new() { Image = "large-10.png" } }, Actions = new() {
-                ["idle"] = Clip(true, Enumerable.Range(0, 10).Select(i => ("large-" + i + ".png", 100)).ToArray()),
+            TopSwing = new() { Scenery = new() { Image = lastLarge } }, Actions = new() {
+                ["idle"] = Clip(true, Enumerable.Range(0, largeCount).Select(i => ("large-" + i + ".png", 100)).ToArray()),
                 ["edge-top-idle"] = Clip(true, ("large-0.png", 100)) } }, largeFiles)),
-            "side scenery shares the original total decoded memory limit");
+            "side scenery shares the total decoded memory limit");
         Reject(() => library.Import(Zip("ornament-pixels", animated with { Id = "ornament-pixels",
-            TopSwing = new() { Ornament = new() { Image = "large-10.png" } }, Actions = new() {
-                ["idle"] = Clip(true, Enumerable.Range(0, 10).Select(i => ("large-" + i + ".png", 100)).ToArray()),
+            TopSwing = new() { Ornament = new() { Image = lastLarge } }, Actions = new() {
+                ["idle"] = Clip(true, Enumerable.Range(0, largeCount).Select(i => ("large-" + i + ".png", 100)).ToArray()),
                 ["edge-top-idle"] = Clip(true, ("large-0.png", 100)) } }, largeFiles)),
             "ornament pixels share the same total decoded memory limit");
         Reject(() => library.Import(Zip("total-pixels", animated with { Id = "total-pixels", Actions = new() {
-            ["idle"] = Clip(true, Enumerable.Range(0, 11).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
+            ["idle"] = Clip(true, Enumerable.Range(0, largeCount + 1).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
             "total decoded pixels remain bounded with the expanded rest package limit");
 
         Reject(() => library.Import(Zip("traversal", animated with { Id = "traversal" }, new() { ["../outside.png"] = imageBytes })),
@@ -527,8 +530,8 @@ internal static class CharacterPackVerification
             Reject(()=>library.Import(Zip("orphan-"+optionalCloud,cloudManifest with {Id="orphan-"+optionalCloud,Cloud=null,Actions=new() {
                 ["idle"]=Clip(true,("idle.png",100)),[optionalCloud]=Clip(optionalCloud=="cloud-idle",("idle.png",100))}},
                 new() { ["idle.png"]=imageBytes })),"cruising pose requires its cloud layer "+optionalCloud);
-        Reject(() => library.Import(Zip("cloud-pixels", cloudManifest with { Id = "cloud-pixels", Cloud = new() { Image = "large-10.png" },
-            Actions = new() { ["idle"] = Clip(true, Enumerable.Range(0, 10).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
+        Reject(() => library.Import(Zip("cloud-pixels", cloudManifest with { Id = "cloud-pixels", Cloud = new() { Image = lastLarge },
+            Actions = new() { ["idle"] = Clip(true, Enumerable.Range(0, largeCount).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
             "cloud pixels count toward the same total decoded memory limit");
         Reject(() => library.Import(Zip("canvas", animated with { Id = "canvas" }, new() {
             ["idle.png"] = imageBytes, ["second.png"] = canvasBytes.ToArray() })), "inconsistent frame canvases are rejected");

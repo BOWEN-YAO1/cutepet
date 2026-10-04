@@ -41,7 +41,8 @@ internal static class FrameCanvasVerification
                 +"\"canvas\":{\"width\":64,\"height\":64,\"scale\":"+number+",\"offsetX\":0,\"offsetY\":0}}]}}}")),
                 _=>new MemoryStream(bytes),false),"overflowed numeric registration cannot load "+number);
         Reject(()=>Load(frame with {Region=null}),"canvas cannot be used without a source region");
-        Reject(()=>Load(Enumerable.Range(0,12).Select(i=>frame with {Canvas=new(2048,2048,1,i,0)}).ToArray()),
+        Reject(()=>Load(Enumerable.Range(0,(int)(CharacterPackLoader.MaxDecodedPixels/(2048L*2048))+1)
+            .Select(i=>frame with {Canvas=new(2048,2048,1,i,0)}).ToArray()),
             "distinct rendered canvases count toward the shared decoded-pixel budget");
         void Reject(Action action,string description)
         {

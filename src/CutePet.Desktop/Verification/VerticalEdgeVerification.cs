@@ -65,7 +65,13 @@ internal static class VerticalEdgeVerification
             var duration = pack.Actions[EdgeActions.Peek(EdgeActions.Base(side))].Duration;
             window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(duration / 2));
             var expression = window.CharacterArt.Source;
-            check(ReferenceEquals(expression, pack.Actions[EdgeActions.Peek(EdgeActions.Base(side))].At(duration / 2))
+            var clip=pack.Actions[EdgeActions.Peek(EdgeActions.Base(side))];
+            var midpoint=clip.PositionAt(duration/2);
+            var expected=clip.SmoothFrames
+                ? new FrameInterpolator().Sample(clip.Frames[midpoint.Index],clip.Frames[midpoint.Index+1],midpoint.Fraction)
+                : clip.At(duration/2);
+            check(ReferenceEquals(window.CurrentSpriteFrame.Image,clip.At(duration/2))
+                && Pixels((BitmapSource)expression).SequenceEqual(Pixels(expected))
                 && window.ScreenEdgePeekOffset == (side == ScreenEdge.Top ? 8 : 0), "vertical response selects its package pose at midpoint " + side);
             var current=window.CurrentSpriteFrame;
             var height=Math.Min(window.CharacterArt.Height,window.CharacterArt.Width*current.Image.PixelHeight/current.Image.PixelWidth);
@@ -114,6 +120,11 @@ internal static class VerticalEdgeVerification
         BottomEdgeVerification.Run(window,directory,check);
         Record(window, directory, check);
         window.WakeCharacterImmediately();
+    }
+    private static byte[] Pixels(BitmapSource image)
+    {
+        var rgba=new FormatConvertedBitmap(image,PixelFormats.Pbgra32,null,0);
+        var bytes=new byte[rgba.PixelWidth*rgba.PixelHeight*4];rgba.CopyPixels(bytes,rgba.PixelWidth*4,0);return bytes;
     }
     private static void Record(MainWindow window, string directory, Action<bool, string> check)
     {
