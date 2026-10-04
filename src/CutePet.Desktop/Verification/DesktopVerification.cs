@@ -266,6 +266,7 @@ internal static class DesktopVerification
                 { transparentFrame |= framePixels[pixel] == 0; visibleFrame |= framePixels[pixel] >= 250; }
                 var registered = image is CroppedBitmap or RenderTargetBitmap ? image.PixelWidth == 256 && image.PixelHeight == 352
                         || image.PixelWidth == 240 && image.PixelHeight == 360
+                        || image.PixelWidth == 288 && image.PixelHeight == 384
                     : image.PixelWidth == window.SelectedCharacter.Idle.Frames[0].Image.PixelWidth
                         && image.PixelHeight == window.SelectedCharacter.Idle.Frames[0].Image.PixelHeight;
                 Check(image.IsFrozen && registered && transparentFrame && visibleFrame,

@@ -109,7 +109,8 @@ internal static class CharacterPackVerification
         check(player.Action == "greeting", "old four-action packs retain their greeting on either click choice");
         var tianyi = library.Find("tianyi");
         using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
-            check(edgeArchive.GetEntry("edge-sequence-v5.png") is not null && edgeArchive.GetEntry("edge-full-v2.png") is null,
+            check(edgeArchive.GetEntry("side-sequence-v6.png") is not null && edgeArchive.GetEntry("edge-sequence-v5.png") is null
+                && edgeArchive.GetEntry("side-inbetweens-v1.png") is null,
                 "Tianyi export carries the articulated atlas without the superseded floating full-body sprites");
         var edgeFiles = new Dictionary<string, byte[]>();
         using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
@@ -148,11 +149,32 @@ internal static class CharacterPackVerification
             && edgeRoundTrip.Actions["edge-bottom-peek"].Frames[0].Image == edgeRoundTrip.Actions["edge-bottom-idle"].Frames[0].Image
             && edgeFiles.ContainsKey("bottom-sequence-v6.png") && !edgeFiles.ContainsKey("edge-bottom-v1.png"),
             "bottom atlas responses export and import with shared cached views instead of old body-stretch sprites");
-        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 445,
+        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 459,
             "expanded sequences stay within the bounded 768-reference package limit");
         check(edgeRoundTrip.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)
             .SequenceEqual(tianyi.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)),
             "source crops and canvas registration survive real export and import");
+        check(SideEdgeMotion.Responses.All(a=>edgeRoundTrip.Actions[a].SmoothFrames
+            && edgeRoundTrip.Actions[a].Frames.All(f=>f.DurationMs==40)),
+            "registered side smoothing and forty-millisecond timings survive actual export and import");
+        var movingGrip=tianyi.Manifest with {Id="smooth-moving-grip",Actions=new(tianyi.Manifest.Actions)};
+        movingGrip.Actions["edge-peek"]=movingGrip.Actions["edge-peek"] with {Frames=new() {
+            movingGrip.Actions["edge-peek"].Frames[0],movingGrip.Actions["edge-peek"].Frames[1] with {EdgeAnchorX=.3}}};
+        Reject(()=>other.Import(Zip("smooth-moving-grip",movingGrip,edgeFiles)),"smooth clips cannot interpolate changing grip registration");
+        var unregistered=tianyi.Manifest with {Id="smooth-unregistered",Actions=new(tianyi.Manifest.Actions)};
+        unregistered.Actions["edge-peek"]=unregistered.Actions["edge-peek"] with {Frames=unregistered.Actions["edge-peek"].Frames
+            .Select(f=>f with {Canvas=null}).ToList()};
+        Reject(()=>other.Import(Zip("smooth-unregistered",unregistered,edgeFiles)),"smooth clips require registered source canvases");
+        check(SideEdgeMotion.Responses.All(a=>edgeRoundTrip.Manifest.Actions[a].Frames
+            .Select(f=>(f.HeadAnchorX,f.HeadAnchorY)).SequenceEqual(tianyi.Manifest.Actions[a].Frames.Select(f=>(f.HeadAnchorX,f.HeadAnchorY)))),
+            "eye landmarks survive actual package export and import");
+        foreach(var pivot in new[]{(1.1,(double?) .5),(.5,(double?)null)})
+        {
+            var bad=tianyi.Manifest with {Id="bad-head-registration",Actions=new(tianyi.Manifest.Actions)};
+            bad.Actions["edge-idle"]=bad.Actions["edge-idle"] with {Frames=new() {
+                bad.Actions["edge-idle"].Frames[0] with {HeadAnchorX=pivot.Item1,HeadAnchorY=pivot.Item2}}};
+            Reject(()=>other.Import(Zip("bad-head-registration",bad,edgeFiles)),"head landmark must be a complete in-bounds coordinate pair "+pivot);
+        }
         foreach (var response in EdgeActions.TopResponses.Skip(1))
         {
             var orphan = tianyi.Manifest with {Id="top-orphan",Actions=new() {

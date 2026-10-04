@@ -53,6 +53,17 @@ internal sealed class CharacterAnimation
         : flying && pack.Actions.ContainsKey("cloud-idle") ? "cloud-idle" : "idle");
     internal double ActionProgress => (transient is null ? baseElapsed : transientElapsed) / pack.Actions[Action].Duration;
     internal LoadedFrame SpriteFrame => pack.Actions[Action].Frames[pack.Actions[Action].PositionAt(transient is null ? baseElapsed : transientElapsed).Index];
+    internal (LoadedFrame From, LoadedFrame To, double Fraction) Presentation
+    {
+        get
+        {
+            var clip = pack.Actions[Action];
+            var position = clip.PositionAt(transient is null ? baseElapsed : transientElapsed);
+            var current = clip.Frames[position.Index];
+            var next = clip.SmoothFrames && position.Index + 1 < clip.Frames.Count ? clip.Frames[position.Index + 1] : current;
+            return (current, next, position.Fraction);
+        }
+    }
     public BitmapSource Image => SpriteFrame.Image;
     public CharacterFrame Frame => Action switch
     { "low" => CharacterFrame.Low, "blink" or "cloud-blink" => CharacterFrame.Closed,

@@ -56,6 +56,7 @@ public sealed record CharacterCloud
 public sealed record CharacterAction
 {
     public bool Loop { get; init; }
+    public bool SmoothFrames { get; init; }
     public List<CharacterActionFrame> Frames { get; init; } = new();
 }
 public sealed record CharacterFrameRegion(int X, int Y, int Width, int Height);
@@ -68,9 +69,12 @@ public sealed record CharacterActionFrame(string Image, int DurationMs = 180)
     public double? EdgeAnchorX { get; init; }
     public double? EdgeAnchorY { get; init; }
     public double? SwingSeatAnchorY { get; init; }
+    public double? HeadAnchorX { get; init; }
+    public double? HeadAnchorY { get; init; }
 }
-internal sealed record LoadedFrame(BitmapSource Image, int DurationMs, double? EdgeAnchorX = null, double? EdgeAnchorY = null, double? SwingSeatAnchorY = null);
-internal sealed record LoadedAction(bool Loop, IReadOnlyList<LoadedFrame> Frames)
+internal sealed record LoadedFrame(BitmapSource Image, int DurationMs, double? EdgeAnchorX = null, double? EdgeAnchorY = null, double? SwingSeatAnchorY = null,
+    double? HeadAnchorX = null, double? HeadAnchorY = null);
+internal sealed record LoadedAction(bool Loop, IReadOnlyList<LoadedFrame> Frames, bool SmoothFrames = false)
 {
     public double Duration => Frames.Sum(frame => frame.DurationMs);
     public BitmapSource At(double elapsed)

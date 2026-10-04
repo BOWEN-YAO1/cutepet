@@ -16,7 +16,8 @@ internal static class CharacterPackLoader
     internal const int MaxManifestBytes = 256 * 1024;
     internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "cloud-idle", "cloud-blink", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-shy", "edge-sway", "edge-nod", "edge-top-idle", "edge-top-peek", "edge-top-look", "edge-top-smile", "edge-bottom-idle", "edge-bottom-peek", "edge-bottom-look", "edge-bottom-smile" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true, WriteIndented = true };
+        PropertyNameCaseInsensitive = true, WriteIndented = true,
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull };
     public static bool ValidId(string? id) => id is not null && Regex.IsMatch(id, "\\A[a-z][a-z0-9-]{0,63}\\z");
     public static bool SafeFile(string name) => name.Length <= 120
         && Regex.IsMatch(name, "\\A[a-zA-Z0-9_-]+(?:/[a-zA-Z0-9_-]+)*\\.png\\z", RegexOptions.IgnoreCase);
@@ -180,9 +181,20 @@ internal static class CharacterPackLoader
                         throw new InvalidDataException("同一角色的普通动作帧需要保持相同画布大小。");
                 }
                 if (edge) edgeCanvases.TryAdd(edgeBase, (image.PixelWidth,image.PixelHeight,frame.Region is not null));
-                loaded.Add(new(image, frame.DurationMs, frame.EdgeAnchorX, frame.EdgeAnchorY, frame.SwingSeatAnchorY));
+                if (frame.HeadAnchorX.HasValue != frame.HeadAnchorY.HasValue
+                    || frame.HeadAnchorX.HasValue && (!side || frame.Canvas is null)
+                    || frame.HeadAnchorX is double hx && (!double.IsFinite(hx) || hx<0 || hx>1)
+                    || frame.HeadAnchorY is double hy && (!double.IsFinite(hy) || hy<0 || hy>1))
+                    throw new InvalidDataException("头部配准点需要左右登记画布、同时提供X/Y并位于画布内。");
+                loaded.Add(new(image, frame.DurationMs, frame.EdgeAnchorX, frame.EdgeAnchorY, frame.SwingSeatAnchorY, frame.HeadAnchorX, frame.HeadAnchorY));
             }
-            var clip = new LoadedAction(action.Loop, loaded);
+            if (action.SmoothFrames && (EdgeActions.BaseOf(name) != "edge-idle"
+                || action.Frames.Any(f => f.Canvas is null)
+                || loaded[0].EdgeAnchorX is null || loaded[0].EdgeAnchorY is null
+                || loaded.Any(f=>f.HeadAnchorX.HasValue!=loaded[0].HeadAnchorX.HasValue)
+                || loaded.Any(f => f.EdgeAnchorX != loaded[0].EdgeAnchorX || f.EdgeAnchorY != loaded[0].EdgeAnchorY)))
+                throw new InvalidDataException("连续过渡仅用于同一画布、固定双手锚点的左右贴边图集。");
+            var clip = new LoadedAction(action.Loop, loaded, action.SmoothFrames);
             if (clip.Duration > 30000) throw new InvalidDataException("一个动作最多持续 30 秒。");
             actions.Add(name, clip);
         }

@@ -61,6 +61,8 @@ my-pet.cutepet.zip
 
 ## 多帧动作
 
+0.40.0 起，登记过的左右图集动作可设置 `smoothFrames: true`，让相邻源帧之间做随屏幕刷新采样的短过渡。需要每帧都有 `canvas`、一致画布尺寸及完全相同的 `edgeAnchorX` / `edgeAnchorY`；不同锚点或未登记图集会被拒绝。还可提供一对画布归一化坐标 `headAnchorX` / `headAnchorY`，把可见眼睛对齐后混合；同动作必须全部提供或全部省略，坐标必须有限且在 0–1 之间。手部区域保持固定。旧包默认关闭过渡选项。字段、帧率和视觉限制见 [侧边连续过渡](side-smooth.md)。
+
 每个动作的 frames 可包含多张 PNG，也可以重复引用同一张，durationMs 是该帧持续的毫秒数。例如将以下动作加到 actions 对象中：
 
 ```json

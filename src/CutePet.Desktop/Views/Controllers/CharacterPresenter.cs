@@ -15,9 +15,10 @@ internal sealed class CharacterPresenter
     private readonly MainWindow window;
     private readonly bool verification;
     private readonly DispatcherTimer blink = new() { Interval = TimeSpan.FromSeconds(4) };
-    private readonly DispatcherTimer frameTimer = new() { Interval = TimeSpan.FromMilliseconds(20) };
     private readonly Stopwatch animationClock = new();
+    private bool rendering;
     private readonly CharacterAnimation characterAnimation = new();
+    private readonly FrameInterpolator interpolator = new();
     private readonly BehaviorRhythm rhythm;
     private readonly IdleFloat idleFloat = new();
     private bool hovered, hoverPlayed;
@@ -46,18 +47,20 @@ internal sealed class CharacterPresenter
         rhythm = new BehaviorRhythm(verification ? () => 0 : null);
         nextLook = rhythm.Between(8000,16000);
         blink.Tick += (_, _) => Blink();
-        frameTimer.Tick += (_, _) =>
-        {
-            var elapsed = animationClock.Elapsed;
-            animationClock.Restart();
-            AdvanceCharacterAnimation(elapsed);
-        };
+    }
+
+    private void OnRendering(object? sender, EventArgs args)
+    {
+        var elapsed = animationClock.Elapsed;
+        animationClock.Restart();
+        AdvanceCharacterAnimation(elapsed);
     }
     internal void ApplyPack()
     {
         window.CancelScreenEdge();
         window.CancelCloud();
         characterAnimation.Configure(window.SelectedCharacter);
+        interpolator.Reset();
         rhythm.Reset(); idleFloat.Reset(); floating = false; window.Bob.Y = 0;
         ResetAmbient();
         window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
@@ -81,7 +84,13 @@ internal sealed class CharacterPresenter
     }
 
     internal void StartCharacterBlink() { if (!window.CloudActive) characterAnimation.Blink(); RefreshCharacterFrame(); }
-    internal void StartAnimationClock() { animationClock.Restart(); frameTimer.Start(); }
+    internal void StartAnimationClock()
+    {
+        if (rendering) return;
+        animationClock.Restart();
+        CompositionTarget.Rendering += OnRendering;
+        rendering = true;
+    }
     internal void AdvanceCharacterAnimation(TimeSpan elapsed)
     {
         if ((!window.CloudActive || window.CanCloudMove) && (!window.ScreenEdgeActive || window.CanPlayAmbient)) characterAnimation.Advance(elapsed);
@@ -239,7 +248,9 @@ internal sealed class CharacterPresenter
         if (window.Model.IsLow && !window.Model.IsStale) window.CancelCloud();
         characterAnimation.Low = window.Model.IsLow && !window.Model.IsStale;
         characterAnimation.Flying = window.CloudActive && window.CloudArt.Opacity == 1;
-        if (window.CharacterArt.Source != characterAnimation.Image) window.CharacterArt.Source = characterAnimation.Image;
+        var sample = characterAnimation.Presentation;
+        var image = interpolator.Sample(sample.From, sample.To, sample.Fraction);
+        if (window.CharacterArt.Source != image) window.CharacterArt.Source = image;
         ApplyFloating();
     }
 
@@ -265,9 +276,11 @@ internal sealed class CharacterPresenter
             window.CancelScreenEdge();
             window.CancelCloud();
             blink.Stop();
-            frameTimer.Stop();
+            if (rendering) CompositionTarget.Rendering -= OnRendering;
+            rendering = false;
             animationClock.Reset();
             characterAnimation.Reset();
+            interpolator.Reset();
             ResetAmbient();
             window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
             RefreshCharacterFrame();

@@ -21,8 +21,17 @@ internal static class SideEdgeVerification
         var samples = new List<BitmapSource>();
         var labels = new[] { "微笑探头", "缩回再探出", "探头轻摇", "探头点头" };
         var artwork = SideEdgeMotion.Responses.SelectMany(a => window.SelectedCharacter.Actions[a].Frames).DistinctBy(f => f.Image).ToArray();
-        check(artwork.Length == 24 && artwork.All(f => f.Image.IsFrozen),
-            "side gestures use twenty-four cached articulated poses with shoulder insertion stages");
+        check(artwork.Length == 15 && artwork.All(f => f.Image.IsFrozen),
+            "side gestures share fifteen coherent head-normalized drawings instead of mixing camera scales");
+        check(SideEdgeMotion.Responses.All(a=>window.SelectedCharacter.Actions[a].SmoothFrames
+            && window.SelectedCharacter.Actions[a].Frames.All(f=>f.DurationMs==40)),
+            "all moving side drawings advance at twenty-five source frames per second");
+        check(artwork.All(f=>f.EdgeAnchorX==48.0/288 && f.EdgeAnchorY==250.0/384),
+            "all side drawings share identical hand registration so frame changes never shift the anchor");
+        var heads=artwork.Select(f=>HeadHeight(f.Image)).ToArray();
+        check(heads.Max()-heads.Min()<=5 && heads.All(h=>h>=195&&h<=205),
+            "actual rendered side head heights stay within five source pixels across the entire reveal");
+        CheckInterpolation(check);
         long LowerVisible(LoadedFrame frame)
         {
             var rgba = new FormatConvertedBitmap(frame.Image,PixelFormats.Bgra32,null,0);
@@ -51,14 +60,14 @@ internal static class SideEdgeVerification
                 var aligned = true;
                 window.PlayCharacterInteraction();
                 check(window.ScreenEdgeResponse == action, "side responses rotate through supported package actions " + side + action);
-                var steps=(int)Math.Ceiling(duration/40);
+                var steps=(int)Math.Ceiling(duration/20);
                 for (var step = 0; step < steps; step++)
                 {
                     var frame = ScreenEdgeVerification.Capture(window, side, (side == ScreenEdge.Left ? "左侧 · " : "右侧 · ") + labels[index]);
-                    encoder.Frames.Add(BitmapFrame.Create(frame)); delays.Add(4);
-                    seen.Add((BitmapSource)window.CharacterArt.Source);
+                    encoder.Frames.Add(BitmapFrame.Create(frame)); delays.Add(2);
+                    seen.Add(window.CurrentSpriteFrame.Image);
                     if (step == steps/3) samples.Add(frame);
-                    window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(40,duration-step*40)));
+                    window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(20,duration-step*20)));
                     maximumOutward = Math.Max(maximumOutward,window.ScreenEdgePeekOffset);
                     var current = window.CurrentSpriteFrame;
                     var width = Math.Min(window.CharacterArt.Width,window.CharacterArt.Height * current.Image.PixelWidth / current.Image.PixelHeight);
@@ -97,8 +106,8 @@ internal static class SideEdgeVerification
         }
         using var bytes = new MemoryStream(); encoder.Save(bytes);
         File.WriteAllBytes(Path.Combine(directory,"side-edge-actions.gif"),ThroneMotionVerification.WithAnimationMetadata(bytes.ToArray(),delays));
-        check(encoder.Frames.Count == SideEdgeMotion.Responses.Sum(a=>(int)Math.Ceiling(window.SelectedCharacter.Actions[a].Duration/40))*2,
-            "side preview samples every forty milliseconds so insertion stages are not skipped");
+        check(encoder.Frames.Count == SideEdgeMotion.Responses.Sum(a=>(int)Math.Ceiling(window.SelectedCharacter.Actions[a].Duration/20))*2,
+            "side preview samples every twenty milliseconds including intermediate rendered blends");
         var contact = new DrawingVisual();
         using (var draw = contact.RenderOpen())
             for (var row = 0; row < 4; row++)
@@ -134,5 +143,67 @@ internal static class SideEdgeVerification
             player.Preview(action); player.Low = true;
             check(player.Action == "low", "fresh low quota clears custom side preview " + action);
         }
+    }
+
+    private static void CheckInterpolation(Action<bool,string> check)
+    {
+        BitmapSource Solid(byte b,byte g,byte r,byte a)
+            => BitmapSource.Create(1,1,96,96,PixelFormats.Pbgra32,null,new[]{b,g,r,a},4);
+        var red=Solid(0,0,255,255); var blue=Solid(255,0,0,255); var clear=Solid(0,0,0,0);
+        var interpolator=new FrameInterpolator();
+        var bytes=new byte[4]; var middle=interpolator.Sample(red,blue,.5);middle.CopyPixels(bytes,4,0);
+        check(bytes[0]==128&&bytes[2]==127&&bytes[3]==255,"registered frame interpolation preserves opaque color without dimming");
+        var later=interpolator.Sample(red,blue,.75);later.CopyPixels(bytes,4,0);
+        check(ReferenceEquals(middle,later)&&bytes[0]>128&&bytes[2]<127,"subframe samples reuse one bounded output while pixels continue moving");
+        interpolator.Sample(red,clear,.5).CopyPixels(bytes,4,0);
+        check(bytes[2]==127&&bytes[3]==127,"transparent interpolation blends premultiplied color and alpha together");
+        check(ReferenceEquals(interpolator.Sample(red,blue,0),red)&&ReferenceEquals(interpolator.Sample(red,blue,1),blue)
+            &&ReferenceEquals(interpolator.Sample(red,red,.5),red),"frame boundaries and identical idle drawings remain their exact cached images");
+        BitmapSource Marker(int headX)
+        {
+            var pixels=new byte[13*100*4];
+            var eye=(5*13+headX)*4; pixels[eye+2]=pixels[eye+3]=255;
+            var hand=(80*13+2)*4; pixels[hand+1]=pixels[hand+3]=255;
+            return BitmapSource.Create(13,100,96,96,PixelFormats.Pbgra32,null,pixels,13*4);
+        }
+        var a=new LoadedFrame(Marker(3),40,EdgeAnchorY:.75,HeadAnchorX:3.0/13,HeadAnchorY:.05);
+        var b=new LoadedFrame(Marker(9),40,EdgeAnchorY:.75,HeadAnchorX:9.0/13,HeadAnchorY:.05);
+        var morphed=interpolator.Sample(a,b,.5);var actual=new byte[13*100*4];morphed.CopyPixels(actual,13*4,0);
+        check(actual[(5*13+6)*4+3]>=240&&actual[(5*13+3)*4+3]==0&&actual[(5*13+9)*4+3]==0,
+            "head landmark warping produces one moving eye instead of two crossfaded eyes");
+        check(actual[(80*13+2)*4+1]==255&&actual[(80*13+2)*4+3]==255,
+            "head warping tapers to zero and leaves the lower stationary grip untouched");
+        interpolator.Reset();
+    }
+
+    private static int HeadHeight(BitmapSource image)
+    {
+        var rgba=new FormatConvertedBitmap(image,PixelFormats.Bgra32,null,0);
+        var width=rgba.PixelWidth;var height=rgba.PixelHeight;
+        var bytes=new byte[width*height*4];rgba.CopyPixels(bytes,width*4,0);
+        var skin=new bool[width*height];var top=height;
+        for(var y=0;y<height;y++)for(var x=0;x<width;x++)
+        {
+            var p=(y*width+x)*4;
+            if(bytes[p+3]<200)continue;
+            top=Math.Min(top,y);
+            skin[y*width+x]=bytes[p+2]>180&&bytes[p+2]>bytes[p+1]*1.04&&bytes[p+1]>bytes[p]*1.02;
+        }
+        var largest=0;var chin=0;var queue=new Queue<int>();
+        for(var seed=0;seed<skin.Length;seed++)
+        {
+            if(!skin[seed])continue;
+            skin[seed]=false;queue.Enqueue(seed);var count=0;var bottom=0;
+            while(queue.Count>0)
+            {
+                var point=queue.Dequeue();count++;bottom=Math.Max(bottom,point/width);
+                Add(point-1,point%width>0);Add(point+1,point%width<width-1);
+                Add(point-width,point>=width);Add(point+width,point<skin.Length-width);
+            }
+            if(count>largest){largest=count;chin=bottom;}
+        }
+        return chin-top;
+        void Add(int point,bool inside)
+        {if(inside&&skin[point]){skin[point]=false;queue.Enqueue(point);}}
     }
 }

@@ -107,8 +107,11 @@ actions['stand'] = {'loop': False, 'frames': [dict(f, durationMs=100) for f in r
 spec=importlib.util.spec_from_file_location('inbetweens',Path(__file__).with_name('register-tianyi-inbetweens.py'))
 inbetweens=importlib.util.module_from_spec(spec);spec.loader.exec_module(inbetweens)
 actions=inbetweens.insert_inbetweens(actions,frame)
+spec=importlib.util.spec_from_file_location('side_registration',Path(__file__).with_name('register-tianyi-side.py'))
+side_registration=importlib.util.module_from_spec(spec);spec.loader.exec_module(side_registration)
+actions=side_registration.register_side(actions)
 manifest['actions'] = actions
-manifest['edgeAnchorX'] = anchors['side',0]['edgeAnchorX']
+manifest['edgeAnchorX'] = actions['edge-idle']['frames'][0]['edgeAnchorX']
 manifest['edgeTopAnchorY'] = anchors['top',0]['edgeAnchorY']
 manifest['edgeBottomAnchorY'] = anchors['bottom',0]['edgeAnchorY']
 manifest['topSwing']['seatAnchorY'] = anchors['top',0]['swingSeatAnchorY']

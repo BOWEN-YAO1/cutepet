@@ -1,7 +1,7 @@
-# 发布包目录与打包（0.39.0）
+# 发布包目录与打包（0.40.0）
 
 ```text
-CutePet-Desktop-v0.39.0-win-x64/
+CutePet-Desktop-v0.40.0-win-x64/
 ├── CutePet.exe
 ├── CutePet.dll
 ├── CutePet.Core.dll
@@ -34,7 +34,7 @@ dotnet src/CutePet.Desktop/bin/Release/net8.0-windows/CutePet.dll --verify artif
 dotnet publish src/CutePet.Desktop -c Release --no-build -o artifacts/publish
 python scripts/package-desktop.py --publish-dir artifacts/publish --verification-dir artifacts/desktop-verification --output-dir artifacts/packages
 $taskCommit = git rev-parse HEAD
-python scripts/verify-package.py artifacts/packages/CutePet-Desktop-v0.39.0-win-x64.zip --expected-commit $taskCommit
+python scripts/verify-package.py artifacts/packages/CutePet-Desktop-v0.40.0-win-x64.zip --expected-commit $taskCommit
 ```
 
 任一步失败则停止发布。打包器拒绝未提交修改或未通过的窗口验证报告，从项目版本生成文件名，创建全新的临时目录，按分类复制文档和新预览，并附对应提交的 GPL 源码和 SHA-256。打包器本身不证明发布目录与提交一致，维护者应按上述顺序执行，不复用旧版 publish 目录。
