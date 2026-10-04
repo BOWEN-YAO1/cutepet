@@ -60,8 +60,9 @@ def main():
                 checks.append(f'{role}: portable dialogue and every active sprite match attached source')
         checks.append('License, exact commit and matching source checksum attached')
         assert {'previews/interface/app-dialogue-settings.png', 'previews/dialogue/dialogue-preview.png'}.issubset(names)
-        assert len([name for name in names if name.startswith('previews/animations/') and name.endswith('.gif')]) == 3
-        checks.append('Fresh interface, dialogue and three animation previews grouped correctly')
+        assert {name for name in names if name.startswith('previews/animations/') and name.endswith('.gif')} == {
+            'previews/animations/'+name for name in ('side-edge-actions.gif','bottom-edge-actions.gif','top-edge-actions.gif','cloud-landing.gif')}
+        checks.append('Fresh interface, dialogue, three edge animations and soft landing grouped correctly')
     digest = hashlib.sha256(args.package.read_bytes()).hexdigest()
     assert args.package.with_name(args.package.name+'.sha256').read_text().split()[0] == digest
     print(json.dumps({'passed': True, 'checks': checks, 'sha256': digest}, ensure_ascii=False))

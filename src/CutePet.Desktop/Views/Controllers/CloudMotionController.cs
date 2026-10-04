@@ -9,18 +9,20 @@ internal sealed class CloudMotionController
     private readonly MainWindow window;
     private readonly bool verification;
     private readonly CloudFlight flight = new();
-    private double waiting, startX, targetX, top, targetY;
+    private readonly CloudLanding landing = new();
+    private double startX, targetX, top, targetY;
     internal RoamingRoute? Route { get; private set; }
     internal double TripDuration => flight.DurationMs;
     private int direction = -1;
     internal bool Active => flight.Active;
+    internal bool Landing => landing.Active;
     internal double RequestedX { get; private set; }
     internal double RequestedY { get; private set; }
     internal CloudMotionController(MainWindow window, bool verification)
     { this.window = window; this.verification = verification; }
     internal bool Start(bool roam = false, bool proactive = false)
     {
-        if (Active || window.ScreenEdgeActive || window.SelectedCharacter.CloudImage is null || window.Settings.PositionLocked
+        if (Active || Landing || window.ScreenEdgeActive || window.SelectedCharacter.CloudImage is null || window.Settings.PositionLocked
             || window.CharacterRestPose || window.Model.IsLow && !window.Model.IsStale) return false;
         var dpi = VisualTreeHelper.GetDpi(window);
         var plan = NativePlacement.PlanDrift(window, 96 * window.Settings.EffectiveCharacterScale * dpi.DpiScaleX, direction);
@@ -35,13 +37,13 @@ internal sealed class CloudMotionController
             var quota = window.QuotaHost.Position;
             var quotaBounds = NativePlacement.RoamingBounds(window.QuotaHost);
             Route = DesktopRoaming.Plan(bounds.Area, bounds.Size, bounds.Origin, new Rect(quota, quotaBounds.Size), dpi.DpiScaleX, Random.Shared.NextDouble);
-            if (Route is null) { waiting = 0; return false; }
+            if (Route is null) return false;
             startX = Route.Start.X; top = Route.Start.Y; targetX = Route.Target.X; targetY = Route.Target.Y;
         }
         RequestedX = startX;
         RequestedY = top;
         flight.Start(window.SelectedCharacter.Actions.TryGetValue("summon-cloud", out var spell) ? spell.Duration : 0, Route?.TravelMs ?? 8000);
-        waiting = 0;
+        window.ActivityStarted(QuietActivity.Cloud);
         window.StartCloudSpell();
         window.Speak("cloud", proactive);
         Render();
@@ -49,6 +51,13 @@ internal sealed class CloudMotionController
     }
     internal void Advance(TimeSpan elapsed)
     {
+        if (Landing)
+        {
+            if (!window.CanPlayAmbient) return;
+            landing.Advance(elapsed); Render();
+            if (!Landing) window.ActivityFinished();
+            return;
+        }
         if (window.ScreenEdgeActive || window.SelectedCharacter.CloudImage is null || window.Settings.PositionLocked
             || window.CharacterRestPose || window.Model.IsLow && !window.Model.IsStale)
         { Cancel(); return; }
@@ -69,9 +78,6 @@ internal sealed class CloudMotionController
         if (!window.CanCloudMove) return;
         if (!Active)
         {
-            if (!window.Settings.AutoCloud) { waiting = 0; return; }
-            waiting += Math.Max(0, elapsed.TotalMilliseconds);
-            if (waiting >= 18000 && window.CharacterIdle) Start(roam: true, proactive: true);
             return;
         }
         var finished = flight.Advance(elapsed);
@@ -88,28 +94,41 @@ internal sealed class CloudMotionController
         if (finished)
         {
             direction = targetX < startX ? 1 : -1;
-            waiting = 0;
+            window.ActivityFinished();
             window.SavePlacement();
         }
     }
     internal void Cancel()
     {
         flight.Cancel();
+        landing.Cancel();
         Route = null;
-        waiting = 0;
         window.CancelCloudSpell();
         Render();
     }
+    internal void Land()
+    {
+        if (!Active) return;
+        landing.Begin(CurrentPose());
+        flight.Cancel(); Route = null;
+        window.CancelCloudSpell();
+        if (!Landing) window.ActivityFinished();
+        Render();
+        window.SavePlacement();
+    }
+    private CloudPose CurrentPose() => new(flight.Opacity, flight.Lift, flight.Bob, flight.CloudBob,
+        flight.Lean(Route?.Heading(flight.Travel).X ?? Math.Sign(targetX-startX)), flight.CloudTilt, flight.CloudBreath);
     private void Render()
     {
-        window.CloudArt.Opacity = flight.Opacity;
-        window.CloudLift.Y = flight.Lift;
-        window.CloudCharacterBob.Y = flight.Bob;
-        window.CloudBob.Y = flight.CloudBob;
-        window.CloudLean.Angle = flight.Lean(Route?.Heading(flight.Travel).X ?? Math.Sign(targetX - startX));
-        window.CloudRoll.Angle = flight.CloudTilt;
-        window.CloudBreath.ScaleX = 1 + flight.CloudBreath;
-        window.CloudBreath.ScaleY = 1 - flight.CloudBreath;
-        window.GroundShadow.Opacity = 1 - flight.Opacity;
+        var pose = Landing ? landing.Pose : CurrentPose();
+        window.CloudArt.Opacity = pose.Opacity;
+        window.CloudLift.Y = pose.Lift;
+        window.CloudCharacterBob.Y = pose.Bob;
+        window.CloudBob.Y = pose.CloudBob;
+        window.CloudLean.Angle = pose.Lean;
+        window.CloudRoll.Angle = pose.Tilt;
+        window.CloudBreath.ScaleX = 1 + pose.Breath;
+        window.CloudBreath.ScaleY = 1 - pose.Breath;
+        window.GroundShadow.Opacity = 1 - pose.Opacity;
     }
 }

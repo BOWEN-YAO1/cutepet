@@ -125,7 +125,7 @@ internal sealed class CharacterAnimation
     public bool TryAmbient(string action)
     {
         if (onEdge) return false;
-        if (action == "sit-happy")
+        if (action is "sit-happy" or "sit-greeting" or "sit-blink")
         {
             if (Low || !resting || transient is not null || !pack.Actions.ContainsKey(action)) return false;
             Start(action);

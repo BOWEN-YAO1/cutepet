@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Automation;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -16,20 +18,33 @@ internal sealed class CharacterPresenter
     private readonly DispatcherTimer frameTimer = new() { Interval = TimeSpan.FromMilliseconds(40) };
     private readonly Stopwatch animationClock = new();
     private readonly CharacterAnimation characterAnimation = new();
+    private readonly BehaviorRhythm rhythm;
+    private readonly IdleFloat idleFloat = new();
     private bool hovered, hoverPlayed;
-    private double hoverElapsed, lookElapsed, nextLook = NextLook();
-    private double idleForRest, seatedElapsed, cloudBlinkElapsed;
+    private double hoverElapsed, lookElapsed, nextLook;
+    private double seatedElapsed, restDuration, cloudBlinkElapsed, nextCloudBlink;
     private bool automaticRest, floating;
     internal bool Resting => characterAnimation.Resting;
     internal bool RestPose => characterAnimation.RestPose;
     internal bool Idle => characterAnimation.Action == "idle";
-    private static double NextLook() => Random.Shared.Next(8000, 16001);
+    private double NextLook() => window.ScreenEdgeActive ? rhythm.Between(12000,26000)
+        : RestPose ? rhythm.Between(10000,22000) : rhythm.Between(8000,16000);
+    private void PlanActivity() => rhythm.Plan(window.Settings.AutoRest && window.SelectedCharacter.Manifest.RestAfterMs > 0,
+        window.Settings.AutoCloud && !window.Settings.PositionLocked && window.SelectedCharacter.CloudImage is not null,
+        window.SelectedCharacter.Manifest.RestAfterMs);
+    internal double NextActivityDelay { get { PlanActivity(); return rhythm.RemainingMs; } }
+    internal QuietActivity NextActivity { get { PlanActivity(); return rhythm.Next; } }
+    internal string ChooseAmbient(string group, IEnumerable<string> actions) => rhythm.Choose(group, actions);
+    internal void ActivityStarted(QuietActivity activity) { rhythm.Started(activity); lookElapsed = 0; nextLook = NextLook(); }
+    internal void ActivityFinished() { rhythm.ResetQuiet(); lookElapsed = 0; nextLook = NextLook(); }
     internal CharacterFrame CurrentFrame => characterAnimation.Frame;
     internal LoadedFrame SpriteFrame => characterAnimation.SpriteFrame;
     public CharacterPresenter(MainWindow window, bool verification)
     {
         this.window = window;
         this.verification = verification;
+        rhythm = new BehaviorRhythm(verification ? () => 0 : null);
+        nextLook = rhythm.Between(8000,16000);
         blink.Tick += (_, _) => Blink();
         frameTimer.Tick += (_, _) =>
         {
@@ -43,6 +58,7 @@ internal sealed class CharacterPresenter
         window.CancelScreenEdge();
         window.CancelCloud();
         characterAnimation.Configure(window.SelectedCharacter);
+        rhythm.Reset(); idleFloat.Reset(); floating = false; window.Bob.Y = 0;
         ResetAmbient();
         window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
         window.CharacterArt.Width = window.SelectedCharacter.Manifest.DisplayWidth;
@@ -60,6 +76,8 @@ internal sealed class CharacterPresenter
     private void Blink()
     {
         if (window.IsVisible && !verification && window.CanPlayAmbient && !window.CloudActive) StartCharacterBlink();
+        blink.Interval = TimeSpan.FromMilliseconds(rhythm.Between(window.SelectedCharacter.Manifest.BlinkIntervalMs*.8,
+            window.SelectedCharacter.Manifest.BlinkIntervalMs*1.4));
     }
 
     internal void StartCharacterBlink() { if (!window.CloudActive) characterAnimation.Blink(); RefreshCharacterFrame(); }
@@ -73,10 +91,12 @@ internal sealed class CharacterPresenter
         else if (window.CanCloudMove && window.CloudArt.Opacity == 1)
         {
             cloudBlinkElapsed += Math.Max(0, elapsed.TotalMilliseconds);
-            if (cloudBlinkElapsed >= 4200 && characterAnimation.Action == "idle")
-            { characterAnimation.Blink(); cloudBlinkElapsed %= 4200; }
+            if (cloudBlinkElapsed >= nextCloudBlink && characterAnimation.Action == "idle")
+            { characterAnimation.Blink(); cloudBlinkElapsed = 0; nextCloudBlink = rhythm.Between(4200,7000); }
         }
         RefreshCharacterFrame();
+        idleFloat.Advance(elapsed);
+        if (!verification) window.Bob.Y = idleFloat.Value;
         if (window.IsVisible && !verification) AdvanceAmbient(elapsed);
         window.Dialogue.Advance(elapsed);
     }
@@ -86,15 +106,15 @@ internal sealed class CharacterPresenter
         hovered = inside;
         hoverElapsed = 0;
         hoverPlayed = false;
-        idleForRest = 0;
+        rhythm.ResetQuiet();
     }
     private void ResetAmbient()
-    { hovered = hoverPlayed = automaticRest = false; hoverElapsed = lookElapsed = idleForRest = seatedElapsed = 0; nextLook = NextLook(); }
+    { hovered = hoverPlayed = automaticRest = false; hoverElapsed = lookElapsed = seatedElapsed = 0; rhythm.ResetQuiet(); nextLook = NextLook(); }
     internal void AdvanceAmbient(TimeSpan elapsed)
     {
         var ms = Math.Max(0, elapsed.TotalMilliseconds);
-        if (window.CloudActive) return;
-        if (!window.CanPlayAmbient || characterAnimation.Low) { idleForRest = 0; return; }
+        if (window.CloudActive || window.CloudLanding) return;
+        if (!window.CanPlayAmbient || characterAnimation.Low || window.DetailsVisible || window.ControlCenter?.IsCharactersPage == true) return;
         if (window.ScreenEdgeActive)
         {
             if (hovered && !hoverPlayed)
@@ -105,7 +125,7 @@ internal sealed class CharacterPresenter
             if (!hovered)
             {
                 lookElapsed += ms;
-                if (lookElapsed >= nextLook) { window.PeekScreenEdge(); lookElapsed = 0; nextLook = NextLook(); }
+                if (lookElapsed >= nextLook) { window.PeekScreenEdge(proactive: true); lookElapsed = 0; nextLook = NextLook(); }
             }
             return;
         }
@@ -114,30 +134,35 @@ internal sealed class CharacterPresenter
             if (automaticRest && characterAnimation.Action == "sit")
             {
                 seatedElapsed += ms;
-                if (seatedElapsed >= window.SelectedCharacter.Manifest.RestDurationMs)
-                { characterAnimation.StandUp(); window.Speak("wake", proactive: true); automaticRest = false; idleForRest = seatedElapsed = 0; }
+                if (seatedElapsed >= restDuration)
+                { characterAnimation.StandUp(); window.Speak("wake", proactive: true); automaticRest = false; seatedElapsed = 0; ActivityFinished(); }
             }
             if (!hovered && characterAnimation.Action == "sit")
             {
                 lookElapsed += ms;
-                if (lookElapsed >= nextLook && characterAnimation.TryAmbient("sit-happy"))
-                { lookElapsed = 0; nextLook = NextLook(); }
+                var choices = new[] { "sit-happy", "sit-greeting", "sit-blink" }.Where(window.SelectedCharacter.Actions.ContainsKey).ToArray();
+                if (lookElapsed >= nextLook && choices.Length > 0)
+                { characterAnimation.TryAmbient(rhythm.Choose("seated", choices)); lookElapsed = 0; nextLook = NextLook(); }
             }
             RefreshCharacterFrame();
             return;
         }
-        if (!hovered && window.Settings.AutoRest && window.SelectedCharacter.Manifest.RestAfterMs > 0)
+        if (!hovered && window.CanCloudMove && characterAnimation.Action == "idle")
         {
-            idleForRest += ms;
-            if (idleForRest >= window.SelectedCharacter.Manifest.RestAfterMs && characterAnimation.Action == "idle"
-                && characterAnimation.SitDown())
+            PlanActivity();
+            var next = rhythm.Advance(elapsed);
+            if (next == QuietActivity.Rest && characterAnimation.SitDown())
             {
+                ActivityStarted(QuietActivity.Rest);
                 automaticRest = true;
+                restDuration = rhythm.Between(window.SelectedCharacter.Manifest.RestDurationMs*.85, window.SelectedCharacter.Manifest.RestDurationMs*1.3);
                 window.Speak("rest", proactive: true);
-                seatedElapsed = idleForRest = 0;
+                seatedElapsed = 0;
                 RefreshCharacterFrame();
                 return;
             }
+            if (next == QuietActivity.Cloud && window.TryAutomaticCloud()) return;
+            if (next != QuietActivity.None) rhythm.ResetQuiet();
         }
         if (hovered && !hoverPlayed)
         {
@@ -155,13 +180,13 @@ internal sealed class CharacterPresenter
     internal void PlayInteraction()
     {
         if (window.ScreenEdgeActive) { window.PeekScreenEdge(proactive: false); return; }
-        window.CancelCloud();
+        window.LandCloud();
         window.Speak(characterAnimation.RestPose ? "rest" : "click");
         characterAnimation.ReactToClick(Random.Shared.Next(2));
         hoverPlayed = hovered;
         lookElapsed = 0;
         nextLook = NextLook();
-        idleForRest = seatedElapsed = 0;
+        rhythm.ResetQuiet(); seatedElapsed = 0;
         if (!characterAnimation.Resting) automaticRest = false;
         RefreshCharacterFrame();
         PlayTilt();
@@ -169,7 +194,8 @@ internal sealed class CharacterPresenter
     internal void PlayGreeting()
     {
         if (window.ScreenEdgeActive) { window.PeekScreenEdge(proactive: false); return; }
-        window.CancelCloud();
+        window.LandCloud();
+        rhythm.ResetQuiet();
         window.Speak(characterAnimation.RestPose ? "rest" : "click");
         characterAnimation.Greet();
         RefreshCharacterFrame();
@@ -178,10 +204,10 @@ internal sealed class CharacterPresenter
     internal void ToggleRest()
     {
         if (window.ScreenEdgeActive) WakeImmediately();
-        window.CancelCloud();
+        window.LandCloud();
         ResetAmbient();
         if (characterAnimation.Resting) { characterAnimation.StandUp(); window.Speak("wake"); }
-        else if (characterAnimation.SitDown()) window.Speak("rest");
+        else if (characterAnimation.SitDown()) { ActivityStarted(QuietActivity.Rest); window.Speak("rest"); }
         window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
         RefreshCharacterFrame();
     }
@@ -208,6 +234,7 @@ internal sealed class CharacterPresenter
     }
     internal void RefreshCharacterFrame()
     {
+        if (window.Model.IsLow && !window.Model.IsStale) rhythm.ResetQuiet();
         if (window.Model.IsLow && !window.Model.IsStale) window.CancelScreenEdge();
         if (window.Model.IsLow && !window.Model.IsStale) window.CancelCloud();
         characterAnimation.Low = window.Model.IsLow && !window.Model.IsStale;
@@ -218,13 +245,10 @@ internal sealed class CharacterPresenter
     private void ApplyFloating()
     {
         var enabled = window.IsVisible && !verification && window.SelectedCharacter.Manifest.Float
-            && !characterAnimation.RestPose && !window.CloudActive && !window.ScreenEdgeActive;
+            && !characterAnimation.RestPose && !window.CloudActive && !window.CloudLanding && !window.ScreenEdgeActive;
         if (floating == enabled) return;
         floating = enabled;
-        window.Bob.BeginAnimation(TranslateTransform.YProperty, null);
-        if (enabled)
-            window.Bob.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, -4, TimeSpan.FromSeconds(2.2))
-            { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever, EasingFunction = new SineEase() });
+        idleFloat.SetEnabled(enabled);
     }
 
     internal void Animate(bool active)
@@ -247,6 +271,7 @@ internal sealed class CharacterPresenter
             window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
             RefreshCharacterFrame();
             window.Bob.BeginAnimation(TranslateTransform.YProperty, null);
+            idleFloat.Reset(); window.Bob.Y = 0;
             floating = false;
         }
     }
@@ -254,6 +279,7 @@ internal sealed class CharacterPresenter
     internal void StartCloudSpell()
     {
         cloudBlinkElapsed = 0;
+        nextCloudBlink = rhythm.Between(4200,7000);
         characterAnimation.Preview("summon-cloud");
         window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
         RefreshCharacterFrame();

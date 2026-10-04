@@ -6,6 +6,8 @@
 
 0.36.0 新增 `Characters/CharacterDialogue.cs`（台词校验、随机选择、冷却和寿命）、`Views/Controllers/DialogueController.cs`（动作情境、额度转变与气泡呈现）、`Verification/DialogueVerification.cs`（台词端到端验证）。每位角色的 `character.json` 保存自己的 `dialogue`；设置页提供频率和主动开关。`scripts/package-desktop.py` 和 `verify-package.py` 负责分类打包及源码一致性检查，发布目录说明见 [分发文档](distribution.md)。
 
+0.37.0 新增 `Characters/BehaviorRhythm.cs`（统一活动计划与随机动作袋）、`Characters/SoftMotion.cs`（站立起伏、短暂收云及缓动）和 `Verification/BehaviorVerification.cs`。现有呈现控制器使用这些独立时钟状态，保持角色包格式和原有开关；详细行为见 [自然节奏](natural-behavior.md)。
+
 ## 仓库顶层
 
 ```text

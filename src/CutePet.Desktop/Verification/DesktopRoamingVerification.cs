@@ -104,13 +104,18 @@ internal static class DesktopRoamingVerification
         check(!window.CloudActive && !window.CharacterRestPose && window.LastRecallPosition is not null
             && window.QuotaHost.Position == quotaPosition, "recall cancels roaming and leaves quota in place");
         if (!window.Settings.AutoCloud) window.ToggleAutoCloud();
-        window.AdvanceCloud(TimeSpan.FromMilliseconds(17999));
+        var autoRest = window.Settings.AutoRest;
+        if (autoRest) window.ToggleAutoRest();
+        var quiet = window.NextActivityDelay;
+        window.AdvanceAmbient(TimeSpan.FromMilliseconds(quiet-1));
         check(!window.CloudActive, "recall waits before permitting another automatic departure");
-        window.AdvanceCloud(TimeSpan.FromMilliseconds(1));
+        window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+        window.AdvanceAmbient(TimeSpan.FromMilliseconds(1));
         check(window.CloudActive && window.CloudRoute is not null, "free activity starts a full-desktop route after its quiet interval");
         window.ToggleAutoCloud();
         window.AdvanceCloud(TimeSpan.FromMinutes(3));
         check(!window.CloudActive && !window.Settings.AutoCloud, "free activity switch cancels and suppresses automatic trips");
+        if (autoRest) window.ToggleAutoRest();
         window.RoamDesktop();
         check(window.CloudActive, "manual roaming remains available when free activity is disabled");
         window.TogglePositionLock();

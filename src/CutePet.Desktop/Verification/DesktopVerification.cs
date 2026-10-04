@@ -330,11 +330,14 @@ internal static class DesktopVerification
             Check(window.CurrentCharacterFrame == CharacterFrame.Rise, "manual rise remains available after seated interactions");
             Render(window, directory, "animation-rise", 144);
             window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+            var restTestAutoCloud = window.Settings.AutoCloud;
+            if (restTestAutoCloud) window.ToggleAutoCloud();
             window.AdvanceAmbient(TimeSpan.FromSeconds(30));
             Check(window.CurrentCharacterFrame == CharacterFrame.Conjure, "automatic rest starts after the package idle interval");
             window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
             window.AdvanceAmbient(TimeSpan.FromSeconds(20));
             Check(window.CurrentCharacterFrame == CharacterFrame.Rise, "automatic rest rises after its configured seated duration");
+            if (restTestAutoCloud) window.ToggleAutoCloud();
             window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
             window.ToggleAutoRest();
             window.AdvanceAmbient(TimeSpan.FromSeconds(60));
@@ -591,6 +594,7 @@ internal static class DesktopVerification
             SwingVerification.Run(window, directory, Check);
             await ControlCenterVerification.RunAsync(window, directory, Check);
             await DialogueVerification.RunAsync(directory, Check);
+            await BehaviorVerification.RunAsync(directory, Check);
 
             if (live)
             {

@@ -20,7 +20,7 @@ internal sealed class CenterViewModel : INotifyPropertyChanged, IDisposable
     public string VisibilityText => host.IsVisible ? "桌宠正在显示" : "桌宠已隐藏";
     public string VisibilityAction => host.IsVisible ? "隐藏桌宠" : "显示桌宠";
     public string ActivityText => !host.IsVisible ? "已隐藏 · 活动暂停" : host.ScreenEdgeActive ? "正在屏幕边缘休息"
-        : host.CloudActive ? "正在乘云游动" : host.CharacterResting ? "正在王座上休息" : "正在待机";
+        : host.CloudActive ? "正在乘云游动" : host.CloudLanding ? "正在收起云朵" : host.CharacterResting ? "正在王座上休息" : "正在待机";
     public string RestAction => host.CharacterResting ? "起身收起王座" : "召唤王座休息";
     public string DataNote => host.Model.IsStale && host.Model.HasData ? "同步尚未恢复。下方如有数值，为上次读取的记录。"
         : !host.Model.HasData ? "连接后会显示官方剩余百分比和重置时间。" : "使用后自动同步官方额度。";
@@ -30,7 +30,7 @@ internal sealed class CenterViewModel : INotifyPropertyChanged, IDisposable
     public bool CanCloud => host.SelectedCharacter.CloudImage is not null;
     public bool CanAutoRest => host.SelectedCharacter.Manifest.RestAfterMs > 0;
     public bool CanEdge => EdgeActions.Available(host.SelectedCharacter);
-    public bool CanRoam => CanCloud && !PositionLocked && !host.CharacterRestPose && !host.CloudActive
+    public bool CanRoam => CanCloud && !PositionLocked && !host.CharacterRestPose && !host.CloudActive && !host.CloudLanding
         && !(host.Model.IsLow && !host.Model.IsStale);
     public bool CanRest => host.CharacterResting || host.SelectedCharacter.Actions.ContainsKey("sit") && !host.CharacterRestPose
         && !(host.Model.IsLow && !host.Model.IsStale);

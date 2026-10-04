@@ -89,14 +89,20 @@ internal static class CloudVerification
         check(!window.CloudActive && window.CurrentCharacterFrame is CharacterFrame.Happy or CharacterFrame.Wave,
             "clicking interrupts cloud travel and plays the normal response");
         window.WakeCharacterImmediately();
+        var autoRest = window.Settings.AutoRest;
+        if (autoRest) window.ToggleAutoRest();
         if (!window.Settings.AutoCloud) window.ToggleAutoCloud();
-        window.AdvanceCloud(TimeSpan.FromMilliseconds(17999));
+        var quiet = window.NextActivityDelay;
+        check(window.NextActivity == QuietActivity.Cloud && quiet >= 25000 && quiet <= 50000, "automatic cloud uses the unified randomized quiet plan");
+        window.AdvanceAmbient(TimeSpan.FromMilliseconds(quiet-1));
         check(!window.CloudActive, "automatic cloud waits for its quiet interval");
-        window.AdvanceCloud(TimeSpan.FromMilliseconds(1));
+        window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
+        window.AdvanceAmbient(TimeSpan.FromMilliseconds(1));
         check(window.CloudActive && savedAutoCloud(), "automatic cloud starts and its switch persists");
         window.ToggleAutoCloud();
         window.AdvanceCloud(TimeSpan.FromMinutes(1));
         check(!window.CloudActive && !savedAutoCloud(), "disabling automatic cloud cancels and prevents new trips");
+        if (autoRest) window.ToggleAutoRest();
         window.SummonCloud();
         check(window.CloudActive, "manual cloud remains available when automatic cloud is off");
         CloudMotionVerification.Run(window, check, render);

@@ -61,7 +61,7 @@ def main():
         for name in ('app-overview.png', 'app-characters.png', 'app-activity.png', 'app-settings.png', 'app-dialogue-settings.png'):
             shutil.copy2(args.verification_dir/name, stage/'previews/interface'/name)
         for name in ('side-edge-actions.gif', 'side-edge-contact-sheet.png', 'bottom-edge-actions.gif',
-                     'bottom-edge-contact-sheet.png', 'top-edge-actions.gif', 'top-edge-contact-sheet.png'):
+                     'bottom-edge-contact-sheet.png', 'top-edge-actions.gif', 'top-edge-contact-sheet.png', 'cloud-landing.gif'):
             shutil.copy2(args.verification_dir/name, stage/'previews/animations'/name)
         shutil.copy2(args.verification_dir/'dialogue-preview.png', stage/'previews/dialogue/dialogue-preview.png')
         zip_directory(repo/'examples/character-pack', stage/'characters/角色包示例.zip')
@@ -90,12 +90,14 @@ def main():
 需要 Windows x64 和 .NET 8 Desktop Runtime；运行文件请保持在同一个目录。
 原有设置和已导入的角色包继续沿用，无需删除设置。以前导入的角色不会被自动覆盖。
 
-这版新增天依 60 句、小猫 32 句情境台词；点击、悬停、拖放、乘云、王座和四边互动分别回应。
+这版优化动作衔接：乘云和自动休息统一轮换安排，停留时间随机变化；坐姿小回应和贴边自动动作减少重复。
+点击时立即回应，云朵与浮动姿态柔和收回。拖动、锁定、隐藏、角色切换和低额度仍能立即中止移动。
+保留天依 60 句、小猫 32 句情境台词；点击、悬停、拖放、乘云、王座和四边互动分别回应。
 气泡约 4–8 秒后自动收起，额度只在状态变化时提醒。设置 → 交流可选择安静 / 普通 / 活泼，或关闭主动台词。
 需要体验新台词请选择内置角色，也可导入 characters 内的新角色包。
 
 - characters/：天依、小猫台词互动包与自定义角色示例。
-- previews/：主界面图片、动作 GIF、台词预览，按用途归档。
+- previews/：主界面图片、动作 GIF、柔和收云动画与台词预览，按用途归档。
 - docs/：功能、角色包格式、开发和验证文档。
 - licenses/：GPL v3 与素材权利说明。
 - source/：与此版本对应的源码 ZIP、提交编号与校验值。

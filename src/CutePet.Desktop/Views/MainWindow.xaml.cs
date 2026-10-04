@@ -48,7 +48,7 @@ public partial class MainWindow : Window
     internal void RefreshScreenEdgeBounds(Rect area, Size size) => edgeMotion.Reanchor(area, size);
     internal string? ScreenEdgeResponse => edgeMotion.Response;
     internal void StartEdgePeek(string? action = null) => characterPresenter.PeekEdge(action);
-    internal void PeekScreenEdge(bool proactive = true) => edgeMotion.Peek(proactive);
+    internal void PeekScreenEdge(bool proactive = false) => edgeMotion.Peek(proactive);
     internal void CancelScreenEdge() => edgeMotion.Cancel();
     internal void AdvanceScreenEdge(TimeSpan elapsed) => edgeMotion.Advance(elapsed);
     public void ToggleEdgeInteraction()
@@ -67,6 +67,13 @@ public partial class MainWindow : Window
     }
     private bool cloudPointerInside;
     internal bool CloudActive => cloudMotion.Active;
+    internal bool CloudLanding => cloudMotion.Landing;
+    internal void LandCloud() => cloudMotion.Land();
+    internal void ActivityStarted(QuietActivity activity) => characterPresenter.ActivityStarted(activity);
+    internal void ActivityFinished() => characterPresenter.ActivityFinished();
+    internal string ChooseAmbient(string group, System.Collections.Generic.IEnumerable<string> actions) => characterPresenter.ChooseAmbient(group, actions);
+    internal double NextActivityDelay => characterPresenter.NextActivityDelay;
+    internal QuietActivity NextActivity => characterPresenter.NextActivity;
     internal bool CharacterIdle => characterPresenter.Idle;
     internal double CloudRequestedX => cloudMotion.RequestedX;
     internal double CloudRequestedY => cloudMotion.RequestedY;
@@ -77,6 +84,7 @@ public partial class MainWindow : Window
         && ControlCenter?.IsCharactersPage != true && (verification || !NativePlacement.PointerNear(this, 28));
     public void SummonCloud() { if (ScreenEdgeActive) WakeCharacterImmediately(); cloudMotion.Start(); }
     public void RoamDesktop() { if (ScreenEdgeActive) WakeCharacterImmediately(); cloudMotion.Start(roam: true); }
+    internal bool TryAutomaticCloud() => cloudMotion.Start(roam: true, proactive: true);
     public void RecallPet()
     {
         WakeCharacterImmediately();
