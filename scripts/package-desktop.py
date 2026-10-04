@@ -60,7 +60,7 @@ def main():
             f'Commit: {sha}\nMatching GPL v3 source: {source.name}\nSHA256: {checksum(source)}\n', encoding='utf-8')
         for name in ('app-overview.png', 'app-characters.png', 'app-activity.png', 'app-settings.png', 'app-dialogue-settings.png'):
             shutil.copy2(args.verification_dir/name, stage/'previews/interface'/name)
-        for name in ('side-edge-actions.gif', 'side-edge-contact-sheet.png', 'bottom-edge-actions.gif',
+        for name in ('side-edge-actions.gif', 'side-edge-contact-sheet.png', 'side-144-stages.png', 'bottom-edge-actions.gif',
                      'bottom-edge-contact-sheet.png', 'top-edge-actions.gif', 'top-edge-contact-sheet.png', 'top-drawn-keyframes.gif', 'side-drawn-keyframes.gif', 'cloud-landing.gif',
                      'pose-sequences.gif', 'pose-contact-sheet.png', 'throne-motion.gif', 'seated-motion.gif'):
             shutil.copy2(args.verification_dir/name, stage/'previews/animations'/name)
@@ -91,13 +91,13 @@ def main():
 需要 Windows x64 和 .NET 8 Desktop Runtime；运行文件请保持在同一个目录。
 原有设置和已导入的角色包继续沿用，无需删除设置。以前导入的角色不会被自动覆盖。
 
-这版侧边实际绘图从15张增至64张：32级渐进探出、16张点头、16张轻摇。
+这版新增112张侧边过渡绘图：144级探出、16张点头、16张轻摇，侧边共176张不同姿势。
 左右共用绘图并镜像，缩回使用原路倒放，扶边点固定。
 previews/animations/side-drawn-keyframes.gif直接播放原绘图；side-edge-actions.gif展示左右窗口效果。
 上侧继续保留64张绘图：闭眼、向左张望、向右张望、微笑歪头各16张。
-天依共242个活跃绘图、28个动作。固定座椅与悬挂点，保留花藤绳饰，动作沿原路倒放回收。
+天依共354个活跃绘图、28个动作。固定座椅与悬挂点，保留花藤绳饰，动作沿原路倒放回收。
 previews/animations/top-drawn-keyframes.gif直接播放原绘图，不经过图片混合；top-edge-actions.gif展示实际窗口效果。
-新天依角色包需应用0.43.0。
+新天依角色包需应用0.44.0。
 回应开始、结束和待机共用同一姿势，头部配准后的过渡不会拖动秋千板。
 侧边统一头部尺寸，头部短过渡在上方手掌前归零，两只手保持扶边；原始 PNG 不修改。
 运动段每帧 40 毫秒，目标每秒 25 个源帧时间段，并随屏幕绘制在相邻帧之间做短过渡。

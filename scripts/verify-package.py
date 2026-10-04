@@ -60,6 +60,7 @@ def main():
                 checks.append(f'{role}: portable dialogue and every active sprite match attached source')
         checks.append('License, exact commit and matching source checksum attached')
         assert {'previews/interface/app-dialogue-settings.png', 'previews/dialogue/dialogue-preview.png'}.issubset(names)
+        assert 'previews/animations/side-144-stages.png' in names
         assert {name for name in names if name.startswith('previews/animations/') and name.endswith('.gif')} == {
             'previews/animations/'+name for name in ('side-edge-actions.gif','bottom-edge-actions.gif','top-edge-actions.gif','cloud-landing.gif',
                                                    'pose-sequences.gif','throne-motion.gif','seated-motion.gif','top-drawn-keyframes.gif','side-drawn-keyframes.gif')}

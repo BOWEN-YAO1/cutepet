@@ -21,19 +21,23 @@ internal static class SideEdgeVerification
         var samples = new List<BitmapSource>();
         var labels = new[] { "微笑探头", "缩回再探出", "探头轻摇", "探头点头" };
         var artwork = SideEdgeMotion.Responses.SelectMany(a => window.SelectedCharacter.Actions[a].Frames).DistinctBy(f => f.Image).ToArray();
-        check(artwork.Length == 64 && artwork.All(f => f.Image.IsFrozen),
-            "side gestures use sixty-four actual drawings: thirty-two reveal stages and sixteen each for nod and tilt");
-        check(window.SelectedCharacter.Actions["edge-peek"].Frames.Select(f=>f.Image).Distinct().Count()==32
+        check(artwork.Length == 176 && artwork.All(f => f.Image.IsFrozen),
+            "side gestures use 176 distinct drawings: 144 reveal stages and sixteen each for nod and tilt");
+        check(window.SelectedCharacter.Actions["edge-peek"].Frames.Select(f=>f.Image).Distinct().Count()==144
             && new[]{"edge-nod","edge-sway"}.All(a=>window.SelectedCharacter.Actions[a].Frames
-                .Select(f=>f.Image).Distinct().Count()==48),
-            "nod and tilt each have sixteen independent drawings in addition to the shared thirty-two-stage reveal");
+                .Select(f=>f.Image).Distinct().Count()==160),
+            "nod and tilt each include the shared 144-stage reveal and sixteen independent gesture drawings");
         check(SideEdgeMotion.Responses.All(a=>ReferenceEquals(window.SelectedCharacter.Actions[a].Frames[0].Image,
                 window.SelectedCharacter.Actions["edge-idle"].Frames[0].Image)
             &&ReferenceEquals(window.SelectedCharacter.Actions[a].Frames[^1].Image,window.SelectedCharacter.Actions["edge-idle"].Frames[0].Image)),
             "dense side gestures start and finish at the exact shared idle drawing");
         check(SideEdgeMotion.Responses.All(a=>window.SelectedCharacter.Actions[a].SmoothFrames
-            && window.SelectedCharacter.Actions[a].Frames.All(f=>f.DurationMs==40)),
-            "all moving side drawings advance at twenty-five source frames per second");
+            && window.SelectedCharacter.Actions[a].Frames.All(f=>f.DurationMs is 10 or 40)),
+            "dense reveal drawings advance at ten milliseconds while gestures retain forty-millisecond timing");
+        check(window.SelectedCharacter.Actions["edge-peek"].Duration==2870
+            && window.SelectedCharacter.Actions["edge-shy"].Duration==4310
+            && new[]{"edge-nod","edge-sway"}.All(a=>window.SelectedCharacter.Actions[a].Duration==4110),
+            "adding 112 transition drawings keeps reveal under three seconds and gestures under five seconds");
         check(artwork.All(f=>f.EdgeAnchorX==48.0/288 && f.EdgeAnchorY==260.0/384),
             "all side drawings share identical hand registration so frame changes never shift the anchor");
         var heads=artwork.Select(f=>HeadHeight(f.Image)).ToArray();
@@ -132,7 +136,7 @@ internal static class SideEdgeVerification
         }
         using var bytes = new MemoryStream(); encoder.Save(bytes);
         File.WriteAllBytes(Path.Combine(directory,"side-edge-actions.gif"),ThroneMotionVerification.WithAnimationMetadata(bytes.ToArray(),delays));
-        check(encoder.Frames.Count == SideEdgeMotion.Responses.Sum(a=>(int)Math.Ceiling(window.SelectedCharacter.Actions[a].Duration/40))*2,
+        check(encoder.Frames.Count == SideEdgeMotion.Responses.Sum(a=>(int)Math.Ceiling(Math.Ceiling(window.SelectedCharacter.Actions[a].Duration/20)/2))*2,
             "side GIF samples every forty milliseconds while window assertions advance every twenty milliseconds");
         var contact = new DrawingVisual();
         using (var draw = contact.RenderOpen())
@@ -207,15 +211,30 @@ internal static class SideEdgeVerification
     {
         var encoder=new GifBitmapEncoder();var delays=new List<int>();
         foreach(var action in SideEdgeMotion.Responses)
-            foreach(var frame in pack.Actions[action].Frames)
+        {
+            var clip=pack.Actions[action];
+            // GIF viewers often clamp a 10 ms delay to 100 ms. Capture the
+            // source sequence at 50 fps while preserving its real duration.
+            for(var elapsed=0.0;elapsed<clip.Duration;elapsed+=20)
             {
                 var visual=new DrawingVisual();using(var draw=visual.RenderOpen())
-                {draw.DrawRectangle(Brushes.WhiteSmoke,null,new Rect(0,0,288,384));draw.DrawImage(frame.Image,new Rect(0,0,288,384));}
+                {draw.DrawRectangle(Brushes.WhiteSmoke,null,new Rect(0,0,288,384));draw.DrawImage(clip.At(elapsed),new Rect(0,0,288,384));}
                 var bitmap=new RenderTargetBitmap(288,384,96,96,PixelFormats.Pbgra32);bitmap.Render(visual);
-                encoder.Frames.Add(BitmapFrame.Create(bitmap));delays.Add(frame.DurationMs/10);
+                encoder.Frames.Add(BitmapFrame.Create(bitmap));delays.Add((int)Math.Min(20,clip.Duration-elapsed)/10);
             }
+        }
         using var bytes=new MemoryStream();encoder.Save(bytes);
         File.WriteAllBytes(Path.Combine(directory,"side-drawn-keyframes.gif"),ThroneMotionVerification.WithAnimationMetadata(bytes.ToArray(),delays));
+        var drawings=pack.Actions["edge-peek"].Frames.Select(f=>f.Image).Distinct().ToArray();
+        var grid=new DrawingVisual();using(var draw=grid.RenderOpen())
+        {
+            draw.DrawRectangle(Brushes.WhiteSmoke,null,new Rect(0,0,2304,1728));
+            for(var i=0;i<drawings.Length;i++)
+                draw.DrawImage(drawings[i],new Rect(i%16*144,i/16*192,144,192));
+        }
+        var sheet=new RenderTargetBitmap(2304,1728,96,96,PixelFormats.Pbgra32);sheet.Render(grid);
+        var png=new PngBitmapEncoder();png.Frames.Add(BitmapFrame.Create(sheet));
+        using var file=File.Create(Path.Combine(directory,"side-144-stages.png"));png.Save(file);
     }
 
     internal static int HeadHeight(BitmapSource image)
@@ -239,8 +258,11 @@ internal static class SideEdgeVerification
             while(queue.Count>0)
             {
                 var point=queue.Dequeue();count++;bottom=Math.Max(bottom,point/width);
-                Add(point-1,point%width>0);Add(point+1,point%width<width-1);
-                Add(point-width,point>=width);Add(point+width,point<skin.Length-width);
+                // Include diagonal skin links after filtering, keeping the
+                // lower cheek in the same face component as the upper cheek.
+                for(var dy=-1;dy<=1;dy++)for(var dx=-1;dx<=1;dx++)
+                    Add(point+dy*width+dx,point%width+dx>=0&&point%width+dx<width
+                        &&point/width+dy>=0&&point/width+dy<height);
             }
             if(count>largest){largest=count;chin=bottom;}
         }

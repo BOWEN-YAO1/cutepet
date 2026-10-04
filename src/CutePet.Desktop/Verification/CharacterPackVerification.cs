@@ -151,14 +151,21 @@ internal static class CharacterPackVerification
             && edgeRoundTrip.Actions["edge-bottom-peek"].Frames[0].Image == edgeRoundTrip.Actions["edge-bottom-idle"].Frames[0].Image
             && edgeFiles.ContainsKey("bottom-sequence-v6.png") && !edgeFiles.ContainsKey("edge-bottom-v1.png"),
             "bottom atlas responses export and import with shared cached views instead of old body-stretch sprites");
-        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 712,
-            "expanded sequences stay within the bounded 768-reference package limit");
+        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 1720,
+            "expanded sequences stay within the bounded 2048-reference package limit");
         check(edgeRoundTrip.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)
             .SequenceEqual(tianyi.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)),
             "source crops and canvas registration survive real export and import");
         check(SideEdgeMotion.Responses.All(a=>edgeRoundTrip.Actions[a].SmoothFrames
-            && edgeRoundTrip.Actions[a].Frames.All(f=>f.DurationMs==40)),
-            "registered side smoothing and forty-millisecond timings survive actual export and import");
+            && edgeRoundTrip.Actions[a].Frames.Select(f=>f.DurationMs).SequenceEqual(tianyi.Actions[a].Frames.Select(f=>f.DurationMs))),
+            "registered side smoothing and mixed ten/forty-millisecond timings survive actual export and import");
+        var tooFast=tianyi.Manifest with {Id="dense-too-fast",Actions=new(tianyi.Manifest.Actions)};
+        tooFast.Actions["edge-peek"]=tooFast.Actions["edge-peek"] with {Frames=new() {
+            tooFast.Actions["edge-peek"].Frames[0] with {DurationMs=9}}};
+        Reject(()=>other.Import(Zip("dense-too-fast",tooFast,edgeFiles)),"dense registered side frames reject durations below ten milliseconds");
+        var unsmoothed=tianyi.Manifest with {Id="dense-unsmoothed",Actions=new(tianyi.Manifest.Actions)};
+        unsmoothed.Actions["edge-peek"]=unsmoothed.Actions["edge-peek"] with {SmoothFrames=false};
+        Reject(()=>other.Import(Zip("dense-unsmoothed",unsmoothed,edgeFiles)),"ten-millisecond timings require registered smoothing rather than widening all action timings");
         var movingGrip=tianyi.Manifest with {Id="smooth-moving-grip",Actions=new(tianyi.Manifest.Actions)};
         movingGrip.Actions["edge-peek"]=movingGrip.Actions["edge-peek"] with {Frames=new() {
             movingGrip.Actions["edge-peek"].Frames[0],movingGrip.Actions["edge-peek"].Frames[1] with {EdgeAnchorX=.3}}};
@@ -225,10 +232,12 @@ internal static class CharacterPackVerification
         Reject(()=>other.Import(Zip("top-anchor",badTopAnchor,edgeFiles)),"top virtual suspension anchor remains in the upper half");
         var tooMany=new CharacterManifest {Id="frame-limit",Name="帧数边界测试",Actions=new() {
             ["idle"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences+1).Select(_=>("idle.png",40)).ToArray())}};
-        Reject(()=>other.Import(Zip("frame-limit",tooMany,new() { ["idle.png"]=imageBytes })),"768 reference package cap rejects excess even when artwork is shared");
+        Reject(()=>other.Import(Zip("frame-limit",tooMany,new() { ["idle.png"]=imageBytes })),"2048 reference package cap rejects excess even when artwork is shared");
         var atLimit = tooMany with { Id="frame-at-limit", Actions=new() {
-            ["idle"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences/2).Select(_=>("idle.png",40)).ToArray()),
-            ["low"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences/2).Select(_=>("idle.png",40)).ToArray())}};
+            ["idle"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences/4).Select(_=>("idle.png",40)).ToArray()),
+            ["low"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences/4).Select(_=>("idle.png",40)).ToArray()),
+            ["sit"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences/4).Select(_=>("idle.png",40)).ToArray()),
+            ["edge-idle"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences/4).Select(_=>("idle.png",40)).ToArray())}};
         check(other.Import(Zip("frame-at-limit",atLimit,new() { ["idle.png"]=imageBytes })).Actions.Values.Sum(c=>c.Frames.Count)==CharacterPackLoader.MaxFrameReferences,
             "the exact frame-reference boundary remains loadable");
         var badBottomAnchor=tianyi.Manifest with {Id="bottom-anchor",Actions=new(tianyi.Manifest.Actions)};

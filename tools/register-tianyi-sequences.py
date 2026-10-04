@@ -120,8 +120,8 @@ manifest['edgeBottomAnchorY'] = anchors['bottom',0]['edgeAnchorY']
 manifest['topSwing']['seatAnchorY'] = actions['edge-top-idle']['frames'][0]['swingSeatAnchorY']
 manifest['topSwing']['seatHalfWidth'] = .365
 content = json.dumps(manifest, ensure_ascii=False, indent=2)+'\n'
-assert len(content.encode()) <= 512*1024
-assert sum(len(c['frames']) for c in actions.values()) <= 768
+assert len(content.encode()) <= 1024*1024
+assert sum(len(c['frames']) for c in actions.values()) <= 2048
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--check', action='store_true', help='Check saved metadata without writing files')
 if parser.parse_args().check:
@@ -130,4 +130,4 @@ else:
     (ROOT/'character.json').write_text(content, encoding='utf-8')
 print(json.dumps({'actions':len(actions), 'references':sum(len(c['frames']) for c in actions.values()),
                   'uniquePoses':len({(f['image'],tuple(f['region'].values())) for c in actions.values() for f in c['frames']}),
-                  'manifestBytes':len(content.encode())}))
+                  'manifestBytes':len(content.encode()),'sideDepthStep':side_registration.REGISTRATION['maximumDepthStep']}))

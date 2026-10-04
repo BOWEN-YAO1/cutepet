@@ -12,11 +12,11 @@ namespace CutePet.Desktop;
 
 internal static class CharacterPackLoader
 {
-    internal const int MaxFrameReferences = 768;
-    internal const int MaxManifestBytes = 512 * 1024;
+    internal const int MaxFrameReferences = 2048;
+    internal const int MaxManifestBytes = 1024 * 1024;
     // Dense drawn transition sets need more cached source/canvas pixels. Keep a
-    // finite 288 MiB conservative package budget; repeated views still share it.
-    internal const long MaxDecodedPixels = 75_497_472;
+    // finite 384 MiB conservative package budget; repeated views still share it.
+    internal const long MaxDecodedPixels = 100_663_296;
     internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "cloud-idle", "cloud-blink", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-shy", "edge-sway", "edge-nod", "edge-top-idle", "edge-top-peek", "edge-top-look", "edge-top-smile", "edge-bottom-idle", "edge-bottom-peek", "edge-bottom-look", "edge-bottom-smile" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true, WriteIndented = true,
@@ -94,12 +94,13 @@ internal static class CharacterPackLoader
         {
             if (action is null || action.Frames is null || action.Frames.Count == 0
                 || (frameCount += action.Frames.Count) > MaxFrameReferences || action.Loop != (name is "idle" or "low" or "sit" or "cloud-idle" || EdgeActions.BaseOf(name) == name))
-                throw new InvalidDataException("待机、低额度、坐姿、乘云和贴边姿势必须循环；其他动作必须有限播放，最多 768 帧引用。");
+                throw new InvalidDataException("待机、低额度、坐姿、乘云和贴边姿势必须循环；其他动作必须有限播放，最多 2048 帧引用。");
             var loaded = new List<LoadedFrame>();
             foreach (var frame in action.Frames)
             {
-                if (frame is null || frame.Image is null || !SafeFile(frame.Image) || frame.DurationMs < 40 || frame.DurationMs > 10000)
-                    throw new InvalidDataException("动作图片路径或帧时间不合法（40–10000 毫秒）。");
+                var minimumDuration = action.SmoothFrames && EdgeActions.BaseOf(name) == "edge-idle" ? 10 : 40;
+                if (frame is null || frame.Image is null || !SafeFile(frame.Image) || frame.DurationMs < minimumDuration || frame.DurationMs > 10000)
+                    throw new InvalidDataException("动作图片路径或帧时间不合法（普通帧40–10000毫秒；登记平滑侧边帧最低10毫秒）。");
                 if (!images.TryGetValue(frame.Image, out var image))
                 {
                     using var stream = openImage(frame.Image);
@@ -110,7 +111,7 @@ internal static class CharacterPackLoader
                     var decoded = decoder.Frames[0];
                     if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
                         || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > MaxDecodedPixels)
-                        throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，图集、区域及画布总预算为 288 MiB。");
+                        throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，图集、区域及画布总预算为 384 MiB。");
                     decoded.Freeze();
                     images.Add(frame.Image, image = decoded);
                 }
