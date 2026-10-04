@@ -13,10 +13,10 @@ namespace CutePet.Desktop;
 internal static class CharacterPackLoader
 {
     internal const int MaxFrameReferences = 768;
-    internal const int MaxManifestBytes = 256 * 1024;
+    internal const int MaxManifestBytes = 512 * 1024;
     // Dense drawn transition sets need more cached source/canvas pixels. Keep a
-    // finite 224 MiB conservative package budget; repeated views still share it.
-    internal const long MaxDecodedPixels = 58_720_256;
+    // finite 288 MiB conservative package budget; repeated views still share it.
+    internal const long MaxDecodedPixels = 75_497_472;
     internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "cloud-idle", "cloud-blink", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-shy", "edge-sway", "edge-nod", "edge-top-idle", "edge-top-peek", "edge-top-look", "edge-top-smile", "edge-bottom-idle", "edge-bottom-peek", "edge-bottom-look", "edge-bottom-smile" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true, WriteIndented = true,
@@ -110,7 +110,7 @@ internal static class CharacterPackLoader
                     var decoded = decoder.Frames[0];
                     if (decoder.Frames.Count != 1 || decoded.PixelWidth > 2048 || decoded.PixelHeight > 2048
                         || (pixels += (long)decoded.PixelWidth * decoded.PixelHeight) > MaxDecodedPixels)
-                        throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，图集、区域及画布总预算为 224 MiB。");
+                        throw new InvalidDataException("图片超过大小限制：单帧最大 2048×2048，图集、区域及画布总预算为 288 MiB。");
                     decoded.Freeze();
                     images.Add(frame.Image, image = decoded);
                 }

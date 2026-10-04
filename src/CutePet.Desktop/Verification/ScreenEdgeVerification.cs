@@ -118,7 +118,7 @@ internal static class ScreenEdgeVerification
 
         var player = new CharacterAnimation();
         player.Configure(window.Characters.Find("tianyi")); player.Preview("edge-peek");
-        player.Advance(TimeSpan.FromSeconds(2));
+        player.Advance(TimeSpan.FromMilliseconds(window.Characters.Find("tianyi").Actions["edge-peek"].Duration));
         check(player.Action == "edge-idle", "manager finite edge preview returns to its edge base");
         player.Low = true;
         check(player.Action == "low", "player low state clears standalone edge preview");

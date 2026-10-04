@@ -21,16 +21,41 @@ internal static class SideEdgeVerification
         var samples = new List<BitmapSource>();
         var labels = new[] { "微笑探头", "缩回再探出", "探头轻摇", "探头点头" };
         var artwork = SideEdgeMotion.Responses.SelectMany(a => window.SelectedCharacter.Actions[a].Frames).DistinctBy(f => f.Image).ToArray();
-        check(artwork.Length == 15 && artwork.All(f => f.Image.IsFrozen),
-            "side gestures share fifteen coherent head-normalized drawings instead of mixing camera scales");
+        check(artwork.Length == 64 && artwork.All(f => f.Image.IsFrozen),
+            "side gestures use sixty-four actual drawings: thirty-two reveal stages and sixteen each for nod and tilt");
+        check(window.SelectedCharacter.Actions["edge-peek"].Frames.Select(f=>f.Image).Distinct().Count()==32
+            && new[]{"edge-nod","edge-sway"}.All(a=>window.SelectedCharacter.Actions[a].Frames
+                .Select(f=>f.Image).Distinct().Count()==48),
+            "nod and tilt each have sixteen independent drawings in addition to the shared thirty-two-stage reveal");
+        check(SideEdgeMotion.Responses.All(a=>ReferenceEquals(window.SelectedCharacter.Actions[a].Frames[0].Image,
+                window.SelectedCharacter.Actions["edge-idle"].Frames[0].Image)
+            &&ReferenceEquals(window.SelectedCharacter.Actions[a].Frames[^1].Image,window.SelectedCharacter.Actions["edge-idle"].Frames[0].Image)),
+            "dense side gestures start and finish at the exact shared idle drawing");
         check(SideEdgeMotion.Responses.All(a=>window.SelectedCharacter.Actions[a].SmoothFrames
             && window.SelectedCharacter.Actions[a].Frames.All(f=>f.DurationMs==40)),
             "all moving side drawings advance at twenty-five source frames per second");
-        check(artwork.All(f=>f.EdgeAnchorX==48.0/288 && f.EdgeAnchorY==250.0/384),
+        check(artwork.All(f=>f.EdgeAnchorX==48.0/288 && f.EdgeAnchorY==260.0/384),
             "all side drawings share identical hand registration so frame changes never shift the anchor");
         var heads=artwork.Select(f=>HeadHeight(f.Image)).ToArray();
+        for(var i=0;i<artwork.Length;i++)
+        {var pose=new PngBitmapEncoder();pose.Frames.Add(BitmapFrame.Create(artwork[i].Image));
+            using var file=File.Create(Path.Combine(directory,$"side-registered-{i:00}.png"));pose.Save(file);}
         check(heads.Max()-heads.Min()<=5 && heads.All(h=>h>=195&&h<=205),
-            "actual rendered side head heights stay within five source pixels across the entire reveal");
+            "actual rendered side head heights stay within five source pixels across reveal, nod and tilt: "+string.Join(",",heads));
+        foreach(var frame in artwork)
+        {
+            var rgba=new FormatConvertedBitmap(frame.Image,PixelFormats.Bgra32,null,0);
+            var stride=rgba.PixelWidth*4;var pixels=new byte[stride*rgba.PixelHeight];rgba.CopyPixels(pixels,stride,0);
+            int Palm(int start,int end)
+            {
+                var count=0;
+                for(var y=start;y<end;y++)for(var x=32;x<65;x++)
+                {var p=y*stride+x*4;if(pixels[p+3]>=200&&pixels[p+2]>pixels[p+1]*1.1&&pixels[p+1]>pixels[p]*1.05)count++;}
+                return count;
+            }
+            check(Palm(210,255)>=20&&Palm(265,310)>=20,
+                "both painted gripping palms remain visible near the fixed side boundary");
+        }
         CheckInterpolation(check);
         long LowerVisible(LoadedFrame frame)
         {
@@ -46,6 +71,7 @@ internal static class SideEdgeVerification
         var peekFrames = window.SelectedCharacter.Actions["edge-peek"].Frames;
         check(peekFrames.Max(LowerVisible) > LowerVisible(peekFrames[0]) * 1.5,
             "deeper leaning artwork progressively exposes more of the connected lower silhouette");
+        SaveDrawings(window.SelectedCharacter,directory);
         foreach (var side in new[] { ScreenEdge.Left, ScreenEdge.Right })
         {
             window.WakeCharacterImmediately();
@@ -64,7 +90,7 @@ internal static class SideEdgeVerification
                 for (var step = 0; step < steps; step++)
                 {
                     var frame = ScreenEdgeVerification.Capture(window, side, (side == ScreenEdge.Left ? "左侧 · " : "右侧 · ") + labels[index]);
-                    encoder.Frames.Add(BitmapFrame.Create(frame)); delays.Add(2);
+                    if(step%2==0){encoder.Frames.Add(BitmapFrame.Create(frame));delays.Add(4);}
                     seen.Add(window.CurrentSpriteFrame.Image);
                     if (step == steps/3) samples.Add(frame);
                     window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(20,duration-step*20)));
@@ -106,8 +132,8 @@ internal static class SideEdgeVerification
         }
         using var bytes = new MemoryStream(); encoder.Save(bytes);
         File.WriteAllBytes(Path.Combine(directory,"side-edge-actions.gif"),ThroneMotionVerification.WithAnimationMetadata(bytes.ToArray(),delays));
-        check(encoder.Frames.Count == SideEdgeMotion.Responses.Sum(a=>(int)Math.Ceiling(window.SelectedCharacter.Actions[a].Duration/20))*2,
-            "side preview samples every twenty milliseconds including intermediate rendered blends");
+        check(encoder.Frames.Count == SideEdgeMotion.Responses.Sum(a=>(int)Math.Ceiling(window.SelectedCharacter.Actions[a].Duration/40))*2,
+            "side GIF samples every forty milliseconds while window assertions advance every twenty milliseconds");
         var contact = new DrawingVisual();
         using (var draw = contact.RenderOpen())
             for (var row = 0; row < 4; row++)
@@ -161,19 +187,35 @@ internal static class SideEdgeVerification
             &&ReferenceEquals(interpolator.Sample(red,red,.5),red),"frame boundaries and identical idle drawings remain their exact cached images");
         BitmapSource Marker(int headX)
         {
-            var pixels=new byte[13*100*4];
+            var pixels=new byte[13*192*4];
             var eye=(5*13+headX)*4; pixels[eye+2]=pixels[eye+3]=255;
-            var hand=(80*13+2)*4; pixels[hand+1]=pixels[hand+3]=255;
-            return BitmapSource.Create(13,100,96,96,PixelFormats.Pbgra32,null,pixels,13*4);
+            foreach(var y in new[]{134,170})
+            {var hand=(y*13+2)*4; pixels[hand+1]=pixels[hand+3]=255;}
+            return BitmapSource.Create(13,192,96,96,PixelFormats.Pbgra32,null,pixels,13*4);
         }
-        var a=new LoadedFrame(Marker(3),40,EdgeAnchorY:.75,HeadAnchorX:3.0/13,HeadAnchorY:.05);
-        var b=new LoadedFrame(Marker(9),40,EdgeAnchorY:.75,HeadAnchorX:9.0/13,HeadAnchorY:.05);
-        var morphed=interpolator.Sample(a,b,.5);var actual=new byte[13*100*4];morphed.CopyPixels(actual,13*4,0);
+        var a=new LoadedFrame(Marker(3),40,EdgeAnchorX:2.0/13,EdgeAnchorY:.75,HeadAnchorX:3.0/13,HeadAnchorY:5.0/192);
+        var b=new LoadedFrame(Marker(9),40,EdgeAnchorX:2.0/13,EdgeAnchorY:.75,HeadAnchorX:9.0/13,HeadAnchorY:5.0/192);
+        var morphed=interpolator.Sample(a,b,.5);var actual=new byte[13*192*4];morphed.CopyPixels(actual,13*4,0);
         check(actual[(5*13+6)*4+3]>=240&&actual[(5*13+3)*4+3]==0&&actual[(5*13+9)*4+3]==0,
             "head landmark warping produces one moving eye instead of two crossfaded eyes");
-        check(actual[(80*13+2)*4+1]==255&&actual[(80*13+2)*4+3]==255,
-            "head warping tapers to zero and leaves the lower stationary grip untouched");
+        check(new[]{134,170}.All(y=>actual[(y*13+2)*4+1]==255&&actual[(y*13+2)*4+3]==255),
+            "head warping leaves both upper and lower palms fixed around the side anchor midpoint");
         interpolator.Reset();
+    }
+
+    private static void SaveDrawings(CharacterPack pack,string directory)
+    {
+        var encoder=new GifBitmapEncoder();var delays=new List<int>();
+        foreach(var action in SideEdgeMotion.Responses)
+            foreach(var frame in pack.Actions[action].Frames)
+            {
+                var visual=new DrawingVisual();using(var draw=visual.RenderOpen())
+                {draw.DrawRectangle(Brushes.WhiteSmoke,null,new Rect(0,0,288,384));draw.DrawImage(frame.Image,new Rect(0,0,288,384));}
+                var bitmap=new RenderTargetBitmap(288,384,96,96,PixelFormats.Pbgra32);bitmap.Render(visual);
+                encoder.Frames.Add(BitmapFrame.Create(bitmap));delays.Add(frame.DurationMs/10);
+            }
+        using var bytes=new MemoryStream();encoder.Save(bytes);
+        File.WriteAllBytes(Path.Combine(directory,"side-drawn-keyframes.gif"),ThroneMotionVerification.WithAnimationMetadata(bytes.ToArray(),delays));
     }
 
     internal static int HeadHeight(BitmapSource image)

@@ -120,7 +120,7 @@ manifest['edgeBottomAnchorY'] = anchors['bottom',0]['edgeAnchorY']
 manifest['topSwing']['seatAnchorY'] = actions['edge-top-idle']['frames'][0]['swingSeatAnchorY']
 manifest['topSwing']['seatHalfWidth'] = .365
 content = json.dumps(manifest, ensure_ascii=False, indent=2)+'\n'
-assert len(content.encode()) <= 256*1024
+assert len(content.encode()) <= 512*1024
 assert sum(len(c['frames']) for c in actions.values()) <= 768
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--check', action='store_true', help='Check saved metadata without writing files')

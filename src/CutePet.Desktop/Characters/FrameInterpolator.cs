@@ -23,7 +23,12 @@ internal sealed class FrameInterpolator
             ? new Vector((tx-x)*from.Image.PixelWidth,(ty-y)*from.Image.PixelHeight) : default;
         // On a swing the fixed lower landmark is the seat, not the suspension
         // above the character. Never warp the board or its rope attachments.
-        return Sample(from.Image,to.Image,fraction,delta,(from.SwingSeatAnchorY ?? from.EdgeAnchorY ?? 0)*from.Image.PixelHeight);
+        var grip=(from.SwingSeatAnchorY ?? from.EdgeAnchorY ?? 0)*from.Image.PixelHeight;
+        // A side anchor is the midpoint between two palms. Stop head warping
+        // above the upper palm so both hands remain attached to the border.
+        if(from.SwingSeatAnchorY is null&&from.EdgeAnchorX is not null)
+            grip=Math.Max(0,grip-from.Image.PixelHeight*.10);
+        return Sample(from.Image,to.Image,fraction,delta,grip);
     }
 
     internal BitmapSource Sample(BitmapSource from, BitmapSource to, double fraction)

@@ -84,9 +84,9 @@ internal static class CharacterPackVerification
         configBytes.CopyTo(paddedConfig,0);
         using(var configStream=new MemoryStream(paddedConfig))
             check(CharacterPackLoader.Load(configStream,_=>new MemoryStream(imageBytes),false).Id==animated.Id,
-                "a valid manifest at the exact 256 KiB boundary loads");
+                "a valid manifest at the exact configured byte boundary loads");
         Reject(()=>CharacterPackLoader.Load(new MemoryStream(paddedConfig.Concat(new byte[]{32}).ToArray()),
-            _=>new MemoryStream(imageBytes),false),"manifest rejects one byte beyond 256 KiB before parsing");
+            _=>new MemoryStream(imageBytes),false),"manifest rejects one byte beyond its configured limit before parsing");
         player.Configure(animatedPack);
         var initial = player.Image;
         player.Advance(TimeSpan.FromMilliseconds(130));
@@ -109,7 +109,9 @@ internal static class CharacterPackVerification
         check(player.Action == "greeting", "old four-action packs retain their greeting on either click choice");
         var tianyi = library.Find("tianyi");
         using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
-            check(edgeArchive.GetEntry("side-sequence-v6.png") is not null && edgeArchive.GetEntry("edge-sequence-v5.png") is null
+            check(new[]{"side-reveal-a-v7.png","side-reveal-b-v8.png","side-nod-v7.png","side-sway-v7.png"}
+                .All(name=>edgeArchive.GetEntry(name) is not null)
+                && edgeArchive.GetEntry("side-sequence-v6.png") is null && edgeArchive.GetEntry("edge-sequence-v5.png") is null
                 && edgeArchive.GetEntry("side-inbetweens-v1.png") is null,
                 "Tianyi export carries the articulated atlas without the superseded floating full-body sprites");
         var edgeFiles = new Dictionary<string, byte[]>();
@@ -149,7 +151,7 @@ internal static class CharacterPackVerification
             && edgeRoundTrip.Actions["edge-bottom-peek"].Frames[0].Image == edgeRoundTrip.Actions["edge-bottom-idle"].Frames[0].Image
             && edgeFiles.ContainsKey("bottom-sequence-v6.png") && !edgeFiles.ContainsKey("edge-bottom-v1.png"),
             "bottom atlas responses export and import with shared cached views instead of old body-stretch sprites");
-        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 506,
+        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 712,
             "expanded sequences stay within the bounded 768-reference package limit");
         check(edgeRoundTrip.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)
             .SequenceEqual(tianyi.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)),
