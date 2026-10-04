@@ -31,13 +31,16 @@
               <TranslateTransform x:Name="CloudCharacterBob" /></TransformGroup></Image.RenderTransform>
           </Image>
         </Grid>
-        <Border x:Name="SpeechBubble" Background="#FFF9ED" CornerRadius="10" BorderBrush="#D8E5DB" BorderThickness="1"
-                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-26,4,0,0" Padding="10,6" MaxWidth="110"
-                Visibility="{Binding ShowCharacterMessage, Converter={StaticResource VisibleWhenTrue}}">
-          <TextBlock Text="{Binding CharacterMessage}" FontSize="11" Foreground="#456054" TextWrapping="Wrap" />
-        </Border>
        </Grid>
       </Viewbox>
+      <Popup x:Name="SpeechPopup" PlacementTarget="{Binding ElementName=PetStage}" Placement="Top" AllowsTransparency="True"
+             StaysOpen="True" Focusable="False" IsHitTestVisible="False" VerticalOffset="-4">
+        <Border x:Name="SpeechBubble"
+                Background="#FFF8FB" CornerRadius="12" BorderBrush="#E8A1B6" BorderThickness="1"
+                Padding="12,8" MaxWidth="190" MinWidth="64" IsHitTestVisible="False">
+          <TextBlock Text="{Binding SpeechText}" FontSize="13" Foreground="#60434D" TextWrapping="Wrap" />
+        </Border>
+      </Popup>
     </Canvas>
   </Viewbox>
 </Window>

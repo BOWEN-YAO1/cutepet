@@ -2,6 +2,8 @@
 
 程序代码许可证见 LICENSE（GNU GPL v3）。
 
+0.36.0 新增的内置角色台词为项目编写的本地文本，随各自角色配置和 GPL v3 源码分发。本版未生成或替换图片，原角色与素材权利说明继续适用。便携包许可证位于 licenses/，匹配源码与提交记录位于 source/。
+
 应用图标（0.29.0）：本项目 XAML 矢量绘制的小猫与云，源文件为 `src/CutePet.Desktop/Assets/Brand.xaml`；`tools/CutePet.IconBuilder` 生成多分辨率 ICO 和 PNG。随项目按 GPL v3 分发，不是洛天依或其他角色的官方标识，也未使用外部图标素材。
 
 小猫：由本项目 XAML 矢量路径绘制，0.8.0 导出为透明帧，0.8.1 整理到 `src/CutePet.Desktop/Characters/Packs/cat/`，随项目按 GPL v3 分发。角色包包含完整许可证和原始矢量源码链接。

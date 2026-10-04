@@ -164,7 +164,7 @@ dotnet src/CutePet.Desktop/bin/Release/net8.0-windows/CutePet.dll --verify-live 
 dotnet publish src/CutePet.Desktop -c Release --self-contained false -o artifacts/CutePet-Desktop
 ```
 
-随目录附上仓库 `LICENSE`、素材记录、本说明与对应源码提交链接，再压缩整个目录。当前没有自动 Release 和安装器。正式版携带运行环境的计划见 [开发文档](development.md)。
+0.36.0 起用 [分组打包脚本](distribution.md) 生成 ZIP：主目录保留 EXE 和必需运行文件，角色包、预览、文档、许可和对应源码分别归档。先提交、构建并验证，再打包；CI 同时检查布局与源码。当前没有自动 Release 和安装器。正式版携带运行环境的计划见 [开发文档](development.md)。
 
 ## 0.8.1 目录与交互拆分
 

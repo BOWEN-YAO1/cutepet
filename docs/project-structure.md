@@ -4,6 +4,8 @@
 
 日期：2026-10-02。0.8.1 整理目录，并将主窗口中的交互状态和播放计时分配给独立模块。保留 0.8 的角色包格式、设置目录、程序入口与已实现功能。
 
+0.36.0 新增 `Characters/CharacterDialogue.cs`（台词校验、随机选择、冷却和寿命）、`Views/Controllers/DialogueController.cs`（动作情境、额度转变与气泡呈现）、`Verification/DialogueVerification.cs`（台词端到端验证）。每位角色的 `character.json` 保存自己的 `dialogue`；设置页提供频率和主动开关。`scripts/package-desktop.py` 和 `verify-package.py` 负责分类打包及源码一致性检查，发布目录说明见 [分发文档](distribution.md)。
+
 ## 仓库顶层
 
 ```text

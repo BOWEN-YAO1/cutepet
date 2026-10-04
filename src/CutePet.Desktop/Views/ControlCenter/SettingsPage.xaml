@@ -32,6 +32,15 @@
       </Border>
       <Border Background="{DynamicResource CenterSurface}" CornerRadius="14" Padding="24" Margin="0,16,0,0">
         <StackPanel>
+          <TextBlock Text="交流" Style="{StaticResource CenterSection}"/>
+          <DockPanel Margin="0,4,0,18"><CheckBox x:Name="SpeechSwitch" DockPanel.Dock="Right" IsChecked="{Binding ProactiveSpeech, Mode=TwoWay}" Style="{StaticResource CenterToggle}" AutomationProperties.Name="主动台词" Margin="20,0,0,0"/>
+            <TextBlock Text="主动台词" FontSize="14"/></DockPanel>
+          <TextBlock Text="交流频率" Margin="0,0,0,8"/>
+          <ComboBox x:Name="SpeechChoice" ItemsSource="{Binding SpeechChoices}" DisplayMemberPath="Label" SelectedValuePath="Value" SelectedValue="{Binding SpeechFrequency, Mode=TwoWay}" AutomationProperties.Name="交流频率"/>
+        </StackPanel>
+      </Border>
+      <Border Background="{DynamicResource CenterSurface}" CornerRadius="14" Padding="24" Margin="0,16,0,0">
+        <StackPanel>
           <TextBlock Text="启动与连接" Style="{StaticResource CenterSection}"/>
           <DockPanel Margin="0,4,0,20"><CheckBox x:Name="StartupSwitch" DockPanel.Dock="Right" IsChecked="{Binding StartWithWindows, Mode=TwoWay}" Style="{StaticResource CenterToggle}" AutomationProperties.Name="开机启动" Margin="20,0,0,0"/>
             <TextBlock Text="开机启动" FontSize="14"/></DockPanel>

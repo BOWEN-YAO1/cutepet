@@ -23,6 +23,7 @@ public sealed record CharacterManifest
     public double EdgeBottomAnchorY { get; init; } = 1;
     public CharacterCloud? Cloud { get; init; }
     public CharacterTopSwing? TopSwing { get; init; }
+    public Dictionary<string, string[]>? Dialogue { get; init; }
     public Dictionary<string, CharacterAction> Actions { get; init; } = new();
 }
 public sealed record CharacterTopSwing

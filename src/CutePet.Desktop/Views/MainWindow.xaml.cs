@@ -39,6 +39,8 @@ public partial class MainWindow : Window
     private readonly CharacterPresenter characterPresenter;
     private readonly CloudMotionController cloudMotion;
     private readonly EdgeMotionController edgeMotion;
+    internal DialogueController Dialogue { get; }
+    internal void Speak(string context, bool proactive = false) => Dialogue.Speak(context, proactive);
     internal bool ScreenEdgeActive => edgeMotion.Active;
     internal EdgeAttachment? ScreenEdgeAttachment => edgeMotion.Attachment;
     internal double ScreenEdgePeekOffset => edgeMotion.PeekOffset;
@@ -46,7 +48,7 @@ public partial class MainWindow : Window
     internal void RefreshScreenEdgeBounds(Rect area, Size size) => edgeMotion.Reanchor(area, size);
     internal string? ScreenEdgeResponse => edgeMotion.Response;
     internal void StartEdgePeek(string? action = null) => characterPresenter.PeekEdge(action);
-    internal void PeekScreenEdge() => edgeMotion.Peek();
+    internal void PeekScreenEdge(bool proactive = true) => edgeMotion.Peek(proactive);
     internal void CancelScreenEdge() => edgeMotion.Cancel();
     internal void AdvanceScreenEdge(TimeSpan elapsed) => edgeMotion.Advance(elapsed);
     public void ToggleEdgeInteraction()
@@ -60,6 +62,7 @@ public partial class MainWindow : Window
         var attached = edgeMotion.Attach(area, size, released, dpi);
         if (!attached && !verification) NativePlacement.Apply(this, released.X, released.Y);
         SavePlacement();
+        Speak(attached ? Dialogue.Context : "drag");
         return attached;
     }
     private bool cloudPointerInside;
@@ -134,7 +137,9 @@ public partial class MainWindow : Window
         characterPresenter = new CharacterPresenter(this, verification);
         cloudMotion = new CloudMotionController(this, verification);
         edgeMotion = new EdgeMotionController(this, verification);
+        Dialogue = new DialogueController(this, verification);
         DataContext = Model;
+        SpeechBubble.DataContext = Model;
         DetailsViewport.DataContext = Model;
         Model.PropertyChanged += (_, _) => RefreshCharacterFrame();
         ApplyCharacter();
@@ -153,7 +158,7 @@ public partial class MainWindow : Window
         IsVisibleChanged += (_, _) =>
         {
             Animate(IsVisible && !verification);
-            if (!IsVisible) { QuotaHost.Hide(); cloudPointerInside = false; details.ResetHover(); StopDetailsTimers(); ShowDetails(false); }
+            if (!IsVisible) { Dialogue.Clear(); QuotaHost.Hide(); cloudPointerInside = false; details.ResetHover(); StopDetailsTimers(); ShowDetails(false); }
             else if (loaded) { QuotaHost.ShowAt(QuotaHost.Position); ShowDetails(Settings.Details == DetailsMode.Always); }
             DesktopStateChanged?.Invoke();
         };
@@ -186,7 +191,7 @@ public partial class MainWindow : Window
         SavePlacement();
         countdown.Start();
         ShowDetails(Settings.Details == DetailsMode.Always);
-        if (!verification) { Animate(true); StartSession(); }
+        if (!verification) { Animate(true); Dialogue.Startup(DateTime.Now.Hour); StartSession(); }
     }
 
     private void StartSession()
@@ -249,6 +254,7 @@ public partial class MainWindow : Window
         Settings = Settings with { CharacterPackId = SelectedCharacter.Id,
             Character = SelectedCharacter.Id == "tianyi" ? PetCharacter.Tianyi : PetCharacter.Cat };
         characterPresenter.ApplyPack();
+        Dialogue.Configure();
     }
 
     public void ManageCharacters() => OpenControlCenter("characters");
@@ -315,7 +321,6 @@ public partial class MainWindow : Window
         Height = layout.Size.Height;
         Place(PetStage, layout.Pet);
         QuotaHost.ResizeCard(Settings.QuotaPosition, Settings.EffectiveQuotaScale);
-        SpeechBubble.Margin = new Thickness(0, 4, 0, 0);
         ApplyDetailsPlacement();
         UpdateLayout();
         if (anchor is Point physical)
@@ -351,6 +356,7 @@ public partial class MainWindow : Window
         Settings = Settings with { AlwaysOnTop = Topmost };
         QuotaHost.Topmost = Topmost;
         NativePlacement.SetPopupTopmost(DetailsViewport, Topmost);
+        NativePlacement.SetPopupTopmost(SpeechBubble, Topmost);
         SavePlacement();
     }
 
@@ -401,6 +407,17 @@ public partial class MainWindow : Window
         DesktopStateChanged?.Invoke();
     }
 
+    internal void SetSpeechFrequency(DialogueFrequency frequency)
+    {
+        Settings = (Settings with { SpeechFrequency = frequency }).Validated();
+        Dialogue.UpdatePreferences(); SavePlacement();
+    }
+    internal void SetProactiveSpeech(bool enabled)
+    {
+        Settings = Settings with { ProactiveSpeech = enabled };
+        Dialogue.UpdatePreferences(); SavePlacement();
+    }
+
     internal void SavePlacement()
     {
         if (dragging.IsDragging) return; // Persist quota coordinates only after the gesture commits.
@@ -438,13 +455,10 @@ public partial class MainWindow : Window
 
     private void OnMouseDown(object sender, MouseButtonEventArgs e) => dragging.OnMouseDown(e);
     private void OnMouseMove(object sender, MouseEventArgs e) => dragging.OnMouseMove(e);
-    private async void OnMouseUp(object sender, MouseButtonEventArgs e)
+    private void OnMouseUp(object sender, MouseButtonEventArgs e)
     {
         if (!dragging.OnMouseUp(e)) return;
-        Model.CharacterMessage = "收到！我会看着的";
         characterPresenter.PlayInteraction();
-        try { await Task.Delay(1800, stop.Token); } catch (OperationCanceledException) { return; }
-        Model.RestoreCharacterMessage();
     }
     internal void BeginQuotaDrag(Point grabOffset) => dragging.BeginQuotaDrag(grabOffset);
     internal void UpdateQuotaDrag(Point pointer) => dragging.UpdateQuotaDrag(pointer);
@@ -470,6 +484,7 @@ public partial class MainWindow : Window
         if (dragging.IsDragging) EndQuotaDrag(cancel: true);
         ControlCenter?.Close();
         exiting = true;
+        Dialogue.Dispose();
         SavePlacement();
         countdown.Stop();
         StopDetailsTimers();

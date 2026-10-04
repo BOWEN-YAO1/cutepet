@@ -44,6 +44,9 @@ internal sealed class CenterViewModel : INotifyPropertyChanged, IDisposable
     public bool AutoCloud { get => host.Settings.AutoCloud; set { if (value != AutoCloud) host.ToggleAutoCloud(); } }
     public bool AutoRest { get => host.Settings.AutoRest; set { if (value != AutoRest) host.ToggleAutoRest(); } }
     public bool EdgeInteraction { get => host.Settings.EdgeInteraction; set { if (value != EdgeInteraction) host.ToggleEdgeInteraction(); } }
+    public bool ProactiveSpeech { get => host.Settings.ProactiveSpeech; set { if (value != ProactiveSpeech) host.SetProactiveSpeech(value); } }
+    public DialogueFrequency SpeechFrequency { get => host.Settings.SpeechFrequency; set { if (value != SpeechFrequency) host.SetSpeechFrequency(value); } }
+    public CenterChoice<DialogueFrequency>[] SpeechChoices { get; } = { new(DialogueFrequency.Quiet, "安静"), new(DialogueFrequency.Normal, "普通"), new(DialogueFrequency.Lively, "活泼") };
     public bool StartWithWindows { get => host.Settings.StartWithWindows; set { if (value != StartWithWindows) host.ToggleStartup(); Refresh(); } }
     public double CharacterScale { get => host.Settings.EffectiveCharacterScale; set { if (Math.Abs(value - CharacterScale) > 0.001) host.SetCharacterScale(value); } }
     public double QuotaScale { get => host.Settings.EffectiveQuotaScale; set { if (Math.Abs(value - QuotaScale) > 0.001) host.SetQuotaScale(value); } }

@@ -20,6 +20,8 @@
 
 ZIP 根目录必须直接包含 character.json，不要把整个外层文件夹一并压进去。
 
+0.36.0 起可在 `character.json` 中添加可选 `dialogue` 字段，让角色携带自己的情境台词。导入 / 导出会保留台词，旧包仍使用通用回应；支持的事件、限制与例子见 [角色台词](dialogue.md)。
+
 ```text
 my-pet.cutepet.zip
 ├── character.json

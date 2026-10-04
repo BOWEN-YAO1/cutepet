@@ -43,6 +43,13 @@ internal static class ControlCenterVerification
 
             center.Navigate("settings"); await Settle();
             var settings = (SettingsPage)center.PageHost.Content;
+            settings.SpeechChoice.SelectedValue = DialogueFrequency.Quiet;
+            settings.SpeechSwitch.IsChecked = false; await Settle();
+            check(host.Settings.SpeechFrequency == DialogueFrequency.Quiet && !host.Settings.ProactiveSpeech,
+                "real settings controls persist dialogue frequency and proactive toggle");
+            host.SetSpeechFrequency(DialogueFrequency.Normal); host.SetProactiveSpeech(true); await Settle();
+            check(settings.SpeechChoice.SelectedValue is DialogueFrequency.Normal && settings.SpeechSwitch.IsChecked == true,
+                "dialogue settings update from host back into the interface");
             check(host.Settings.ThemeColor == CenterColors.DefaultTheme && host.Settings.FontColor == CenterColors.DefaultFont
                 && center.Foreground == center.FindResource("CenterInk"), "existing settings open with the default pink palette and dark rose text");
             check(settings.ResetColorsButton.Background is SolidColorBrush defaultFill && defaultFill.Color == Color.FromRgb(232,161,182),
@@ -119,6 +126,9 @@ internal static class ControlCenterVerification
             check(host.Settings.QuotaPosition == QuotaDock.Right && host.QuotaHost.Position != point,
                 "explicit quota-position command uses existing independent placement");
             Render(center, directory, "app-settings");
+            settings.SpeechChoice.BringIntoView(); await Settle();
+            Render(center, directory, "app-dialogue-settings");
+            ((ScrollViewer)settings.Content).ScrollToTop(); await Settle();
 
             center.Navigate("characters"); await Settle();
             var characters = (CharactersPage)center.PageHost.Content;

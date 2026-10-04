@@ -22,6 +22,7 @@ internal sealed class PetDragController
         if ((e.GetPosition(window.Scene) - start).Length < 4) return;
         if (!window.CanDrag) { mouseStart = null; return; }
         dragged = true;
+        window.Dialogue.Clear();
         window.WakeCharacterImmediately();
         try { window.DragMove(); } catch (InvalidOperationException) { }
         finally

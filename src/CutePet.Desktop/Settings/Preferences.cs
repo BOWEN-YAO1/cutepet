@@ -7,6 +7,7 @@ namespace CutePet.Desktop;
 
 public enum DetailsMode { Hover, Always, Hidden }
 public enum QuotaDock { Bottom, Top, Left, Right }
+public enum DialogueFrequency { Quiet, Normal, Lively }
 
 public sealed record Preferences(double? Left = null, double? Top = null, double Scale = 1,
     bool AlwaysOnTop = true, string? CodexPath = null, DetailsMode Details = DetailsMode.Hover,
@@ -14,7 +15,8 @@ public sealed record Preferences(double? Left = null, double? Top = null, double
     double? CharacterScale = null, double? QuotaScale = null,
     bool PositionLocked = false, bool StartWithWindows = false, string? CharacterPackId = null, bool AutoRest = true,
     bool AutoCloud = true, double? QuotaLeft = null, double? QuotaTop = null, bool IndependentWindows = false,
-    bool EdgeInteraction = true, string ThemeColor = CenterColors.DefaultTheme, string FontColor = CenterColors.DefaultFont)
+    bool EdgeInteraction = true, string ThemeColor = CenterColors.DefaultTheme, string FontColor = CenterColors.DefaultFont,
+    DialogueFrequency SpeechFrequency = DialogueFrequency.Normal, bool ProactiveSpeech = true)
 {
     // Older settings used Scale for the entire widget. Missing independent values inherit that size.
     [JsonIgnore] public double EffectiveCharacterScale => CharacterScale ?? Scale;
@@ -30,6 +32,7 @@ public sealed record Preferences(double? Left = null, double? Top = null, double
         Scale = double.IsFinite(Scale) ? Math.Clamp(Scale, 0.8, 1.4) : 1,
         CodexPath = string.IsNullOrWhiteSpace(CodexPath) ? null : CodexPath,
         Details = Enum.IsDefined(Details) ? Details : DetailsMode.Hover,
+        SpeechFrequency = Enum.IsDefined(SpeechFrequency) ? SpeechFrequency : DialogueFrequency.Normal,
         QuotaPosition = Enum.IsDefined(QuotaPosition) ? QuotaPosition : QuotaDock.Left,
         Character = Enum.IsDefined(Character) ? Character : PetCharacter.Cat,
         CharacterPackId = CharacterPackLoader.ValidId(CharacterPackId) ? CharacterPackId : null,

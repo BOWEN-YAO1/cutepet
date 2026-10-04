@@ -78,6 +78,7 @@ internal sealed class CharacterPresenter
         }
         RefreshCharacterFrame();
         if (window.IsVisible && !verification) AdvanceAmbient(elapsed);
+        window.Dialogue.Advance(elapsed);
     }
     internal void PointerChanged(bool inside)
     {
@@ -99,7 +100,7 @@ internal sealed class CharacterPresenter
             if (hovered && !hoverPlayed)
             {
                 hoverElapsed += ms;
-                if (hoverElapsed >= 400) { window.PeekScreenEdge(); hoverPlayed = true; }
+                if (hoverElapsed >= 400) { window.PeekScreenEdge(proactive: false); hoverPlayed = true; }
             }
             if (!hovered)
             {
@@ -114,7 +115,7 @@ internal sealed class CharacterPresenter
             {
                 seatedElapsed += ms;
                 if (seatedElapsed >= window.SelectedCharacter.Manifest.RestDurationMs)
-                { characterAnimation.StandUp(); automaticRest = false; idleForRest = seatedElapsed = 0; }
+                { characterAnimation.StandUp(); window.Speak("wake", proactive: true); automaticRest = false; idleForRest = seatedElapsed = 0; }
             }
             if (!hovered && characterAnimation.Action == "sit")
             {
@@ -132,6 +133,7 @@ internal sealed class CharacterPresenter
                 && characterAnimation.SitDown())
             {
                 automaticRest = true;
+                window.Speak("rest", proactive: true);
                 seatedElapsed = idleForRest = 0;
                 RefreshCharacterFrame();
                 return;
@@ -140,7 +142,7 @@ internal sealed class CharacterPresenter
         if (hovered && !hoverPlayed)
         {
             hoverElapsed += ms;
-            if (hoverElapsed >= 400 && characterAnimation.TryAmbient("hover")) hoverPlayed = true;
+            if (hoverElapsed >= 400) { characterAnimation.TryAmbient("hover"); window.Speak("hover"); hoverPlayed = true; }
         }
         if (!hovered)
         {
@@ -152,8 +154,9 @@ internal sealed class CharacterPresenter
     }
     internal void PlayInteraction()
     {
-        if (window.ScreenEdgeActive) { window.PeekScreenEdge(); return; }
+        if (window.ScreenEdgeActive) { window.PeekScreenEdge(proactive: false); return; }
         window.CancelCloud();
+        window.Speak(characterAnimation.RestPose ? "rest" : "click");
         characterAnimation.ReactToClick(Random.Shared.Next(2));
         hoverPlayed = hovered;
         lookElapsed = 0;
@@ -165,8 +168,9 @@ internal sealed class CharacterPresenter
     }
     internal void PlayGreeting()
     {
-        if (window.ScreenEdgeActive) { window.PeekScreenEdge(); return; }
+        if (window.ScreenEdgeActive) { window.PeekScreenEdge(proactive: false); return; }
         window.CancelCloud();
+        window.Speak(characterAnimation.RestPose ? "rest" : "click");
         characterAnimation.Greet();
         RefreshCharacterFrame();
         PlayTilt();
@@ -176,8 +180,8 @@ internal sealed class CharacterPresenter
         if (window.ScreenEdgeActive) WakeImmediately();
         window.CancelCloud();
         ResetAmbient();
-        if (characterAnimation.Resting) characterAnimation.StandUp();
-        else characterAnimation.SitDown();
+        if (characterAnimation.Resting) { characterAnimation.StandUp(); window.Speak("wake"); }
+        else if (characterAnimation.SitDown()) window.Speak("rest");
         window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
         RefreshCharacterFrame();
     }

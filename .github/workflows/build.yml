@@ -25,3 +25,13 @@ jobs:
             if (-not $taskReport.passed) { Write-Output $taskReport.failure }
           }
           exit $taskVerificationExit
+      - name: Package and verify grouped desktop distribution
+        run: |
+          dotnet publish src/CutePet.Desktop -c Release --no-build -o artifacts/publish
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/package-desktop.py --publish-dir artifacts/publish --verification-dir artifacts/desktop-verification --output-dir artifacts/packages
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $taskPackage = Get-ChildItem -LiteralPath artifacts/packages -Filter 'CutePet-Desktop-*-win-x64.zip' | Select-Object -First 1
+          $taskCommit = git rev-parse HEAD
+          python scripts/verify-package.py $taskPackage.FullName --expected-commit $taskCommit
+          exit $LASTEXITCODE

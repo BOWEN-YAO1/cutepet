@@ -88,7 +88,7 @@ internal sealed class EdgeMotionController
         window.SavePlacement();
         return true;
     }
-    internal void Peek()
+    internal void Peek(bool proactive = true)
     {
         if (!Active || peekElapsed >= 0) return;
         var choices = Attachment!.Side is ScreenEdge.Left or ScreenEdge.Right
@@ -100,6 +100,7 @@ internal sealed class EdgeMotionController
         nextResponse = (nextResponse + 1) % choices.Length;
         peekElapsed = 0;
         window.StartEdgePeek(response);
+        window.Speak(window.Dialogue.Context, proactive);
         Render();
     }
     internal void Advance(TimeSpan elapsed)

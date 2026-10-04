@@ -44,6 +44,10 @@ public sealed class PetViewModel : INotifyPropertyChanged
     private Brush statusBrush = Brushes.DarkSeaGreen;
     private bool canRefresh = true;
     private string characterMessage = "我来帮你看额度";
+    private string speechText = "";
+    private bool speechVisible;
+    public string SpeechText { get => speechText; internal set { if (speechText == value) return; speechText = value; Changed(); } }
+    public bool SpeechVisible { get => speechVisible; internal set { if (speechVisible == value) return; speechVisible = value; Changed(); } }
     public bool HasData { get; private set; }
     public bool IsStale { get; private set; }
     public bool IsLow { get; private set; }

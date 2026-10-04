@@ -29,6 +29,10 @@ public partial class CharactersPage : UserControl, IDisposable
         var sideTransform = new TransformGroup();
         sideTransform.Children.Add(sidePreviewTilt); sideTransform.Children.Add(sidePreviewShift);
         Preview.RenderTransformOrigin = new Point(.5,.5); Preview.RenderTransform = sideTransform;
+        // A newly visible preview layer can still have zero size during the button event.
+        // Reanchor as soon as layout measures it; do not wait for the next animation tick.
+        Preview.SizeChanged += (_, _) => RefreshSidePreview();
+        TopPreviewRopes.SizeChanged += (_, _) => RefreshSidePreview();
         host.Characters.Reload();
         host.SetCharacterPackage(host.SelectedCharacter.Id);
         RefreshList(host.SelectedCharacter.Id);

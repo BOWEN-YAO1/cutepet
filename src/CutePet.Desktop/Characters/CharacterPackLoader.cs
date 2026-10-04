@@ -26,6 +26,7 @@ internal static class CharacterPackLoader
         var manifest = JsonSerializer.Deserialize<CharacterManifest>(jsonBytes, Json)
             ?? throw new InvalidDataException("缺少角色配置。");
         if (manifest.FormatVersion != 1) throw new InvalidDataException("角色包版本不支持，请使用 formatVersion: 1。");
+        CharacterDialogue.Validate(manifest.Dialogue);
         if (!ValidId(manifest.Id) || string.IsNullOrWhiteSpace(manifest.Name) || manifest.Name.Length > 60
             || manifest.Name.Any(char.IsControl) || manifest.Author is null || manifest.Author.Length > 200
             || manifest.License is null || manifest.License.Length > 2000)

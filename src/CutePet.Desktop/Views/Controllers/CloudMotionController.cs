@@ -18,7 +18,7 @@ internal sealed class CloudMotionController
     internal double RequestedY { get; private set; }
     internal CloudMotionController(MainWindow window, bool verification)
     { this.window = window; this.verification = verification; }
-    internal bool Start(bool roam = false)
+    internal bool Start(bool roam = false, bool proactive = false)
     {
         if (Active || window.ScreenEdgeActive || window.SelectedCharacter.CloudImage is null || window.Settings.PositionLocked
             || window.CharacterRestPose || window.Model.IsLow && !window.Model.IsStale) return false;
@@ -43,6 +43,7 @@ internal sealed class CloudMotionController
         flight.Start(window.SelectedCharacter.Actions.TryGetValue("summon-cloud", out var spell) ? spell.Duration : 0, Route?.TravelMs ?? 8000);
         waiting = 0;
         window.StartCloudSpell();
+        window.Speak("cloud", proactive);
         Render();
         return true;
     }
@@ -70,7 +71,7 @@ internal sealed class CloudMotionController
         {
             if (!window.Settings.AutoCloud) { waiting = 0; return; }
             waiting += Math.Max(0, elapsed.TotalMilliseconds);
-            if (waiting >= 18000 && window.CharacterIdle) Start(roam: true);
+            if (waiting >= 18000 && window.CharacterIdle) Start(roam: true, proactive: true);
             return;
         }
         var finished = flight.Advance(elapsed);
