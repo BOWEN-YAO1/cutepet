@@ -19,8 +19,8 @@ internal static class BottomEdgeVerification
         window.CompletePetDrag(area,size,new Point(-1000,area.Bottom-size.Height),1);
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
         var frames=EdgeActions.BottomResponses.SelectMany(a=>window.SelectedCharacter.Actions[a].Frames).Select(f=>f.Image).Distinct().ToArray();
-        check(frames.Length==8 && frames.All(f=>f is CroppedBitmap {IsFrozen:true}),
-            "bottom gestures load eight distinct cached anatomical poses");
+        check(frames.Length==16 && frames.All(f=>f is CroppedBitmap {IsFrozen:true}),
+            "bottom gestures load sixteen distinct cached anatomical poses");
         foreach(var sprite in frames)
         {
             var frame=EdgeActions.BottomResponses.SelectMany(a=>window.SelectedCharacter.Actions[a].Frames).First(f=>f.Image==sprite);

@@ -58,7 +58,6 @@ internal static class VerticalEdgeVerification
             check(ReferenceEquals(window.CharacterArt.Source, pack.Actions[EdgeActions.Base(side)].Frames[0].Image),
                 "host selects dedicated vertical pose artwork " + side);
             window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
-            var contactShift = window.EdgeShift.Y;
             check(window.EdgeShift.X == 0 && window.EdgeMirror.ScaleX == 1
                 && (side == ScreenEdge.Top ? window.EdgeShift.Y < 0 : window.EdgeShift.Y > 0),
                 "vertical art aligns without horizontal mirroring or rotation " + side);
@@ -68,8 +67,11 @@ internal static class VerticalEdgeVerification
             var expression = window.CharacterArt.Source;
             check(ReferenceEquals(expression, pack.Actions[EdgeActions.Peek(EdgeActions.Base(side))].At(duration / 2))
                 && window.ScreenEdgePeekOffset == (side == ScreenEdge.Top ? 8 : 0), "vertical response selects its package pose at midpoint " + side);
-            check((side == ScreenEdge.Top ? window.EdgeShift.Y <= 0 : window.EdgeShift.Y >= contactShift)
-                && window.EdgeStretch.ScaleY == 1,
+            var current=window.CurrentSpriteFrame;
+            var height=Math.Min(window.CharacterArt.Height,window.CharacterArt.Width*current.Image.PixelHeight/current.Image.PixelWidth);
+            var imageTop=16+148-window.CharacterArt.Height+(window.CharacterArt.Height-height)/2;
+            var contact=imageTop+height*current.EdgeAnchorY!.Value+window.EdgeShift.Y;
+            check(Math.Abs(contact-(side==ScreenEdge.Top ? 0 : 178))<.001 && window.EdgeStretch.ScaleY == 1,
                 "vertical response keeps the hand or elbow contact line fixed " + side);
             var movedArea = new Rect(100, 40, 1600, 900);
             window.RefreshScreenEdgeBounds(movedArea, new Size(345, 267));

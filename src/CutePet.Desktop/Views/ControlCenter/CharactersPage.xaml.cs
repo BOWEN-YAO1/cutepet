@@ -18,6 +18,7 @@ public partial class CharactersPage : UserControl, IDisposable
     private readonly TranslateTransform sidePreviewShift = new();
     private readonly Stopwatch clock = new();
     private double swingPreviewElapsed;
+    private bool previewCloudPose;
     private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(40) };
     private CharacterPack? Selected => CharacterList.SelectedItem as CharacterPack;
     private string? lastUsedId;
@@ -44,7 +45,8 @@ public partial class CharactersPage : UserControl, IDisposable
             animation.Advance(elapsed);
             swingPreviewElapsed = (swingPreviewElapsed + elapsed.TotalMilliseconds) % 3200;
             cloudPreview.Advance(elapsed);
-            CloudPreview.Opacity = cloudPreview.Opacity;
+            animation.Flying = previewCloudPose || cloudPreview.Active && cloudPreview.Opacity == 1;
+            CloudPreview.Opacity = previewCloudPose ? 1 : cloudPreview.Opacity;
             Preview.Source = animation.Image;
             RefreshSidePreview();
         };
@@ -78,6 +80,7 @@ public partial class CharactersPage : UserControl, IDisposable
         animation.Configure(pack);
         swingPreviewElapsed = 0;
         cloudPreview.Cancel();
+        previewCloudPose = false;
         CloudPreview.Opacity = 0;
         CloudPreview.Source = pack.CloudImage;
         CloudPreview.Width = pack.Manifest.Cloud?.DisplayWidth ?? 140;
@@ -85,7 +88,7 @@ public partial class CharactersPage : UserControl, IDisposable
         Preview.Source = animation.Image;
         RefreshSidePreview();
         var labels = new[] { ("idle", "待机"), ("blink", "眨眼"), ("greeting", "打招呼"), ("low", "低额度"),
-            ("look", "张望"), ("hover", "悬停"), ("happy", "开心"), ("conjure", "召唤王座"), ("sit", "坐下休息"), ("stand", "起身收起"), ("summon-cloud", "召唤小云"),
+            ("look", "张望"), ("hover", "悬停"), ("happy", "开心"), ("conjure", "召唤王座"), ("sit", "坐下休息"), ("stand", "起身收起"), ("summon-cloud", "召唤小云"), ("cloud-idle", "乘云随风"), ("cloud-blink", "乘云眨眼"),
             ("sit-blink", "坐姿眨眼"), ("sit-greeting", "坐姿挥手"), ("sit-happy", "坐姿微笑"),
             ("edge-idle", "左右贴边"), ("edge-peek", "左右探头微笑"), ("edge-top-idle", "花藤秋千"),
             ("edge-shy", "缩回再探出"), ("edge-sway", "探头轻摇"), ("edge-nod", "探头点头"),
@@ -110,9 +113,10 @@ public partial class CharactersPage : UserControl, IDisposable
     {
         swingPreviewElapsed = 0;
         cloudPreview.Cancel();
+        previewCloudPose = PreviewAction.SelectedValue is "cloud-idle" or "cloud-blink";
         if (PreviewAction.SelectedValue is string action)
         { animation.Preview(action); if (action == "summon-cloud") cloudPreview.Start(Selected!.Actions[action].Duration); }
-        CloudPreview.Opacity = 0;
+        CloudPreview.Opacity = previewCloudPose ? 1 : 0;
         Preview.Source = animation.Image;
         RefreshSidePreview();
     }

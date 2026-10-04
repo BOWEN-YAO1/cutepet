@@ -11,7 +11,9 @@ namespace CutePet.Desktop;
 
 internal static class CharacterPackLoader
 {
-    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-shy", "edge-sway", "edge-nod", "edge-top-idle", "edge-top-peek", "edge-top-look", "edge-top-smile", "edge-bottom-idle", "edge-bottom-peek", "edge-bottom-look", "edge-bottom-smile" };
+    internal const int MaxFrameReferences = 384;
+    internal const int MaxManifestBytes = 128 * 1024;
+    internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "cloud-idle", "cloud-blink", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-shy", "edge-sway", "edge-nod", "edge-top-idle", "edge-top-peek", "edge-top-look", "edge-top-smile", "edge-bottom-idle", "edge-bottom-peek", "edge-bottom-look", "edge-bottom-smile" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true, WriteIndented = true };
     public static bool ValidId(string? id) => id is not null && Regex.IsMatch(id, "\\A[a-z][a-z0-9-]{0,63}\\z");
@@ -20,7 +22,7 @@ internal static class CharacterPackLoader
     public static CharacterPack Load(Stream manifestStream, Func<string, Stream> openImage, bool builtIn, string? directory = null)
     {
         using var limited = new MemoryStream();
-        CopyLimited(manifestStream, limited, 64 * 1024);
+        CopyLimited(manifestStream, limited, MaxManifestBytes);
         var jsonBytes = limited.ToArray().AsSpan();
         if (jsonBytes.StartsWith(new byte[] { 0xEF, 0xBB, 0xBF })) jsonBytes = jsonBytes[3..];
         var manifest = JsonSerializer.Deserialize<CharacterManifest>(jsonBytes, Json)
@@ -47,7 +49,7 @@ internal static class CharacterPackLoader
             || !double.IsFinite(cloud.DisplayWidth) || !double.IsFinite(cloud.DisplayHeight)
             || cloud.DisplayWidth < 40 || cloud.DisplayWidth > 190 || cloud.DisplayHeight < 12 || cloud.DisplayHeight > 40))
             throw new InvalidDataException("云层图片路径或显示大小不合法。");
-        if (manifest.Actions.ContainsKey("summon-cloud") && manifest.Cloud is null)
+        if ((manifest.Actions.ContainsKey("summon-cloud") || manifest.Actions.ContainsKey("cloud-idle") || manifest.Actions.ContainsKey("cloud-blink")) && manifest.Cloud is null)
             throw new InvalidDataException("召唤云动作需要配套 cloud 图层。");
         if (manifest.TopSwing is { } swing && (!manifest.Actions.ContainsKey("edge-top-idle")
             || !double.IsFinite(swing.SeatAnchorY) || swing.SeatAnchorY <= manifest.EdgeTopAnchorY + 0.1 || swing.SeatAnchorY > 0.95
@@ -85,8 +87,8 @@ internal static class CharacterPackLoader
         foreach (var (name, action) in manifest.Actions)
         {
             if (action is null || action.Frames is null || action.Frames.Count == 0
-                || (frameCount += action.Frames.Count) > 160 || action.Loop != (name is "idle" or "low" or "sit" || EdgeActions.BaseOf(name) == name))
-                throw new InvalidDataException("待机、低额度、坐姿和贴边姿势必须循环；其他动作必须有限播放，最多 160 帧。");
+                || (frameCount += action.Frames.Count) > MaxFrameReferences || action.Loop != (name is "idle" or "low" or "sit" or "cloud-idle" || EdgeActions.BaseOf(name) == name))
+                throw new InvalidDataException("待机、低额度、坐姿、乘云和贴边姿势必须循环；其他动作必须有限播放，最多 384 帧引用。");
             var loaded = new List<LoadedFrame>();
             foreach (var frame in action.Frames)
             {

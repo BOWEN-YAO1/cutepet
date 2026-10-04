@@ -61,8 +61,9 @@ def main():
         checks.append('License, exact commit and matching source checksum attached')
         assert {'previews/interface/app-dialogue-settings.png', 'previews/dialogue/dialogue-preview.png'}.issubset(names)
         assert {name for name in names if name.startswith('previews/animations/') and name.endswith('.gif')} == {
-            'previews/animations/'+name for name in ('side-edge-actions.gif','bottom-edge-actions.gif','top-edge-actions.gif','cloud-landing.gif')}
-        checks.append('Fresh interface, dialogue, three edge animations and soft landing grouped correctly')
+            'previews/animations/'+name for name in ('side-edge-actions.gif','bottom-edge-actions.gif','top-edge-actions.gif','cloud-landing.gif',
+                                                   'pose-sequences.gif','throne-motion.gif','seated-motion.gif')}
+        checks.append('Fresh interface, dialogue, pose sequences, throne, seated, edges and landing grouped correctly')
     digest = hashlib.sha256(args.package.read_bytes()).hexdigest()
     assert args.package.with_name(args.package.name+'.sha256').read_text().split()[0] == digest
     print(json.dumps({'passed': True, 'checks': checks, 'sha256': digest}, ensure_ascii=False))

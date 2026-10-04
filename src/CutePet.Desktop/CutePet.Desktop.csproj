@@ -6,11 +6,25 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>disable</ImplicitUsings>
     <AssemblyName>CutePet</AssemblyName>
-    <Version>0.37.0</Version>
+    <Version>0.38.0</Version>
     <ApplicationIcon>Assets/cutepet.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup><ProjectReference Include="../CutePet.Codex/CutePet.Codex.csproj" /></ItemGroup>
-  <ItemGroup><Resource Include="Characters/Packs/**/*.png" /><Resource Include="Characters/Packs/**/character.json" /><Resource Include="Characters/Packs/**/*.txt" /><Resource Include="Characters/Packs/**/SOURCE.md" /></ItemGroup>
+  <ItemGroup>
+    <Resource Include="Characters/Packs/cat/*.png" />
+    <Resource Include="Characters/Packs/tianyi/standing-sequence-v4.png" />
+    <Resource Include="Characters/Packs/tianyi/throne-sequence-v4.png" />
+    <Resource Include="Characters/Packs/tianyi/cloud-sequence-v5.png" />
+    <Resource Include="Characters/Packs/tianyi/edge-sequence-v5.png" />
+    <Resource Include="Characters/Packs/tianyi/bottom-sequence-v6.png" />
+    <Resource Include="Characters/Packs/tianyi/top-sequence-v4.png" />
+    <Resource Include="Characters/Packs/tianyi/cloud-v1.png" />
+    <Resource Include="Characters/Packs/tianyi/rope-ornament-v1.png" />
+    <Resource Include="Characters/Packs/tianyi/scenery-lotus-v1.png" />
+    <Resource Include="Characters/Packs/**/character.json" />
+    <Resource Include="Characters/Packs/**/*.txt" />
+    <Resource Include="Characters/Packs/**/SOURCE.md" />
+  </ItemGroup>
   <ItemGroup><Resource Include="Assets/cutepet.ico" /><Resource Include="Assets/cutepet.png" /></ItemGroup>
 </Project>

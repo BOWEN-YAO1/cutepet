@@ -15,7 +15,7 @@ internal static class ThroneMotionVerification
         var pack = window.Characters.Find("tianyi");
         var player = new CharacterAnimation();
         var lowering = pack.Actions["conjure"];
-        check(lowering.Frames.Count == 8 && pack.Actions["stand"].Frames.Count == 9
+        check(lowering.Frames.Count == 10 && pack.Actions["stand"].Frames.Count == 10
             && lowering.Duration == 1500 && pack.Actions["stand"].Duration == 1000,
             "throne uses more intermediate poses while preserving total action durations");
         double before = 0;
@@ -109,13 +109,15 @@ internal static class ThroneMotionVerification
         Record(window, directory);
         var preview = new GifBitmapDecoder(new Uri(Path.GetFullPath(Path.Combine(directory, "throne-motion.gif"))),
             BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-        check(preview.Frames.Count == 19, "animated preview records the actual host's complete rest cycle");
+        check(preview.Frames.Count == pack.Actions["conjure"].Frames.Count + pack.Actions["stand"].Frames.Count + 2,
+            "animated preview records the actual host's complete rest cycle");
         check((ushort)((BitmapMetadata)preview.Frames[0].Metadata).GetQuery("/grctlext/Delay") == 40,
             "animated preview preserves the intended frame delays");
         Record(window, directory, seated: true);
         var seatedPreview = new GifBitmapDecoder(new Uri(Path.GetFullPath(Path.Combine(directory, "seated-motion.gif"))),
             BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-        check(seatedPreview.Frames.Count == 10, "seated preview records blink, smile and wave from the real host");
+        check(seatedPreview.Frames.Count == pack.Actions["sit-blink"].Frames.Count + pack.Actions["sit-happy"].Frames.Count
+            + pack.Actions["sit-greeting"].Frames.Count + 3, "seated preview records blink, smile and wave from the real host");
     }
 
     private static void Record(MainWindow window, string directory, bool seated = false)

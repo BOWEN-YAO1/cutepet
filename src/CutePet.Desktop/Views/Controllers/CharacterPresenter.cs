@@ -91,7 +91,7 @@ internal sealed class CharacterPresenter
         else if (window.CanCloudMove && window.CloudArt.Opacity == 1)
         {
             cloudBlinkElapsed += Math.Max(0, elapsed.TotalMilliseconds);
-            if (cloudBlinkElapsed >= nextCloudBlink && characterAnimation.Action == "idle")
+            if (cloudBlinkElapsed >= nextCloudBlink && characterAnimation.Action is "idle" or "cloud-idle")
             { characterAnimation.Blink(); cloudBlinkElapsed = 0; nextCloudBlink = rhythm.Between(4200,7000); }
         }
         RefreshCharacterFrame();
@@ -238,6 +238,7 @@ internal sealed class CharacterPresenter
         if (window.Model.IsLow && !window.Model.IsStale) window.CancelScreenEdge();
         if (window.Model.IsLow && !window.Model.IsStale) window.CancelCloud();
         characterAnimation.Low = window.Model.IsLow && !window.Model.IsStale;
+        characterAnimation.Flying = window.CloudActive && window.CloudArt.Opacity == 1;
         if (window.CharacterArt.Source != characterAnimation.Image) window.CharacterArt.Source = characterAnimation.Image;
         ApplyFloating();
     }
@@ -285,7 +286,7 @@ internal sealed class CharacterPresenter
         RefreshCharacterFrame();
     }
     internal void CancelCloudSpell()
-    { if (characterAnimation.Action == "summon-cloud") characterAnimation.ResetTransient(); }
+    { characterAnimation.Flying = false; if (characterAnimation.Action == "summon-cloud") characterAnimation.ResetTransient(); }
     internal void AttachEdge(string baseAction)
     {
         characterAnimation.AttachEdge(baseAction);

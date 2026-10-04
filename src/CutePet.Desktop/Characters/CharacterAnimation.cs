@@ -14,6 +14,18 @@ internal sealed class CharacterAnimation
     private bool low;
     private bool resting;
     private bool onEdge;
+    private bool flying;
+    internal bool Flying
+    {
+        get => flying;
+        set
+        {
+            var next = value && !Low && !RestPose && !onEdge;
+            if (next == flying) return;
+            flying = next; baseElapsed = 0;
+            if (!flying && transient == "cloud-blink") ResetTransient();
+        }
+    }
     private string edgeBase = "edge-idle";
     private string? afterStanding;
     private bool standAfterConjure;
@@ -30,18 +42,20 @@ internal sealed class CharacterAnimation
             if (!low) return;
             resting = false;
             onEdge = false;
+            flying = false;
             afterStanding = null;
             standAfterConjure = false;
-            if (transient is "blink" or "look" or "hover" or "conjure" or "stand" or "summon-cloud" or "sit-blink" or "sit-greeting" or "sit-happy"
+            if (transient is "blink" or "cloud-blink" or "look" or "hover" or "conjure" or "stand" or "summon-cloud" or "sit-blink" or "sit-greeting" or "sit-happy"
                 || transient is not null && EdgeActions.BaseOf(transient) is not null) ResetTransient();
         }
     }
-    public string Action => transient ?? (Low && pack.Actions.ContainsKey("low") ? "low" : onEdge ? edgeBase : resting ? "sit" : "idle");
+    public string Action => transient ?? (Low && pack.Actions.ContainsKey("low") ? "low" : onEdge ? edgeBase : resting ? "sit"
+        : flying && pack.Actions.ContainsKey("cloud-idle") ? "cloud-idle" : "idle");
     internal double ActionProgress => (transient is null ? baseElapsed : transientElapsed) / pack.Actions[Action].Duration;
     internal LoadedFrame SpriteFrame => pack.Actions[Action].Frames[pack.Actions[Action].PositionAt(transient is null ? baseElapsed : transientElapsed).Index];
     public BitmapSource Image => SpriteFrame.Image;
     public CharacterFrame Frame => Action switch
-    { "low" => CharacterFrame.Low, "blink" => CharacterFrame.Closed,
+    { "low" => CharacterFrame.Low, "blink" or "cloud-blink" => CharacterFrame.Closed,
         "greeting" => ReferenceEquals(Image, pack.Idle.Frames[0].Image) ? CharacterFrame.Idle : CharacterFrame.Wave,
         "look" => CharacterFrame.Look, "hover" => CharacterFrame.Hover, "happy" => CharacterFrame.Happy,
         "conjure" => CharacterFrame.Conjure, "sit" => CharacterFrame.Sit, "stand" => CharacterFrame.Rise,
@@ -50,7 +64,8 @@ internal sealed class CharacterAnimation
         "edge-peek" or "edge-shy" or "edge-sway" or "edge-nod" or "edge-top-peek" or "edge-top-look" or "edge-top-smile" or "edge-bottom-peek" or "edge-bottom-look" or "edge-bottom-smile" => CharacterFrame.EdgePeek,
         _ => CharacterFrame.Idle };
     public void Configure(CharacterPack selected) { pack = selected; low = false; baseElapsed = 0; Reset(); }
-    public void Blink() { if (transient is null && !Low && !onEdge) Start(resting ? "sit-blink" : "blink"); }
+    public void Blink() { if (transient is null && !Low && !onEdge) Start(resting ? "sit-blink"
+        : flying && pack.Actions.ContainsKey("cloud-blink") ? "cloud-blink" : "blink"); }
     internal void AttachEdge(string baseAction = "edge-idle")
     { Reset(); edgeBase = baseAction; onEdge = EdgeActions.BaseOf(baseAction) == baseAction && pack.Actions.ContainsKey(baseAction); baseElapsed = 0; }
     internal void PeekEdge(string? action = null)
@@ -141,9 +156,10 @@ internal sealed class CharacterAnimation
         Reset();
         Low = action == "low";
         resting = (action is "sit" or "conjure" or "sit-blink" or "sit-greeting" or "sit-happy") && pack.Actions.ContainsKey("sit");
+        flying = action is "cloud-idle" or "cloud-blink";
         edgeBase = EdgeActions.BaseOf(action) ?? "edge-idle";
         onEdge = EdgeActions.BaseOf(action) is not null && pack.Actions.ContainsKey(edgeBase);
-        if (action is not ("idle" or "low" or "sit") && EdgeActions.BaseOf(action) != action) Start(action);
+        if (action is not ("idle" or "low" or "sit" or "cloud-idle") && EdgeActions.BaseOf(action) != action) Start(action);
     }
     private void Start(string action)
     {
@@ -175,5 +191,5 @@ internal sealed class CharacterAnimation
     public void ResetTransient() { transient = null; transientElapsed = 0; }
     private void StartPendingResponse()
     { if (afterStanding is string response) { afterStanding = null; Start(response); } }
-    public void Reset() { resting = onEdge = false; standAfterConjure = false; afterStanding = null; ResetTransient(); }
+    public void Reset() { resting = onEdge = flying = false; standAfterConjure = false; afterStanding = null; ResetTransient(); }
 }

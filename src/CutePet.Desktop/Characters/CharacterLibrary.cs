@@ -96,7 +96,8 @@ internal sealed class CharacterLibrary
             var allowed = name == "character.json" || CharacterPackLoader.SafeFile(name)
                 || name is "README.md" or "LICENSE.txt" or "LICENSE.md" or "SOURCE.md";
             if (!allowed) throw new InvalidDataException("角色包只支持角色配置、PNG 图片和素材说明文件。");
-            var limit = name.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ? 8 * 1024 * 1024 : 64 * 1024;
+            var limit = name.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ? 8 * 1024 * 1024
+                : name == "character.json" ? CharacterPackLoader.MaxManifestBytes : 64 * 1024;
             total += entry.Length;
             if (entry.Length > limit || total > 64 * 1024 * 1024) throw new InvalidDataException("解压后的角色包超过大小限制。");
             var target = Path.GetFullPath(Path.Combine(directory, name));

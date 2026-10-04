@@ -21,8 +21,8 @@ internal static class SideEdgeVerification
         var samples = new List<BitmapSource>();
         var labels = new[] { "微笑探头", "缩回再探出", "探头轻摇", "探头点头" };
         var artwork = SideEdgeMotion.Responses.SelectMany(a => window.SelectedCharacter.Actions[a].Frames).DistinctBy(f => f.Image).ToArray();
-        check(artwork.Length == 8 && artwork.All(f => f.Image is CroppedBitmap {IsFrozen: true}),
-            "side gestures use eight distinct cached articulated poses");
+        check(artwork.Length == 16 && artwork.All(f => f.Image is CroppedBitmap {IsFrozen: true}),
+            "side gestures use sixteen distinct cached articulated poses");
         long LowerVisible(LoadedFrame frame)
         {
             var rgba = new FormatConvertedBitmap(frame.Image,PixelFormats.Bgra32,null,0);

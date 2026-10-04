@@ -17,14 +17,14 @@ internal static class CharacterPackVerification
         Directory.CreateDirectory(area);
         var library = new CharacterLibrary(Path.Combine(area, "installed"));
         var cat = library.Find("cat");
-        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 26 && cat.Actions.Count == 4,
+        check(library.Packs.Count == 2 && cat.BuiltIn && library.Find("tianyi").Actions.Count == 28 && cat.Actions.Count == 4,
             "both built-in characters load from independent manifests and PNG clips");
         foreach (var builtIn in library.Packs)
         {
             var exportPath = Path.Combine(area, builtIn.Id + ".cutepet.zip");
             library.Export(builtIn, exportPath);
             using var archive = ZipFile.OpenRead(exportPath);
-            check(archive.GetEntry("character.json") is not null && archive.GetEntry("idle.png") is not null
+            check(archive.GetEntry("character.json") is not null && archive.GetEntry(builtIn.Manifest.Actions["idle"].Frames[0].Image) is not null
                 && archive.GetEntry("LICENSE.txt") is not null && archive.GetEntry("SOURCE.md") is not null,
                 $"{builtIn.Id} export contains real frames, manifest, source and rights notices");
         }
@@ -78,6 +78,14 @@ internal static class CharacterPackVerification
                 ["low"] = Clip(true, ("second.png", 100)) } };
         var animatedZip = Zip("animated", animated, new() { ["idle.png"] = imageBytes, ["second.png"] = imageBytes });
         var animatedPack = library.Import(animatedZip);
+        var configBytes=JsonSerializer.SerializeToUtf8Bytes(animated,CharacterPackLoader.Json);
+        var paddedConfig=Enumerable.Repeat((byte)' ',CharacterPackLoader.MaxManifestBytes).ToArray();
+        configBytes.CopyTo(paddedConfig,0);
+        using(var configStream=new MemoryStream(paddedConfig))
+            check(CharacterPackLoader.Load(configStream,_=>new MemoryStream(imageBytes),false).Id==animated.Id,
+                "a valid manifest at the exact 128 KiB boundary loads");
+        Reject(()=>CharacterPackLoader.Load(new MemoryStream(paddedConfig.Concat(new byte[]{32}).ToArray()),
+            _=>new MemoryStream(imageBytes),false),"manifest rejects one byte beyond 128 KiB before parsing");
         player.Configure(animatedPack);
         var initial = player.Image;
         player.Advance(TimeSpan.FromMilliseconds(130));
@@ -100,7 +108,7 @@ internal static class CharacterPackVerification
         check(player.Action == "greeting", "old four-action packs retain their greeting on either click choice");
         var tianyi = library.Find("tianyi");
         using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
-            check(edgeArchive.GetEntry("edge-sequence-v3.png") is not null && edgeArchive.GetEntry("edge-full-v2.png") is null,
+            check(edgeArchive.GetEntry("edge-sequence-v5.png") is not null && edgeArchive.GetEntry("edge-full-v2.png") is null,
                 "Tianyi export carries the articulated atlas without the superseded floating full-body sprites");
         var edgeFiles = new Dictionary<string, byte[]>();
         using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
@@ -132,14 +140,15 @@ internal static class CharacterPackVerification
             tianyi.Manifest.Actions["edge-idle"].Frames[0] with {EdgeAnchorX = .51}}};
         Reject(() => other.Import(Zip("bad-grip",wrongAnchor,edgeFiles)), "atlas gripping anchors remain bounded");
         var mixedMode = tianyi.Manifest with {Id = "mixed-mode", Actions = new(tianyi.Manifest.Actions)};
-        mixedMode.Actions["edge-peek"] = Clip(false,("idle.png",100));
+        mixedMode.Actions["edge-peek"] = new() { Frames=new() {
+            tianyi.Manifest.Actions["edge-peek"].Frames[0] with { Region=null, EdgeAnchorX=null, EdgeAnchorY=null } } };
         Reject(() => other.Import(Zip("mixed-mode",mixedMode,edgeFiles)), "side clips cannot mix atlas views with unrelated full PNG canvases");
         check(EdgeActions.BottomResponses.All(edgeRoundTrip.Actions.ContainsKey)
             && edgeRoundTrip.Actions["edge-bottom-peek"].Frames[0].Image == edgeRoundTrip.Actions["edge-bottom-idle"].Frames[0].Image
-            && edgeFiles.ContainsKey("bottom-sequence-v4.png") && !edgeFiles.ContainsKey("edge-bottom-v1.png"),
+            && edgeFiles.ContainsKey("bottom-sequence-v6.png") && !edgeFiles.ContainsKey("edge-bottom-v1.png"),
             "bottom atlas responses export and import with shared cached views instead of old body-stretch sprites");
-        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 138,
-            "three top responses stay within the 160-frame package limit");
+        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 240,
+            "expanded sequences stay within the bounded 384-reference package limit");
         foreach (var response in EdgeActions.TopResponses.Skip(1))
         {
             var orphan = tianyi.Manifest with {Id="top-orphan",Actions=new() {
@@ -159,7 +168,7 @@ internal static class CharacterPackVerification
             Reject(() => other.Import(Zip("bottom-loop",looping,edgeFiles)), "bottom response cannot loop indefinitely " + response);
         }
         check(EdgeActions.TopResponses.All(edgeRoundTrip.Actions.ContainsKey)
-            && edgeFiles.ContainsKey("top-sequence-v2.png") && !edgeFiles.ContainsKey("swing-jade-v2.png")
+            && edgeFiles.ContainsKey("top-sequence-v4.png") && !edgeFiles.ContainsKey("swing-jade-v2.png")
             && edgeRoundTrip.Manifest.Actions["edge-top-smile"].Frames.All(f=>f.Region is not null&&f.SwingSeatAnchorY is not null),
             "top atlas and per-frame suspension anchors survive actual export and import");
         foreach(var seatY in new[] {double.NaN,.05,.96})
@@ -173,9 +182,13 @@ internal static class CharacterPackVerification
         badTopAnchor.Actions["edge-top-idle"]=new() {Loop=true,Frames=new() {
             tianyi.Manifest.Actions["edge-top-idle"].Frames[0] with {EdgeAnchorY=.51}}};
         Reject(()=>other.Import(Zip("top-anchor",badTopAnchor,edgeFiles)),"top virtual suspension anchor remains in the upper half");
-        var tooMany=tianyi.Manifest with {Id="frame-limit",Actions=new() {
-            ["idle"]=Clip(true,Enumerable.Range(0,161).Select(_=>("idle.png",100)).ToArray())}};
-        Reject(()=>other.Import(Zip("frame-limit",tooMany,edgeFiles)),"160 frame package cap still bounds repeated references");
+        var tooMany=new CharacterManifest {Id="frame-limit",Name="帧数边界测试",Actions=new() {
+            ["idle"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences+1).Select(_=>("idle.png",40)).ToArray())}};
+        Reject(()=>other.Import(Zip("frame-limit",tooMany,new() { ["idle.png"]=imageBytes })),"384 reference package cap rejects excess even when artwork is shared");
+        var atLimit = tooMany with { Id="frame-at-limit", Actions=new() {
+            ["idle"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences).Select(_=>("idle.png",40)).ToArray())}};
+        check(other.Import(Zip("frame-at-limit",atLimit,new() { ["idle.png"]=imageBytes })).Idle.Frames.Count==CharacterPackLoader.MaxFrameReferences,
+            "the exact frame-reference boundary remains loadable");
         var badBottomAnchor=tianyi.Manifest with {Id="bottom-anchor",Actions=new(tianyi.Manifest.Actions)};
         badBottomAnchor.Actions["edge-bottom-idle"]=new() {Loop=true,Frames=new() {
             tianyi.Manifest.Actions["edge-bottom-idle"].Frames[0] with {EdgeAnchorY=.49}}};
@@ -279,7 +292,7 @@ internal static class CharacterPackVerification
         player.Configure(tianyi);
         check(player.TryAmbient("look"), "Tianyi can start its package-defined look clip");
         player.Advance(TimeSpan.FromMilliseconds(600));
-        check(player.Image == tianyi.Actions["look"].Frames[2].Image, "look clip progresses from left glance to right glance");
+        check(player.Image == tianyi.Actions["look"].At(600), "look clip follows the intermediate pose durations");
         check(!player.TryAmbient("hover") && !tianyi.Actions.ContainsKey("hover"), "Tianyi no longer contains or plays the withdrawn head tilt");
         player.ReactToClick(1);
         check(player.Action == "happy" && !player.TryAmbient("look"), "click happy response takes priority over an ambient look");
@@ -341,7 +354,7 @@ internal static class CharacterPackVerification
         player.Configure(legacyTianyi);
         check(player.SitDown() && player.Action == "conjure", "sit request begins the package's magic sequence");
         player.Advance(TimeSpan.FromMilliseconds(600));
-        check(player.Image == tianyi.Actions["conjure"].Frames[1].Image, "throne materialization follows the configured frame sequence");
+        check(player.Image == tianyi.Actions["conjure"].At(600), "throne materialization follows the configured frame sequence");
         player.Advance(TimeSpan.FromSeconds(1));
         check(player.Action == "sit" && player.Resting, "conjure finishes in a persistent seated pose");
         var seated = player.Image;
@@ -471,6 +484,10 @@ internal static class CharacterPackVerification
         Reject(() => library.Import(Zip("cloud-orphan", cloudManifest with { Id = "cloud-orphan", Cloud = null, Actions = new() {
             ["idle"] = Clip(true, ("idle.png", 100)), ["summon-cloud"] = Clip(false, ("idle.png", 100)) } },
             new() { ["idle.png"] = imageBytes })), "cloud summon actions require an optional cloud layer");
+        foreach(var optionalCloud in new[] {"cloud-idle","cloud-blink"})
+            Reject(()=>library.Import(Zip("orphan-"+optionalCloud,cloudManifest with {Id="orphan-"+optionalCloud,Cloud=null,Actions=new() {
+                ["idle"]=Clip(true,("idle.png",100)),[optionalCloud]=Clip(optionalCloud=="cloud-idle",("idle.png",100))}},
+                new() { ["idle.png"]=imageBytes })),"cruising pose requires its cloud layer "+optionalCloud);
         Reject(() => library.Import(Zip("cloud-pixels", cloudManifest with { Id = "cloud-pixels", Cloud = new() { Image = "large-10.png" },
             Actions = new() { ["idle"] = Clip(true, Enumerable.Range(0, 10).Select(i => ("large-" + i + ".png", 100)).ToArray()) } }, largeFiles)),
             "cloud pixels count toward the same total decoded memory limit");

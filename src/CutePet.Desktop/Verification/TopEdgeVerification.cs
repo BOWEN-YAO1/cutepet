@@ -20,8 +20,8 @@ internal static class TopEdgeVerification
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
         var pack=window.SelectedCharacter;
         var frames=EdgeActions.TopResponses.SelectMany(a=>pack.Actions[a].Frames).GroupBy(f=>f.Image).Select(g=>g.First()).ToArray();
-        check(frames.Length==8&&frames.All(f=>f.Image is CroppedBitmap {IsFrozen:true}),
-            "top gestures share eight distinct frozen seated poses");
+        check(frames.Length==16&&frames.All(f=>f.Image is CroppedBitmap {IsFrozen:true}),
+            "top gestures share sixteen distinct frozen seated poses");
         foreach(var frame in frames)
         {
             var rgba=new FormatConvertedBitmap(frame.Image,PixelFormats.Bgra32,null,0);

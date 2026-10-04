@@ -43,7 +43,7 @@ internal static class CloudMotionVerification
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(1000));
         check(window.CurrentCharacterFrame == CharacterFrame.Closed,
             "cloud cruising can blink using the character pack's existing frame");
-        window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(160));
+        window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(window.SelectedCharacter.Actions["cloud-blink"].Duration));
         check(window.CurrentCharacterFrame == CharacterFrame.Idle && window.CloudActive,
             "cruising blink returns to its floating pose without cancelling the route");
         window.TogglePositionLock();

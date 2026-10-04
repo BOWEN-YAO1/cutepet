@@ -69,6 +69,7 @@ internal static class DesktopVerification
             Check(window.Settings.AutoCloud && store.Load().AutoCloud, "legacy settings enable the cloud option");
             window.ToggleAutoCloud(); // Keep existing animation regression clocks isolated from movement.
             CharacterPackVerification.Run(directory, Check);
+            SequenceVerification.Run(window.Characters.Find("tianyi"), directory, Check);
             Check(window.AllowsTransparency && window.WindowStyle == WindowStyle.None && !window.ShowInTaskbar,
                 "transparent borderless desktop host");
             Check(!window.DetailsVisible && window.Width * window.Height < 348 * 440 / 2,
@@ -263,7 +264,8 @@ internal static class DesktopVerification
                 var visibleFrame = false;
                 for (var pixel = 3; pixel < framePixels.Length; pixel += 4)
                 { transparentFrame |= framePixels[pixel] == 0; visibleFrame |= framePixels[pixel] >= 250; }
-                var registered = image is CroppedBitmap ? image.PixelWidth == 384 && image.PixelHeight == 512
+                var registered = image is CroppedBitmap ? image.PixelWidth == 256 && image.PixelHeight == 352
+                        || image.PixelWidth == 240 && image.PixelHeight == 360
                     : image.PixelWidth == window.SelectedCharacter.Idle.Frames[0].Image.PixelWidth
                         && image.PixelHeight == window.SelectedCharacter.Idle.Frames[0].Image.PixelHeight;
                 Check(image.IsFrozen && registered && transparentFrame && visibleFrame,
@@ -380,7 +382,7 @@ internal static class DesktopVerification
             Render(window, directory, "animation-wave", 144);
             window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(180));
             Check(window.CurrentCharacterFrame == CharacterFrame.Wave
-                && window.CharacterArt.Source == window.SelectedCharacter.Actions["greeting"].Frames[1].Image,
+                && window.CharacterArt.Source == window.SelectedCharacter.Actions["greeting"].At(180),
                 "greeting moves from the middle arm pose into the raised wave pose");
             window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(2));
             Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "greeting stops without queuing interactions");
@@ -425,7 +427,7 @@ internal static class DesktopVerification
             for (var i = 3; i < pixels.Length; i += 4)
             {
                 transparent |= pixels[i] == 0;
-                opaque |= pixels[i] == 255;
+                opaque |= pixels[i] >= 250;
             }
             Check(transparent && opaque, "Tianyi sprite contains transparent background and visible artwork");
             var characterRestored = new MainWindow(store, verification: true);
@@ -537,7 +539,7 @@ internal static class DesktopVerification
             Check(manager.Preview.Source == window.SelectedCharacter.Actions["greeting"].Frames[0].Image,
                 "manager greeting preview uses the selected package's real frames");
             manager.CharacterList.SelectedItem = window.Characters.Find("tianyi");
-            Check(manager.PreviewAction.Items.Count == 26, "manager exposes twenty-six Tianyi actions including varied gestures on every edge");
+            Check(manager.PreviewAction.Items.Count == 28, "manager exposes twenty-eight Tianyi actions including cloud loops and varied gestures on every edge");
             manager.PreviewAction.SelectedValue = "happy";
             manager.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
             Check(manager.Preview.Source == window.Characters.Find("tianyi").Actions["happy"].Frames[0].Image,
