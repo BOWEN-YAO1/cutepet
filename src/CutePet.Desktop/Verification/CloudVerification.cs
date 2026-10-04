@@ -86,8 +86,10 @@ internal static class CloudVerification
         quota(false);
         window.SummonCloud();
         window.PlayCharacterInteraction();
-        check(!window.CloudActive && window.CurrentCharacterFrame is CharacterFrame.Happy or CharacterFrame.Wave,
-            "clicking interrupts cloud travel and plays the normal response");
+        check(!window.CloudActive,"clicking immediately stops cloud travel before the response entry frames");
+        window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(100));
+        check(window.CurrentCharacterFrame is CharacterFrame.Happy or CharacterFrame.Wave,
+            "clicking advances through shared standing entry into the normal response");
         window.WakeCharacterImmediately();
         var autoRest = window.Settings.AutoRest;
         if (autoRest) window.ToggleAutoRest();

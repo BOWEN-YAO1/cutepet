@@ -93,4 +93,3 @@ These are intermediateanimationframes to insertbetweenolderstillimages, not just
 - exec-61629754-f636-44e6-9eb2-dd8595fc2ff8.png：站立细化尝试改到了另一侧手臂，不适合原挥手顺序，未接入。
 
 这些原始输出留在工具生成目录，不进入运行包。图格登记及相邻帧映射见 tools/register-tianyi-inbetweens.py；使用 --check 可检查保存配置，维护者复现依赖 Pillow，但构建、运行、分发打包不需要。
-
