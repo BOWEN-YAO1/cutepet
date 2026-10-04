@@ -33,7 +33,7 @@ def main():
         assert not any(PurePosixPath(name).suffix.lower() in {'.png','.gif','.ico','.zip'} for name in expected_root)
         checks.append('Only executable, required runtime files and guide at root; five grouped folders')
         assert {'licenses/LICENSE', 'licenses/THIRD_PARTY_NOTICES.md', 'source/SOURCE.txt'}.issubset(names)
-        source_info = archive.read('source/SOURCE.txt').decode('utf-8')
+        source_info = archive.read('source/SOURCE.txt').decode('utf-8').replace('\r\n', '\n')
         assert 'Commit: ' + args.expected_commit + '\n' in source_info
         source_name = next(name for name in names if name.startswith('source/') and name.endswith('.zip'))
         source_bytes = archive.read(source_name)
