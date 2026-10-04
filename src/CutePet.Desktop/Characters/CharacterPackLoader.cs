@@ -5,14 +5,15 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace CutePet.Desktop;
 
 internal static class CharacterPackLoader
 {
-    internal const int MaxFrameReferences = 384;
-    internal const int MaxManifestBytes = 128 * 1024;
+    internal const int MaxFrameReferences = 768;
+    internal const int MaxManifestBytes = 256 * 1024;
     internal static readonly string[] ActionNames = { "idle", "blink", "greeting", "low", "look", "hover", "happy", "conjure", "sit", "stand", "summon-cloud", "cloud-idle", "cloud-blink", "sit-blink", "sit-greeting", "sit-happy", "edge-idle", "edge-peek", "edge-shy", "edge-sway", "edge-nod", "edge-top-idle", "edge-top-peek", "edge-top-look", "edge-top-smile", "edge-bottom-idle", "edge-bottom-peek", "edge-bottom-look", "edge-bottom-smile" };
     internal static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true, WriteIndented = true };
@@ -79,6 +80,7 @@ internal static class CharacterPackLoader
             throw new InvalidDataException("召唤、起身、坐姿回应或自动休息需要配套 sit 动作。");
         var images = new Dictionary<string, BitmapSource>(StringComparer.OrdinalIgnoreCase);
         var regions = new Dictionary<(string, CharacterFrameRegion), BitmapSource>();
+        var canvases = new Dictionary<(string, CharacterFrameRegion, CharacterFrameCanvas), BitmapSource>();
         var actions = new Dictionary<string, LoadedAction>();
         long pixels = 0;
         var frameCount = 0;
@@ -88,7 +90,7 @@ internal static class CharacterPackLoader
         {
             if (action is null || action.Frames is null || action.Frames.Count == 0
                 || (frameCount += action.Frames.Count) > MaxFrameReferences || action.Loop != (name is "idle" or "low" or "sit" or "cloud-idle" || EdgeActions.BaseOf(name) == name))
-                throw new InvalidDataException("待机、低额度、坐姿、乘云和贴边姿势必须循环；其他动作必须有限播放，最多 384 帧引用。");
+                throw new InvalidDataException("待机、低额度、坐姿、乘云和贴边姿势必须循环；其他动作必须有限播放，最多 768 帧引用。");
             var loaded = new List<LoadedFrame>();
             foreach (var frame in action.Frames)
             {
@@ -140,6 +142,31 @@ internal static class CharacterPackLoader
                         cropped.Freeze(); regions.Add(key, cropped);
                     }
                     image = cropped;
+                }
+                if (frame.Canvas is { } registration)
+                {
+                    if (frame.Region is null || registration.Width < 1 || registration.Height < 1
+                        || registration.Width > 2048 || registration.Height > 2048
+                        || !double.IsFinite(registration.Scale) || registration.Scale < .05 || registration.Scale > 4
+                        || !double.IsFinite(registration.OffsetX) || !double.IsFinite(registration.OffsetY)
+                        || registration.OffsetX < 0 || registration.OffsetY < 0
+                        || registration.OffsetX + image.PixelWidth * registration.Scale > registration.Width + .000001
+                        || registration.OffsetY + image.PixelHeight * registration.Scale > registration.Height + .000001)
+                        throw new InvalidDataException("帧画布需要图集区域、合法缩放和完整位于画布内的放置位置。");
+                    var key = (frame.Image.ToLowerInvariant(), frame.Region, registration);
+                    if (!canvases.TryGetValue(key, out var registered))
+                    {
+                        if ((pixels += (long)registration.Width * registration.Height) > 45_875_200)
+                            throw new InvalidDataException("图集、裁切区域及登记画布合计超过总解码像素限制。");
+                        var visual = new DrawingVisual();
+                        using (var drawing = visual.RenderOpen())
+                            drawing.DrawImage(image, new Rect(registration.OffsetX, registration.OffsetY,
+                                image.PixelWidth * registration.Scale, image.PixelHeight * registration.Scale));
+                        var bitmap = new RenderTargetBitmap(registration.Width, registration.Height, 96, 96, PixelFormats.Pbgra32);
+                        bitmap.Render(visual); bitmap.Freeze();
+                        canvases.Add(key, registered = bitmap);
+                    }
+                    image = registered;
                 }
                 if (edge && frame.Region is not null)
                 {

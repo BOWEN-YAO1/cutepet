@@ -264,7 +264,7 @@ internal static class DesktopVerification
                 var visibleFrame = false;
                 for (var pixel = 3; pixel < framePixels.Length; pixel += 4)
                 { transparentFrame |= framePixels[pixel] == 0; visibleFrame |= framePixels[pixel] >= 250; }
-                var registered = image is CroppedBitmap ? image.PixelWidth == 256 && image.PixelHeight == 352
+                var registered = image is CroppedBitmap or RenderTargetBitmap ? image.PixelWidth == 256 && image.PixelHeight == 352
                         || image.PixelWidth == 240 && image.PixelHeight == 360
                     : image.PixelWidth == window.SelectedCharacter.Idle.Frames[0].Image.PixelWidth
                         && image.PixelHeight == window.SelectedCharacter.Idle.Frames[0].Image.PixelHeight;
@@ -276,7 +276,7 @@ internal static class DesktopVerification
                 && window.CharacterArt.Source == window.SelectedCharacter.Actions["blink"].Frames[0].Image,
                 "Tianyi blink selects the closed-eye frame");
             Render(window, directory, "animation-blink", 144);
-            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(200));
+            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(window.SelectedCharacter.Actions["blink"].Duration));
             Check(window.CurrentCharacterFrame == CharacterFrame.Idle, "blink finishes and restores idle");
             window.CharacterPointerChanged(true);
             window.AdvanceAmbient(TimeSpan.FromMilliseconds(399));
@@ -318,7 +318,7 @@ internal static class DesktopVerification
             window.StartCharacterBlink();
             Check(window.CurrentCharacterFrame == CharacterFrame.SeatedBlink && window.CharacterResting,
                 "host uses a seated blink without losing the throne");
-            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(300));
+            window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(window.SelectedCharacter.Actions["sit-blink"].Duration));
             window.CharacterPointerChanged(true);
             window.AdvanceAmbient(TimeSpan.FromSeconds(60));
             Check(window.CurrentCharacterFrame == CharacterFrame.Sit, "manual sitting persists and ignores standing blink or look");
@@ -378,7 +378,9 @@ internal static class DesktopVerification
             Check(window.CurrentCharacterFrame == CharacterFrame.Idle && !window.CharacterRestPose,
                 "hiding stops the actual seated clock and clears the throne");
             window.PlayGreeting();
-            Check(window.CurrentCharacterFrame == CharacterFrame.Wave, "click greeting starts the wave frame");
+            Check(window.CurrentCharacterFrame == CharacterFrame.Idle
+                && ReferenceEquals(window.CharacterArt.Source,window.SelectedCharacter.Idle.Frames[0].Image),
+                "click greeting starts from its exact shared standing pose before raising the arm");
             Render(window, directory, "animation-wave", 144);
             window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(180));
             Check(window.CurrentCharacterFrame == CharacterFrame.Wave
@@ -393,8 +395,9 @@ internal static class DesktopVerification
                 "actual WPF frame timer finishes a greeting without manual stepping");
             window.HidePet();
             window.PlayGreeting();
+            var hiddenGreetingPose=window.CharacterArt.Source;
             await Task.Delay(250);
-            Check(window.CurrentCharacterFrame == CharacterFrame.Wave,
+            Check(ReferenceEquals(hiddenGreetingPose,window.CharacterArt.Source),
                 "hidden host stops the actual WPF frame timer");
             window.HidePet();
             window.Model.Apply(Snapshot(8, 48), demo: true);

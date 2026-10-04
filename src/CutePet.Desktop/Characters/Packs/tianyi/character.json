@@ -41,20 +41,27 @@
           "image": "standing-sequence-v4.png",
           "durationMs": 40,
           "region": {
-            "x": 264,
+            "x": 8,
             "y": 40,
             "width": 240,
             "height": 360
           }
         },
         {
-          "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
           "region": {
-            "x": 520,
-            "y": 40,
+            "x": 18,
+            "y": 1161,
+            "width": 230,
+            "height": 335
+          },
+          "canvas": {
             "width": 240,
-            "height": 360
+            "height": 360,
+            "scale": 0.8985074626865671,
+            "offsetX": 16.671641791044777,
+            "offsetY": 43.0
           }
         },
         {
@@ -65,6 +72,77 @@
             "y": 40,
             "width": 240,
             "height": 360
+          }
+        },
+        {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 270,
+            "y": 1161,
+            "width": 234,
+            "height": 335
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8985074626865671,
+            "offsetX": 14.874626865671644,
+            "offsetY": 43.0
+          }
+        },
+        {
+          "image": "standing-sequence-v4.png",
+          "durationMs": 40,
+          "region": {
+            "x": 520,
+            "y": 40,
+            "width": 240,
+            "height": 360
+          }
+        },
+        {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 270,
+            "y": 1161,
+            "width": 234,
+            "height": 335
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8985074626865671,
+            "offsetX": 14.874626865671644,
+            "offsetY": 43.0
+          }
+        },
+        {
+          "image": "standing-sequence-v4.png",
+          "durationMs": 40,
+          "region": {
+            "x": 264,
+            "y": 40,
+            "width": 240,
+            "height": 360
+          }
+        },
+        {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 18,
+            "y": 1161,
+            "width": 230,
+            "height": 335
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8985074626865671,
+            "offsetX": 16.671641791044777,
+            "offsetY": 43.0
           }
         },
         {
@@ -84,17 +162,34 @@
       "frames": [
         {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 8,
-            "y": 417,
+            "y": 40,
             "width": 240,
             "height": 360
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 24,
+            "y": 54,
+            "width": 224,
+            "height": 342
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8801169590643275,
+            "offsetX": 21.42690058479532,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 264,
             "y": 417,
@@ -103,8 +198,25 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 528,
+            "y": 55,
+            "width": 224,
+            "height": 341
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8826979472140762,
+            "offsetX": 21.137829912023463,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 520,
             "y": 417,
@@ -113,8 +225,25 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 780,
+            "y": 55,
+            "width": 226,
+            "height": 341
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8826979472140762,
+            "offsetX": 20.25513196480938,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 160,
+          "durationMs": 120,
           "region": {
             "x": 776,
             "y": 417,
@@ -123,8 +252,25 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 780,
+            "y": 55,
+            "width": 226,
+            "height": 341
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8826979472140762,
+            "offsetX": 20.25513196480938,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 520,
             "y": 417,
@@ -133,8 +279,25 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 780,
+            "y": 55,
+            "width": 226,
+            "height": 341
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8826979472140762,
+            "offsetX": 20.25513196480938,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 776,
             "y": 417,
@@ -143,8 +306,25 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 780,
+            "y": 55,
+            "width": 226,
+            "height": 341
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8826979472140762,
+            "offsetX": 20.25513196480938,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 520,
             "y": 417,
@@ -153,13 +333,47 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 528,
+            "y": 55,
+            "width": 224,
+            "height": 341
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8826979472140762,
+            "offsetX": 21.137829912023463,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 264,
             "y": 417,
             "width": 240,
             "height": 360
+          }
+        },
+        {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 24,
+            "y": 54,
+            "width": 224,
+            "height": 342
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8801169590643275,
+            "offsetX": 21.42690058479532,
+            "offsetY": 43.0
           }
         },
         {
@@ -189,22 +403,70 @@
       "frames": [
         {
           "image": "cloud-sequence-v5.png",
-          "durationMs": 800,
+          "durationMs": 760,
           "region": {
             "x": 16,
             "y": 49,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9093655589123867,
+            "offsetX": 10.876132930513599,
+            "offsetY": 30.268882175226622
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 19,
+            "y": 10,
+            "width": 229,
+            "height": 357
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8431372549019608,
+            "offsetX": 23.460784313725483,
+            "offsetY": 43.0
           }
         },
         {
           "image": "cloud-sequence-v5.png",
-          "durationMs": 100,
+          "durationMs": 60,
           "region": {
             "x": 272,
             "y": 49,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9148936170212766,
+            "offsetX": 10.212765957446809,
+            "offsetY": 29.276595744680833
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 264,
+            "y": 10,
+            "width": 240,
+            "height": 357
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8431372549019608,
+            "offsetX": 18.82352941176471,
+            "offsetY": 43.0
           }
         },
         {
@@ -215,6 +477,13 @@
             "y": 49,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9148936170212766,
+            "offsetX": 10.212765957446809,
+            "offsetY": 29.276595744680833
           }
         },
         {
@@ -225,6 +494,13 @@
             "y": 49,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9121212121212121,
+            "offsetX": 10.545454545454547,
+            "offsetY": 30.230303030303048
           }
         },
         {
@@ -235,6 +511,13 @@
             "y": 49,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9093655589123867,
+            "offsetX": 10.876132930513599,
+            "offsetY": 30.268882175226622
           }
         }
       ]
@@ -244,7 +527,7 @@
       "frames": [
         {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 8,
             "y": 40,
@@ -253,8 +536,25 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 17,
+            "y": 794,
+            "width": 231,
+            "height": 337
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8931750741839762,
+            "offsetX": 16.83827893175075,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 8,
             "y": 1145,
@@ -263,8 +563,25 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 269,
+            "y": 797,
+            "width": 233,
+            "height": 334
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9011976047904192,
+            "offsetX": 15.010479041916156,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 280,
+          "durationMs": 240,
           "region": {
             "x": 264,
             "y": 1145,
@@ -273,8 +590,25 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 269,
+            "y": 797,
+            "width": 233,
+            "height": 334
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9011976047904192,
+            "offsetX": 15.010479041916156,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 8,
             "y": 1145,
@@ -283,8 +617,25 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 17,
+            "y": 794,
+            "width": 231,
+            "height": 337
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8931750741839762,
+            "offsetX": 16.83827893175075,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 8,
             "y": 40,
@@ -293,8 +644,25 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 525,
+            "y": 796,
+            "width": 233,
+            "height": 335
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8985074626865671,
+            "offsetX": 15.323880597014934,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 520,
             "y": 1145,
@@ -303,8 +671,25 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 781,
+            "y": 797,
+            "width": 227,
+            "height": 334
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9011976047904192,
+            "offsetX": 17.71407185628742,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 280,
+          "durationMs": 240,
           "region": {
             "x": 776,
             "y": 1145,
@@ -313,13 +698,47 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 781,
+            "y": 797,
+            "width": 227,
+            "height": 334
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9011976047904192,
+            "offsetX": 17.71407185628742,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 520,
             "y": 1145,
             "width": 240,
             "height": 360
+          }
+        },
+        {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 525,
+            "y": 796,
+            "width": 233,
+            "height": 335
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8985074626865671,
+            "offsetX": 15.323880597014934,
+            "offsetY": 43.0
           }
         },
         {
@@ -339,12 +758,56 @@
       "frames": [
         {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
+          "region": {
+            "x": 8,
+            "y": 40,
+            "width": 240,
+            "height": 360
+          }
+        },
+        {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 22,
+            "y": 428,
+            "width": 226,
+            "height": 334
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9011976047904192,
+            "offsetX": 18.164670658682624,
+            "offsetY": 43.0
+          }
+        },
+        {
+          "image": "standing-sequence-v4.png",
+          "durationMs": 40,
           "region": {
             "x": 8,
             "y": 793,
             "width": 240,
             "height": 360
+          }
+        },
+        {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 270,
+            "y": 427,
+            "width": 231,
+            "height": 335
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8985074626865671,
+            "offsetX": 16.2223880597015,
+            "offsetY": 43.0
           }
         },
         {
@@ -359,12 +822,29 @@
         },
         {
           "image": "standing-sequence-v4.png",
-          "durationMs": 160,
+          "durationMs": 120,
           "region": {
             "x": 520,
             "y": 793,
             "width": 240,
             "height": 360
+          }
+        },
+        {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 778,
+            "y": 427,
+            "width": 229,
+            "height": 336
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8958333333333334,
+            "offsetX": 17.42708333333333,
+            "offsetY": 43.0
           }
         },
         {
@@ -379,7 +859,7 @@
         },
         {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 264,
             "y": 793,
@@ -388,13 +868,47 @@
           }
         },
         {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 270,
+            "y": 427,
+            "width": 231,
+            "height": 335
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8985074626865671,
+            "offsetX": 16.2223880597015,
+            "offsetY": 43.0
+          }
+        },
+        {
           "image": "standing-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 8,
             "y": 793,
             "width": 240,
             "height": 360
+          }
+        },
+        {
+          "image": "standing-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 22,
+            "y": 428,
+            "width": 226,
+            "height": 334
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9011976047904192,
+            "offsetX": 18.164670658682624,
+            "offsetY": 43.0
           }
         },
         {
@@ -424,7 +938,7 @@
         },
         {
           "image": "throne-sequence-v4.png",
-          "durationMs": 200,
+          "durationMs": 160,
           "region": {
             "x": 8,
             "y": 56,
@@ -433,8 +947,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 26,
+            "y": 69,
+            "width": 222,
+            "height": 335
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9552238805970149,
+            "offsetX": 13.97014925373135,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 300,
+          "durationMs": 260,
           "region": {
             "x": 264,
             "y": 56,
@@ -443,8 +974,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 280,
+            "y": 67,
+            "width": 224,
+            "height": 337
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9495548961424333,
+            "offsetX": 13.649851632047472,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 60,
           "region": {
             "x": 520,
             "y": 56,
@@ -453,8 +1001,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 534,
+            "y": 68,
+            "width": 221,
+            "height": 336
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9523809523809523,
+            "offsetX": 14.761904761904773,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 60,
           "region": {
             "x": 776,
             "y": 56,
@@ -463,8 +1028,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 787,
+            "y": 75,
+            "width": 209,
+            "height": 329
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9726443768996961,
+            "offsetX": 18.358662613981764,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 60,
           "region": {
             "x": 8,
             "y": 410,
@@ -473,8 +1055,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 29,
+            "y": 428,
+            "width": 211,
+            "height": 328
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.975609756097561,
+            "offsetX": 17.07317073170732,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 60,
           "region": {
             "x": 264,
             "y": 410,
@@ -483,8 +1082,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 282,
+            "y": 428,
+            "width": 211,
+            "height": 328
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.975609756097561,
+            "offsetX": 17.07317073170732,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 60,
           "region": {
             "x": 520,
             "y": 410,
@@ -493,13 +1109,47 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 535,
+            "y": 428,
+            "width": 212,
+            "height": 328
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.975609756097561,
+            "offsetX": 16.585365853658544,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 60,
           "region": {
             "x": 776,
             "y": 410,
             "width": 240,
             "height": 360
+          }
+        },
+        {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 787,
+            "y": 429,
+            "width": 209,
+            "height": 327
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9785932721712538,
+            "offsetX": 17.73700305810398,
+            "offsetY": 24.0
           }
         },
         {
@@ -544,32 +1194,104 @@
         },
         {
           "image": "cloud-sequence-v5.png",
-          "durationMs": 100,
+          "durationMs": 60,
           "region": {
             "x": 16,
             "y": 1158,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9066265060240963,
+            "offsetX": 11.20481927710844,
+            "offsetY": 32.12048192771084
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 264,
+            "y": 1135,
+            "width": 240,
+            "height": 356
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8455056179775281,
+            "offsetX": 18.539325842696627,
+            "offsetY": 43.0
           }
         },
         {
           "image": "cloud-sequence-v5.png",
-          "durationMs": 140,
+          "durationMs": 100,
           "region": {
             "x": 272,
             "y": 1158,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9039039039039038,
+            "offsetX": 11.531531531531538,
+            "offsetY": 33.05705705705708
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 521,
+            "y": 1135,
+            "width": 237,
+            "height": 356
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8455056179775281,
+            "offsetX": 19.807584269662925,
+            "offsetY": 43.0
           }
         },
         {
           "image": "cloud-sequence-v5.png",
-          "durationMs": 140,
+          "durationMs": 100,
           "region": {
             "x": 528,
             "y": 1158,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9039039039039038,
+            "offsetX": 11.531531531531538,
+            "offsetY": 33.05705705705708
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 1135,
+            "width": 233,
+            "height": 356
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8455056179775281,
+            "offsetX": 21.49859550561797,
+            "offsetY": 43.0
           }
         },
         {
@@ -580,6 +1302,13 @@
             "y": 1158,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9066265060240963,
+            "offsetX": 11.20481927710844,
+            "offsetY": 32.12048192771084
           }
         },
         {
@@ -599,62 +1328,206 @@
       "frames": [
         {
           "image": "cloud-sequence-v5.png",
-          "durationMs": 180,
+          "durationMs": 140,
           "region": {
             "x": 16,
             "y": 416,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9093655589123867,
+            "offsetX": 10.876132930513599,
+            "offsetY": 31.178247734139006
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 15,
+            "y": 385,
+            "width": 233,
+            "height": 352
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8551136363636364,
+            "offsetX": 20.37926136363636,
+            "offsetY": 43.0
           }
         },
         {
           "image": "cloud-sequence-v5.png",
-          "durationMs": 180,
+          "durationMs": 140,
           "region": {
             "x": 272,
             "y": 416,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9121212121212121,
+            "offsetX": 10.545454545454547,
+            "offsetY": 30.230303030303048
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 385,
+            "width": 238,
+            "height": 352
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8551136363636364,
+            "offsetX": 18.24147727272728,
+            "offsetY": 43.0
           }
         },
         {
           "image": "cloud-sequence-v5.png",
-          "durationMs": 180,
+          "durationMs": 140,
           "region": {
             "x": 528,
             "y": 416,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9121212121212121,
+            "offsetX": 10.545454545454547,
+            "offsetY": 30.230303030303048
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 520,
+            "y": 389,
+            "width": 240,
+            "height": 349
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8624641833810889,
+            "offsetX": 16.504297994269336,
+            "offsetY": 43.0
           }
         },
         {
           "image": "cloud-sequence-v5.png",
-          "durationMs": 180,
+          "durationMs": 140,
           "region": {
             "x": 784,
             "y": 416,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9148936170212766,
+            "offsetX": 10.212765957446809,
+            "offsetY": 29.276595744680833
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 520,
+            "y": 389,
+            "width": 240,
+            "height": 349
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8624641833810889,
+            "offsetX": 16.504297994269336,
+            "offsetY": 43.0
           }
         },
         {
           "image": "cloud-sequence-v5.png",
-          "durationMs": 180,
+          "durationMs": 140,
           "region": {
             "x": 528,
             "y": 416,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9121212121212121,
+            "offsetX": 10.545454545454547,
+            "offsetY": 30.230303030303048
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 385,
+            "width": 238,
+            "height": 352
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8551136363636364,
+            "offsetX": 18.24147727272728,
+            "offsetY": 43.0
           }
         },
         {
           "image": "cloud-sequence-v5.png",
-          "durationMs": 180,
+          "durationMs": 140,
           "region": {
             "x": 272,
             "y": 416,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9121212121212121,
+            "offsetX": 10.545454545454547,
+            "offsetY": 30.230303030303048
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 15,
+            "y": 385,
+            "width": 233,
+            "height": 352
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8551136363636364,
+            "offsetX": 20.37926136363636,
+            "offsetY": 43.0
           }
         },
         {
@@ -665,6 +1538,13 @@
             "y": 416,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9093655589123867,
+            "offsetX": 10.876132930513599,
+            "offsetY": 31.178247734139006
           }
         }
       ]
@@ -677,39 +1557,16 @@
           "durationMs": 40,
           "region": {
             "x": 16,
-            "y": 796,
+            "y": 416,
             "width": 240,
             "height": 360
-          }
-        },
-        {
-          "image": "cloud-sequence-v5.png",
-          "durationMs": 40,
-          "region": {
-            "x": 272,
-            "y": 796,
+          },
+          "canvas": {
             "width": 240,
-            "height": 360
-          }
-        },
-        {
-          "image": "cloud-sequence-v5.png",
-          "durationMs": 80,
-          "region": {
-            "x": 528,
-            "y": 796,
-            "width": 240,
-            "height": 360
-          }
-        },
-        {
-          "image": "cloud-sequence-v5.png",
-          "durationMs": 40,
-          "region": {
-            "x": 784,
-            "y": 796,
-            "width": 240,
-            "height": 360
+            "height": 360,
+            "scale": 0.9093655589123867,
+            "offsetX": 10.876132930513599,
+            "offsetY": 31.178247734139006
           }
         },
         {
@@ -720,6 +1577,115 @@
             "y": 796,
             "width": 240,
             "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9093655589123867,
+            "offsetX": 10.876132930513599,
+            "offsetY": 32.628398791540796
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 264,
+            "y": 756,
+            "width": 240,
+            "height": 379
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.7941952506596306,
+            "offsetX": 24.696569920844325,
+            "offsetY": 43.0
+          }
+        },
+        {
+          "image": "cloud-sequence-v5.png",
+          "durationMs": 40,
+          "region": {
+            "x": 272,
+            "y": 796,
+            "width": 240,
+            "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.8931750741839762,
+            "offsetX": 12.81899109792285,
+            "offsetY": 35.85459940652822
+          }
+        },
+        {
+          "image": "cloud-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 521,
+            "y": 757,
+            "width": 238,
+            "height": 378
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.7962962962962963,
+            "offsetX": 25.240740740740748,
+            "offsetY": 43.0
+          }
+        },
+        {
+          "image": "cloud-sequence-v5.png",
+          "durationMs": 80,
+          "region": {
+            "x": 528,
+            "y": 796,
+            "width": 240,
+            "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9011976047904192,
+            "offsetX": 11.856287425149695,
+            "offsetY": 32.18562874251495
+          }
+        },
+        {
+          "image": "cloud-sequence-v5.png",
+          "durationMs": 40,
+          "region": {
+            "x": 784,
+            "y": 796,
+            "width": 240,
+            "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9093655589123867,
+            "offsetX": 10.876132930513599,
+            "offsetY": 32.628398791540796
+          }
+        },
+        {
+          "image": "cloud-sequence-v5.png",
+          "durationMs": 40,
+          "region": {
+            "x": 16,
+            "y": 796,
+            "width": 240,
+            "height": 360
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9093655589123867,
+            "offsetX": 10.876132930513599,
+            "offsetY": 32.628398791540796
           }
         }
       ]
@@ -729,7 +1695,34 @@
       "frames": [
         {
           "image": "throne-sequence-v4.png",
-          "durationMs": 60,
+          "durationMs": 40,
+          "region": {
+            "x": 8,
+            "y": 755,
+            "width": 240,
+            "height": 360
+          }
+        },
+        {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 30,
+            "y": 780,
+            "width": 209,
+            "height": 322
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9937888198757764,
+            "offsetX": 16.149068322981364,
+            "offsetY": 24.0
+          }
+        },
+        {
+          "image": "throne-sequence-v4.png",
+          "durationMs": 40,
           "region": {
             "x": 264,
             "y": 755,
@@ -738,8 +1731,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 282,
+            "y": 780,
+            "width": 211,
+            "height": 322
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9937888198757764,
+            "offsetX": 15.15527950310559,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 520,
             "y": 755,
@@ -748,13 +1758,47 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 282,
+            "y": 780,
+            "width": 211,
+            "height": 322
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9937888198757764,
+            "offsetX": 15.15527950310559,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 60,
+          "durationMs": 40,
           "region": {
             "x": 264,
             "y": 755,
             "width": 240,
             "height": 360
+          }
+        },
+        {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 30,
+            "y": 780,
+            "width": 209,
+            "height": 322
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9937888198757764,
+            "offsetX": 16.149068322981364,
+            "offsetY": 24.0
           }
         },
         {
@@ -774,7 +1818,7 @@
       "frames": [
         {
           "image": "throne-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 8,
             "y": 755,
@@ -783,6 +1827,23 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 30,
+            "y": 1126,
+            "width": 210,
+            "height": 329
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9726443768996961,
+            "offsetX": 17.872340425531917,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
           "durationMs": 80,
           "region": {
@@ -794,12 +1855,29 @@
         },
         {
           "image": "throne-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 264,
             "y": 1109,
             "width": 240,
             "height": 360
+          }
+        },
+        {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 536,
+            "y": 1125,
+            "width": 211,
+            "height": 330
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9696969696969697,
+            "offsetX": 17.69696969696969,
+            "offsetY": 24.0
           }
         },
         {
@@ -844,12 +1922,29 @@
         },
         {
           "image": "throne-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 520,
             "y": 1109,
             "width": 240,
             "height": 360
+          }
+        },
+        {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 536,
+            "y": 1125,
+            "width": 211,
+            "height": 330
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9696969696969697,
+            "offsetX": 17.69696969696969,
+            "offsetY": 24.0
           }
         },
         {
@@ -864,12 +1959,29 @@
         },
         {
           "image": "throne-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 8,
             "y": 1109,
             "width": 240,
             "height": 360
+          }
+        },
+        {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 30,
+            "y": 1126,
+            "width": 210,
+            "height": 329
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9726443768996961,
+            "offsetX": 17.872340425531917,
+            "offsetY": 24.0
           }
         },
         {
@@ -889,7 +2001,7 @@
       "frames": [
         {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 60,
           "region": {
             "x": 8,
             "y": 755,
@@ -898,13 +2010,47 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 30,
+            "y": 780,
+            "width": 209,
+            "height": 322
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9937888198757764,
+            "offsetX": 16.149068322981364,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 60,
           "region": {
             "x": 264,
             "y": 755,
             "width": 240,
             "height": 360
+          }
+        },
+        {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 282,
+            "y": 780,
+            "width": 211,
+            "height": 322
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9937888198757764,
+            "offsetX": 15.15527950310559,
+            "offsetY": 24.0
           }
         },
         {
@@ -985,7 +2131,7 @@
         },
         {
           "image": "edge-sequence-v5.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 47,
@@ -994,6 +2140,158 @@
           },
           "edgeAnchorX": 0.23828125,
           "edgeAnchorY": 0.6574153058737509
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 52,
+            "y": 23,
+            "width": 142,
+            "height": 351
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9230769230769231,
+            "offsetX": 62.46153846153845,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.28365384615384615,
+          "edgeAnchorY": 0.7165529659614834
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 53,
+            "y": 400,
+            "width": 158,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 57.48760330578513,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.26291322314049587,
+          "edgeAnchorY": 0.7049460700060725
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 547,
+            "y": 399,
+            "width": 177,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 49.22527472527473,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.23053313873626374,
+          "edgeAnchorY": 0.7036761405887346
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 54,
+            "y": 781,
+            "width": 184,
+            "height": 365
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8876712328767123,
+            "offsetX": 46.33424657534246,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.21566780821917808,
+          "edgeAnchorY": 0.6992422354376858
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 302,
+            "y": 783,
+            "width": 190,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 43.20661157024793,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.2071280991735537,
+          "edgeAnchorY": 0.6923845703536258
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 546,
+            "y": 782,
+            "width": 199,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 39.43406593406594,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.1922862293956044,
+          "edgeAnchorY": 0.7144415762543551
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 50,
+            "y": 1168,
+            "width": 198,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 40.836956521739125,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.20078974184782605,
+          "edgeAnchorY": 0.6893947093538949
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 544,
+            "y": 1168,
+            "width": 216,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 32.91304347826086,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.16983695652173908,
+          "edgeAnchorY": 0.6918592431836349
         },
         {
           "image": "edge-sequence-v5.png",
@@ -1093,7 +2391,7 @@
         },
         {
           "image": "edge-sequence-v5.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 47,
@@ -1102,6 +2400,158 @@
           },
           "edgeAnchorX": 0.23046875,
           "edgeAnchorY": 0.6094183065410199
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 544,
+            "y": 1168,
+            "width": 216,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 32.91304347826086,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.16983695652173908,
+          "edgeAnchorY": 0.6918592431836349
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 50,
+            "y": 1168,
+            "width": 198,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 40.836956521739125,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.20078974184782605,
+          "edgeAnchorY": 0.6893947093538949
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 546,
+            "y": 782,
+            "width": 199,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 39.43406593406594,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.1922862293956044,
+          "edgeAnchorY": 0.7144415762543551
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 302,
+            "y": 783,
+            "width": 190,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 43.20661157024793,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.2071280991735537,
+          "edgeAnchorY": 0.6923845703536258
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 54,
+            "y": 781,
+            "width": 184,
+            "height": 365
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8876712328767123,
+            "offsetX": 46.33424657534246,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.21566780821917808,
+          "edgeAnchorY": 0.6992422354376858
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 547,
+            "y": 399,
+            "width": 177,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 49.22527472527473,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.23053313873626374,
+          "edgeAnchorY": 0.7036761405887346
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 53,
+            "y": 400,
+            "width": 158,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 57.48760330578513,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.26291322314049587,
+          "edgeAnchorY": 0.7049460700060725
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 52,
+            "y": 23,
+            "width": 142,
+            "height": 351
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9230769230769231,
+            "offsetX": 62.46153846153845,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.28365384615384615,
+          "edgeAnchorY": 0.7165529659614834
         },
         {
           "image": "edge-sequence-v5.png",
@@ -1170,7 +2620,7 @@
         },
         {
           "image": "edge-sequence-v5.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 47,
@@ -1179,6 +2629,158 @@
           },
           "edgeAnchorX": 0.23828125,
           "edgeAnchorY": 0.6574153058737509
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 52,
+            "y": 23,
+            "width": 142,
+            "height": 351
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9230769230769231,
+            "offsetX": 62.46153846153845,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.28365384615384615,
+          "edgeAnchorY": 0.7165529659614834
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 53,
+            "y": 400,
+            "width": 158,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 57.48760330578513,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.26291322314049587,
+          "edgeAnchorY": 0.7049460700060725
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 547,
+            "y": 399,
+            "width": 177,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 49.22527472527473,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.23053313873626374,
+          "edgeAnchorY": 0.7036761405887346
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 54,
+            "y": 781,
+            "width": 184,
+            "height": 365
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8876712328767123,
+            "offsetX": 46.33424657534246,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.21566780821917808,
+          "edgeAnchorY": 0.6992422354376858
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 302,
+            "y": 783,
+            "width": 190,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 43.20661157024793,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.2071280991735537,
+          "edgeAnchorY": 0.6923845703536258
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 546,
+            "y": 782,
+            "width": 199,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 39.43406593406594,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.1922862293956044,
+          "edgeAnchorY": 0.7144415762543551
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 50,
+            "y": 1168,
+            "width": 198,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 40.836956521739125,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.20078974184782605,
+          "edgeAnchorY": 0.6893947093538949
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 544,
+            "y": 1168,
+            "width": 216,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 32.91304347826086,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.16983695652173908,
+          "edgeAnchorY": 0.6918592431836349
         },
         {
           "image": "edge-sequence-v5.png",
@@ -1278,7 +2880,7 @@
         },
         {
           "image": "edge-sequence-v5.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 47,
@@ -1287,6 +2889,158 @@
           },
           "edgeAnchorX": 0.23046875,
           "edgeAnchorY": 0.6094183065410199
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 544,
+            "y": 1168,
+            "width": 216,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 32.91304347826086,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.16983695652173908,
+          "edgeAnchorY": 0.6918592431836349
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 50,
+            "y": 1168,
+            "width": 198,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 40.836956521739125,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.20078974184782605,
+          "edgeAnchorY": 0.6893947093538949
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 546,
+            "y": 782,
+            "width": 199,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 39.43406593406594,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.1922862293956044,
+          "edgeAnchorY": 0.7144415762543551
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 302,
+            "y": 783,
+            "width": 190,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 43.20661157024793,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.2071280991735537,
+          "edgeAnchorY": 0.6923845703536258
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 54,
+            "y": 781,
+            "width": 184,
+            "height": 365
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8876712328767123,
+            "offsetX": 46.33424657534246,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.21566780821917808,
+          "edgeAnchorY": 0.6992422354376858
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 547,
+            "y": 399,
+            "width": 177,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 49.22527472527473,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.23053313873626374,
+          "edgeAnchorY": 0.7036761405887346
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 53,
+            "y": 400,
+            "width": 158,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 57.48760330578513,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.26291322314049587,
+          "edgeAnchorY": 0.7049460700060725
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 52,
+            "y": 23,
+            "width": 142,
+            "height": 351
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9230769230769231,
+            "offsetX": 62.46153846153845,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.28365384615384615,
+          "edgeAnchorY": 0.7165529659614834
         },
         {
           "image": "edge-sequence-v5.png",
@@ -1355,7 +3109,7 @@
         },
         {
           "image": "edge-sequence-v5.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 47,
@@ -1364,6 +3118,158 @@
           },
           "edgeAnchorX": 0.23828125,
           "edgeAnchorY": 0.6574153058737509
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 52,
+            "y": 23,
+            "width": 142,
+            "height": 351
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9230769230769231,
+            "offsetX": 62.46153846153845,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.28365384615384615,
+          "edgeAnchorY": 0.7165529659614834
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 53,
+            "y": 400,
+            "width": 158,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 57.48760330578513,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.26291322314049587,
+          "edgeAnchorY": 0.7049460700060725
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 547,
+            "y": 399,
+            "width": 177,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 49.22527472527473,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.23053313873626374,
+          "edgeAnchorY": 0.7036761405887346
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 54,
+            "y": 781,
+            "width": 184,
+            "height": 365
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8876712328767123,
+            "offsetX": 46.33424657534246,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.21566780821917808,
+          "edgeAnchorY": 0.6992422354376858
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 302,
+            "y": 783,
+            "width": 190,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 43.20661157024793,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.2071280991735537,
+          "edgeAnchorY": 0.6923845703536258
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 546,
+            "y": 782,
+            "width": 199,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 39.43406593406594,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.1922862293956044,
+          "edgeAnchorY": 0.7144415762543551
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 50,
+            "y": 1168,
+            "width": 198,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 40.836956521739125,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.20078974184782605,
+          "edgeAnchorY": 0.6893947093538949
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 544,
+            "y": 1168,
+            "width": 216,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 32.91304347826086,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.16983695652173908,
+          "edgeAnchorY": 0.6918592431836349
         },
         {
           "image": "edge-sequence-v5.png",
@@ -1463,7 +3369,7 @@
         },
         {
           "image": "edge-sequence-v5.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 47,
@@ -1472,6 +3378,158 @@
           },
           "edgeAnchorX": 0.23046875,
           "edgeAnchorY": 0.6094183065410199
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 544,
+            "y": 1168,
+            "width": 216,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 32.91304347826086,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.16983695652173908,
+          "edgeAnchorY": 0.6918592431836349
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 50,
+            "y": 1168,
+            "width": 198,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 40.836956521739125,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.20078974184782605,
+          "edgeAnchorY": 0.6893947093538949
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 546,
+            "y": 782,
+            "width": 199,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 39.43406593406594,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.1922862293956044,
+          "edgeAnchorY": 0.7144415762543551
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 302,
+            "y": 783,
+            "width": 190,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 43.20661157024793,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.2071280991735537,
+          "edgeAnchorY": 0.6923845703536258
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 54,
+            "y": 781,
+            "width": 184,
+            "height": 365
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8876712328767123,
+            "offsetX": 46.33424657534246,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.21566780821917808,
+          "edgeAnchorY": 0.6992422354376858
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 547,
+            "y": 399,
+            "width": 177,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 49.22527472527473,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.23053313873626374,
+          "edgeAnchorY": 0.7036761405887346
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 53,
+            "y": 400,
+            "width": 158,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 57.48760330578513,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.26291322314049587,
+          "edgeAnchorY": 0.7049460700060725
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 52,
+            "y": 23,
+            "width": 142,
+            "height": 351
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9230769230769231,
+            "offsetX": 62.46153846153845,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.28365384615384615,
+          "edgeAnchorY": 0.7165529659614834
         },
         {
           "image": "edge-sequence-v5.png",
@@ -1540,7 +3598,7 @@
         },
         {
           "image": "edge-sequence-v5.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 47,
@@ -1549,6 +3607,158 @@
           },
           "edgeAnchorX": 0.23828125,
           "edgeAnchorY": 0.6574153058737509
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 52,
+            "y": 23,
+            "width": 142,
+            "height": 351
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9230769230769231,
+            "offsetX": 62.46153846153845,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.28365384615384615,
+          "edgeAnchorY": 0.7165529659614834
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 53,
+            "y": 400,
+            "width": 158,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 57.48760330578513,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.26291322314049587,
+          "edgeAnchorY": 0.7049460700060725
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 547,
+            "y": 399,
+            "width": 177,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 49.22527472527473,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.23053313873626374,
+          "edgeAnchorY": 0.7036761405887346
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 54,
+            "y": 781,
+            "width": 184,
+            "height": 365
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8876712328767123,
+            "offsetX": 46.33424657534246,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.21566780821917808,
+          "edgeAnchorY": 0.6992422354376858
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 302,
+            "y": 783,
+            "width": 190,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 43.20661157024793,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.2071280991735537,
+          "edgeAnchorY": 0.6923845703536258
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 546,
+            "y": 782,
+            "width": 199,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 39.43406593406594,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.1922862293956044,
+          "edgeAnchorY": 0.7144415762543551
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 50,
+            "y": 1168,
+            "width": 198,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 40.836956521739125,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.20078974184782605,
+          "edgeAnchorY": 0.6893947093538949
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 544,
+            "y": 1168,
+            "width": 216,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 32.91304347826086,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.16983695652173908,
+          "edgeAnchorY": 0.6918592431836349
         },
         {
           "image": "edge-sequence-v5.png",
@@ -1672,7 +3882,7 @@
         },
         {
           "image": "edge-sequence-v5.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 47,
@@ -1681,6 +3891,158 @@
           },
           "edgeAnchorX": 0.23046875,
           "edgeAnchorY": 0.6094183065410199
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 544,
+            "y": 1168,
+            "width": 216,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 32.91304347826086,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.16983695652173908,
+          "edgeAnchorY": 0.6918592431836349
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 50,
+            "y": 1168,
+            "width": 198,
+            "height": 368
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8804347826086957,
+            "offsetX": 40.836956521739125,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.20078974184782605,
+          "edgeAnchorY": 0.6893947093538949
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 546,
+            "y": 782,
+            "width": 199,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 39.43406593406594,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.1922862293956044,
+          "edgeAnchorY": 0.7144415762543551
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 302,
+            "y": 783,
+            "width": 190,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 43.20661157024793,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.2071280991735537,
+          "edgeAnchorY": 0.6923845703536258
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 54,
+            "y": 781,
+            "width": 184,
+            "height": 365
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8876712328767123,
+            "offsetX": 46.33424657534246,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.21566780821917808,
+          "edgeAnchorY": 0.6992422354376858
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 547,
+            "y": 399,
+            "width": 177,
+            "height": 364
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8901098901098901,
+            "offsetX": 49.22527472527473,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.23053313873626374,
+          "edgeAnchorY": 0.7036761405887346
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 53,
+            "y": 400,
+            "width": 158,
+            "height": 363
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8925619834710744,
+            "offsetX": 57.48760330578513,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.26291322314049587,
+          "edgeAnchorY": 0.7049460700060725
+        },
+        {
+          "image": "side-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 52,
+            "y": 23,
+            "width": 142,
+            "height": 351
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9230769230769231,
+            "offsetX": 62.46153846153845,
+            "offsetY": 14
+          },
+          "edgeAnchorX": 0.28365384615384615,
+          "edgeAnchorY": 0.7165529659614834
         },
         {
           "image": "edge-sequence-v5.png",
@@ -1741,7 +4103,7 @@
       "frames": [
         {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 65,
@@ -1751,8 +4113,26 @@
           "edgeAnchorY": 0.9403409090909091
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 18,
+            "y": 114,
+            "width": 230,
+            "height": 304
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8980263157894737,
+            "offsetX": 24.726973684210535,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380793959330144
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 65,
@@ -1762,8 +4142,26 @@
           "edgeAnchorY": 0.9403409090909091
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 275,
+            "y": 117,
+            "width": 229,
+            "height": 300
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.91,
+            "offsetX": 23.804999999999993,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380113636363636
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 65,
@@ -1773,8 +4171,26 @@
           "edgeAnchorY": 0.9403409090909091
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 523,
+            "y": 117,
+            "width": 237,
+            "height": 301
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9069767441860465,
+            "offsetX": 20.523255813953497,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380285412262155
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 65,
@@ -1784,8 +4200,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 117,
+            "width": 236,
+            "height": 301
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9069767441860465,
+            "offsetX": 20.976744186046517,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380285412262155
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 422,
@@ -1795,8 +4229,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 21,
+            "y": 462,
+            "width": 227,
+            "height": 307
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8892508143322475,
+            "offsetX": 27.070032573289907,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9381292567367485
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 422,
@@ -1806,8 +4258,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 274,
+            "y": 463,
+            "width": 230,
+            "height": 306
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8921568627450981,
+            "offsetX": 25.401960784313715,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9381127450980393
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 422,
@@ -1817,6 +4287,24 @@
           "edgeAnchorY": 0.9460227272727273
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 524,
+            "y": 462,
+            "width": 236,
+            "height": 308
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8863636363636364,
+            "offsetX": 23.409090909090907,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.935627582644628
+        },
+        {
           "image": "bottom-sequence-v6.png",
           "durationMs": 80,
           "region": {
@@ -1829,7 +4317,7 @@
         },
         {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 422,
@@ -1839,8 +4327,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 117,
+            "width": 236,
+            "height": 301
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9069767441860465,
+            "offsetX": 20.976744186046517,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380285412262155
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 65,
@@ -1850,8 +4356,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 523,
+            "y": 117,
+            "width": 237,
+            "height": 301
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9069767441860465,
+            "offsetX": 20.523255813953497,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380285412262155
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 65,
@@ -1861,8 +4385,26 @@
           "edgeAnchorY": 0.9403409090909091
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 275,
+            "y": 117,
+            "width": 229,
+            "height": 300
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.91,
+            "offsetX": 23.804999999999993,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380113636363636
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 65,
@@ -1870,6 +4412,24 @@
             "height": 352
           },
           "edgeAnchorY": 0.9403409090909091
+        },
+        {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 18,
+            "y": 114,
+            "width": 230,
+            "height": 304
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8980263157894737,
+            "offsetX": 24.726973684210535,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380793959330144
         },
         {
           "image": "bottom-sequence-v6.png",
@@ -1889,7 +4449,7 @@
       "frames": [
         {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 65,
@@ -1899,8 +4459,26 @@
           "edgeAnchorY": 0.9403409090909091
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 18,
+            "y": 114,
+            "width": 230,
+            "height": 304
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8980263157894737,
+            "offsetX": 24.726973684210535,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380793959330144
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 65,
@@ -1910,8 +4488,26 @@
           "edgeAnchorY": 0.9403409090909091
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 275,
+            "y": 117,
+            "width": 229,
+            "height": 300
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.91,
+            "offsetX": 23.804999999999993,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380113636363636
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 65,
@@ -1921,8 +4517,26 @@
           "edgeAnchorY": 0.9403409090909091
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 24,
+            "y": 815,
+            "width": 224,
+            "height": 291
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9381443298969072,
+            "offsetX": 22.927835051546396,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9378514526710403
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 776,
@@ -1932,8 +4546,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 264,
+            "y": 813,
+            "width": 240,
+            "height": 293
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.931740614334471,
+            "offsetX": 16.191126279863482,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9378878374185541
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 776,
@@ -1943,8 +4575,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 264,
+            "y": 813,
+            "width": 240,
+            "height": 293
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.931740614334471,
+            "offsetX": 16.191126279863482,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9378878374185541
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 776,
@@ -1954,8 +4604,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 24,
+            "y": 815,
+            "width": 224,
+            "height": 291
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9381443298969072,
+            "offsetX": 22.927835051546396,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9378514526710403
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 65,
@@ -1965,8 +4633,26 @@
           "edgeAnchorY": 0.9403409090909091
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 526,
+            "y": 808,
+            "width": 234,
+            "height": 298
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9161073825503355,
+            "offsetX": 20.81543624161074,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9379766625991458
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 776,
@@ -1976,8 +4662,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 810,
+            "width": 237,
+            "height": 297
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9191919191919192,
+            "offsetX": 19.075757575757578,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9353477961432507
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 776,
@@ -1987,8 +4691,26 @@
           "edgeAnchorY": 0.9460227272727273
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 810,
+            "width": 237,
+            "height": 297
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9191919191919192,
+            "offsetX": 19.075757575757578,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9353477961432507
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 776,
@@ -1998,8 +4720,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 526,
+            "y": 808,
+            "width": 234,
+            "height": 298
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9161073825503355,
+            "offsetX": 20.81543624161074,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9379766625991458
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 65,
@@ -2009,8 +4749,26 @@
           "edgeAnchorY": 0.9403409090909091
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 275,
+            "y": 117,
+            "width": 229,
+            "height": 300
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.91,
+            "offsetX": 23.804999999999993,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380113636363636
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 65,
@@ -2018,6 +4776,24 @@
             "height": 352
           },
           "edgeAnchorY": 0.9403409090909091
+        },
+        {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 18,
+            "y": 114,
+            "width": 230,
+            "height": 304
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8980263157894737,
+            "offsetX": 24.726973684210535,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380793959330144
         },
         {
           "image": "bottom-sequence-v6.png",
@@ -2037,7 +4813,7 @@
       "frames": [
         {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 65,
@@ -2047,8 +4823,26 @@
           "edgeAnchorY": 0.9403409090909091
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 462,
+            "width": 236,
+            "height": 307
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8892508143322475,
+            "offsetX": 23.068403908794792,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9381292567367485
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 422,
@@ -2058,8 +4852,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 23,
+            "y": 1153,
+            "width": 225,
+            "height": 304
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8980263157894737,
+            "offsetX": 26.972039473684205,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380793959330144
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 1119,
@@ -2069,8 +4881,26 @@
           "edgeAnchorY": 0.9460227272727273
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 264,
+            "y": 1153,
+            "width": 240,
+            "height": 304
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8980263157894737,
+            "offsetX": 20.236842105263165,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380793959330144
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 1119,
@@ -2080,8 +4910,26 @@
           "edgeAnchorY": 0.9460227272727273
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 264,
+            "y": 1153,
+            "width": 240,
+            "height": 304
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8980263157894737,
+            "offsetX": 20.236842105263165,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380793959330144
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 1119,
@@ -2091,8 +4939,26 @@
           "edgeAnchorY": 0.9460227272727273
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 520,
+            "y": 1152,
+            "width": 239,
+            "height": 305
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8950819672131147,
+            "offsetX": 21.037704918032787,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380961251862892
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 1119,
@@ -2102,8 +4968,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 1149,
+            "width": 237,
+            "height": 307
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8892508143322475,
+            "offsetX": 22.623778501628664,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9381292567367485
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 1119,
@@ -2113,8 +4997,26 @@
           "edgeAnchorY": 0.9460227272727273
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 1149,
+            "width": 237,
+            "height": 307
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8892508143322475,
+            "offsetX": 22.623778501628664,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9381292567367485
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 1119,
@@ -2124,8 +5026,26 @@
           "edgeAnchorY": 0.9431818181818182
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 520,
+            "y": 1152,
+            "width": 239,
+            "height": 305
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8950819672131147,
+            "offsetX": 21.037704918032787,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380961251862892
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 1119,
@@ -2135,8 +5055,26 @@
           "edgeAnchorY": 0.9460227272727273
         },
         {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 23,
+            "y": 1153,
+            "width": 225,
+            "height": 304
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8980263157894737,
+            "offsetX": 26.972039473684205,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9380793959330144
+        },
+        {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 422,
@@ -2144,6 +5082,24 @@
             "height": 352
           },
           "edgeAnchorY": 0.9431818181818182
+        },
+        {
+          "image": "bottom-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 462,
+            "width": 236,
+            "height": 307
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.8892508143322475,
+            "offsetX": 23.068403908794792,
+            "offsetY": 59.0
+          },
+          "edgeAnchorY": 0.9381292567367485
         },
         {
           "image": "bottom-sequence-v6.png",
@@ -2163,7 +5119,7 @@
       "frames": [
         {
           "image": "top-sequence-v4.png",
-          "durationMs": 800,
+          "durationMs": 760,
           "region": {
             "x": 0,
             "y": 70,
@@ -2174,8 +5130,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 19,
+            "y": 27,
+            "width": 229,
+            "height": 350
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9314285714285714,
+            "offsetX": 21.35142857142857,
+            "offsetY": 17.457142857142856
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 800,
+          "durationMs": 760,
           "region": {
             "x": 256,
             "y": 70,
@@ -2186,8 +5161,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 272,
+            "y": 28,
+            "width": 228,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9340974212034384,
+            "offsetX": 21.512893982808023,
+            "offsetY": 18.684813753581665
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 800,
+          "durationMs": 760,
           "region": {
             "x": 512,
             "y": 70,
@@ -2198,8 +5192,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 777,
+            "y": 28,
+            "width": 227,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9340974212034384,
+            "offsetX": 21.97994269340974,
+            "offsetY": 17.750716332378232
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 800,
+          "durationMs": 760,
           "region": {
             "x": 768,
             "y": 70,
@@ -2208,6 +5221,25 @@
           },
           "swingSeatAnchorY": 0.6875,
           "edgeAnchorY": 0.0
+        },
+        {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 779,
+            "y": 401,
+            "width": 226,
+            "height": 346
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.94,
+            "offsetX": 21.78,
+            "offsetY": 19.22
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
         }
       ]
     },
@@ -2216,7 +5248,7 @@
       "frames": [
         {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 70,
@@ -2227,8 +5259,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 19,
+            "y": 27,
+            "width": 229,
+            "height": 350
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9314285714285714,
+            "offsetX": 21.35142857142857,
+            "offsetY": 17.457142857142856
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 70,
@@ -2239,8 +5290,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 272,
+            "y": 28,
+            "width": 228,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9340974212034384,
+            "offsetX": 21.512893982808023,
+            "offsetY": 18.684813753581665
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 70,
@@ -2251,8 +5321,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 777,
+            "y": 28,
+            "width": 227,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9340974212034384,
+            "offsetX": 21.97994269340974,
+            "offsetY": 17.750716332378232
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 70,
@@ -2263,8 +5352,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 526,
+            "y": 28,
+            "width": 228,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9298245614035088,
+            "offsetX": 22.0,
+            "offsetY": 19.491228070175424
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 434,
@@ -2275,8 +5383,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 19,
+            "y": 400,
+            "width": 229,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9394812680115274,
+            "offsetX": 20.429394812680115,
+            "offsetY": 18.40345821325647
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 434,
@@ -2287,8 +5414,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 272,
+            "y": 400,
+            "width": 228,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9394812680115274,
+            "offsetX": 20.899135446685875,
+            "offsetY": 18.282420749279538
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 434,
@@ -2299,8 +5445,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 526,
+            "y": 400,
+            "width": 226,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9394812680115274,
+            "offsetX": 21.838616714697395,
+            "offsetY": 18.221902017291058
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 434,
@@ -2311,8 +5476,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 526,
+            "y": 400,
+            "width": 226,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9394812680115274,
+            "offsetX": 21.838616714697395,
+            "offsetY": 18.221902017291058
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 434,
@@ -2323,8 +5507,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 272,
+            "y": 400,
+            "width": 228,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9394812680115274,
+            "offsetX": 20.899135446685875,
+            "offsetY": 18.282420749279538
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 434,
@@ -2335,8 +5538,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 19,
+            "y": 400,
+            "width": 229,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9394812680115274,
+            "offsetX": 20.429394812680115,
+            "offsetY": 18.40345821325647
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 434,
@@ -2347,8 +5569,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 526,
+            "y": 28,
+            "width": 228,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9298245614035088,
+            "offsetX": 22.0,
+            "offsetY": 19.491228070175424
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 70,
@@ -2359,8 +5600,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 777,
+            "y": 28,
+            "width": 227,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9340974212034384,
+            "offsetX": 21.97994269340974,
+            "offsetY": 17.750716332378232
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 70,
@@ -2371,8 +5631,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 272,
+            "y": 28,
+            "width": 228,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9340974212034384,
+            "offsetX": 21.512893982808023,
+            "offsetY": 18.684813753581665
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 70,
@@ -2381,6 +5660,25 @@
           },
           "swingSeatAnchorY": 0.6875,
           "edgeAnchorY": 0.0
+        },
+        {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 19,
+            "y": 27,
+            "width": 229,
+            "height": 350
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9314285714285714,
+            "offsetX": 21.35142857142857,
+            "offsetY": 17.457142857142856
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
         },
         {
           "image": "top-sequence-v4.png",
@@ -2401,7 +5699,7 @@
       "frames": [
         {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 70,
@@ -2412,8 +5710,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 19,
+            "y": 27,
+            "width": 229,
+            "height": 350
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9314285714285714,
+            "offsetX": 21.35142857142857,
+            "offsetY": 17.457142857142856
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 70,
@@ -2424,8 +5741,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 19,
+            "y": 772,
+            "width": 229,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9394812680115274,
+            "offsetX": 20.429394812680115,
+            "offsetY": 19.34293948126799
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 808,
@@ -2436,8 +5772,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 273,
+            "y": 772,
+            "width": 227,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9394812680115274,
+            "offsetX": 21.368876080691635,
+            "offsetY": 19.221902017291058
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 808,
@@ -2448,8 +5803,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 273,
+            "y": 772,
+            "width": 227,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9394812680115274,
+            "offsetX": 21.368876080691635,
+            "offsetY": 19.221902017291058
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 808,
@@ -2460,8 +5834,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 19,
+            "y": 772,
+            "width": 229,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9394812680115274,
+            "offsetX": 20.429394812680115,
+            "offsetY": 19.34293948126799
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 70,
@@ -2472,8 +5865,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 272,
+            "y": 28,
+            "width": 228,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9340974212034384,
+            "offsetX": 21.512893982808023,
+            "offsetY": 18.684813753581665
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 70,
@@ -2484,8 +5896,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 527,
+            "y": 770,
+            "width": 227,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.905982905982906,
+            "offsetX": 25.17094017094017,
+            "offsetY": 24.81196581196582
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 808,
@@ -2496,8 +5927,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 779,
+            "y": 771,
+            "width": 227,
+            "height": 348
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9367816091954023,
+            "offsetX": 21.67528735632183,
+            "offsetY": 18.919540229885058
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 808,
@@ -2508,8 +5958,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 779,
+            "y": 771,
+            "width": 227,
+            "height": 348
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9367816091954023,
+            "offsetX": 21.67528735632183,
+            "offsetY": 18.919540229885058
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 808,
@@ -2520,8 +5989,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 527,
+            "y": 770,
+            "width": 227,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.905982905982906,
+            "offsetX": 25.17094017094017,
+            "offsetY": 24.81196581196582
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 70,
@@ -2532,8 +6020,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 272,
+            "y": 28,
+            "width": 228,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9340974212034384,
+            "offsetX": 21.512893982808023,
+            "offsetY": 18.684813753581665
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 70,
@@ -2542,6 +6049,25 @@
           },
           "swingSeatAnchorY": 0.6875,
           "edgeAnchorY": 0.0
+        },
+        {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 19,
+            "y": 27,
+            "width": 229,
+            "height": 350
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9314285714285714,
+            "offsetX": 21.35142857142857,
+            "offsetY": 17.457142857142856
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
         },
         {
           "image": "top-sequence-v4.png",
@@ -2562,7 +6088,7 @@
       "frames": [
         {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 70,
@@ -2573,8 +6099,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 19,
+            "y": 27,
+            "width": 229,
+            "height": 350
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9314285714285714,
+            "offsetX": 21.35142857142857,
+            "offsetY": 17.457142857142856
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 70,
@@ -2585,8 +6130,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 20,
+            "y": 1135,
+            "width": 228,
+            "height": 351
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9287749287749287,
+            "offsetX": 22.119658119658126,
+            "offsetY": 18.165242165242176
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 1161,
@@ -2597,8 +6161,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 273,
+            "y": 1137,
+            "width": 231,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9340974212034384,
+            "offsetX": 20.11174785100286,
+            "offsetY": 18.684813753581665
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 1161,
@@ -2609,8 +6192,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 526,
+            "y": 1139,
+            "width": 228,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9137931034482759,
+            "offsetX": 23.82758620689654,
+            "offsetY": 24.913793103448256
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 1161,
@@ -2621,8 +6223,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 1139,
+            "width": 229,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9394812680115274,
+            "offsetX": 20.429394812680115,
+            "offsetY": 19.34293948126799
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 768,
             "y": 1161,
@@ -2633,8 +6254,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 776,
+            "y": 1139,
+            "width": 229,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9394812680115274,
+            "offsetX": 20.429394812680115,
+            "offsetY": 19.34293948126799
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 512,
             "y": 1161,
@@ -2645,8 +6285,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 526,
+            "y": 1139,
+            "width": 228,
+            "height": 347
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9137931034482759,
+            "offsetX": 23.82758620689654,
+            "offsetY": 24.913793103448256
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 1161,
@@ -2657,8 +6316,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 273,
+            "y": 1137,
+            "width": 231,
+            "height": 349
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9340974212034384,
+            "offsetX": 20.11174785100286,
+            "offsetY": 18.684813753581665
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 0,
             "y": 1161,
@@ -2669,8 +6347,27 @@
           "edgeAnchorY": 0.0
         },
         {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 20,
+            "y": 1135,
+            "width": 228,
+            "height": 351
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9287749287749287,
+            "offsetX": 22.119658119658126,
+            "offsetY": 18.165242165242176
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
+        },
+        {
           "image": "top-sequence-v4.png",
-          "durationMs": 80,
+          "durationMs": 40,
           "region": {
             "x": 256,
             "y": 70,
@@ -2679,6 +6376,25 @@
           },
           "swingSeatAnchorY": 0.6875,
           "edgeAnchorY": 0.0
+        },
+        {
+          "image": "top-inbetweens-v1.png",
+          "durationMs": 40,
+          "region": {
+            "x": 19,
+            "y": 27,
+            "width": 229,
+            "height": 350
+          },
+          "canvas": {
+            "width": 256,
+            "height": 352,
+            "scale": 0.9314285714285714,
+            "offsetX": 21.35142857142857,
+            "offsetY": 17.457142857142856
+          },
+          "swingSeatAnchorY": 0.6875,
+          "edgeAnchorY": 0
         },
         {
           "image": "top-sequence-v4.png",
@@ -2699,7 +6415,7 @@
       "frames": [
         {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 150,
           "region": {
             "x": 8,
             "y": 755,
@@ -2708,8 +6424,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 50,
+          "region": {
+            "x": 787,
+            "y": 429,
+            "width": 209,
+            "height": 327
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9785932721712538,
+            "offsetX": 17.73700305810398,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 50,
           "region": {
             "x": 776,
             "y": 410,
@@ -2718,8 +6451,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 50,
+          "region": {
+            "x": 535,
+            "y": 428,
+            "width": 212,
+            "height": 328
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.975609756097561,
+            "offsetX": 16.585365853658544,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 50,
           "region": {
             "x": 520,
             "y": 410,
@@ -2728,8 +6478,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 50,
+          "region": {
+            "x": 282,
+            "y": 428,
+            "width": 211,
+            "height": 328
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.975609756097561,
+            "offsetX": 17.07317073170732,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 50,
           "region": {
             "x": 264,
             "y": 410,
@@ -2738,8 +6505,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 50,
+          "region": {
+            "x": 29,
+            "y": 428,
+            "width": 211,
+            "height": 328
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.975609756097561,
+            "offsetX": 17.07317073170732,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 50,
           "region": {
             "x": 8,
             "y": 410,
@@ -2748,8 +6532,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 50,
+          "region": {
+            "x": 787,
+            "y": 75,
+            "width": 209,
+            "height": 329
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9726443768996961,
+            "offsetX": 18.358662613981764,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 50,
           "region": {
             "x": 776,
             "y": 56,
@@ -2758,8 +6559,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 50,
+          "region": {
+            "x": 534,
+            "y": 68,
+            "width": 221,
+            "height": 336
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9523809523809523,
+            "offsetX": 14.761904761904773,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 50,
           "region": {
             "x": 520,
             "y": 56,
@@ -2768,8 +6586,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 50,
+          "region": {
+            "x": 280,
+            "y": 67,
+            "width": 224,
+            "height": 337
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9495548961424333,
+            "offsetX": 13.649851632047472,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 50,
           "region": {
             "x": 264,
             "y": 56,
@@ -2778,8 +6613,25 @@
           }
         },
         {
+          "image": "throne-inbetweens-v1.png",
+          "durationMs": 50,
+          "region": {
+            "x": 26,
+            "y": 69,
+            "width": 222,
+            "height": 335
+          },
+          "canvas": {
+            "width": 240,
+            "height": 360,
+            "scale": 0.9552238805970149,
+            "offsetX": 13.97014925373135,
+            "offsetY": 24.0
+          }
+        },
+        {
           "image": "throne-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 50,
           "region": {
             "x": 8,
             "y": 56,
@@ -2789,7 +6641,7 @@
         },
         {
           "image": "standing-sequence-v4.png",
-          "durationMs": 100,
+          "durationMs": 50,
           "region": {
             "x": 8,
             "y": 40,

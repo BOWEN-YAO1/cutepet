@@ -13,6 +13,7 @@ internal static class CharacterPackVerification
 {
     public static void Run(string directory, Action<bool, string> check)
     {
+        FrameCanvasVerification.Run(check);
         var area = Path.Combine(directory, "character-pack-tests");
         Directory.CreateDirectory(area);
         var library = new CharacterLibrary(Path.Combine(area, "installed"));
@@ -83,9 +84,9 @@ internal static class CharacterPackVerification
         configBytes.CopyTo(paddedConfig,0);
         using(var configStream=new MemoryStream(paddedConfig))
             check(CharacterPackLoader.Load(configStream,_=>new MemoryStream(imageBytes),false).Id==animated.Id,
-                "a valid manifest at the exact 128 KiB boundary loads");
+                "a valid manifest at the exact 256 KiB boundary loads");
         Reject(()=>CharacterPackLoader.Load(new MemoryStream(paddedConfig.Concat(new byte[]{32}).ToArray()),
-            _=>new MemoryStream(imageBytes),false),"manifest rejects one byte beyond 128 KiB before parsing");
+            _=>new MemoryStream(imageBytes),false),"manifest rejects one byte beyond 256 KiB before parsing");
         player.Configure(animatedPack);
         var initial = player.Image;
         player.Advance(TimeSpan.FromMilliseconds(130));
@@ -147,8 +148,11 @@ internal static class CharacterPackVerification
             && edgeRoundTrip.Actions["edge-bottom-peek"].Frames[0].Image == edgeRoundTrip.Actions["edge-bottom-idle"].Frames[0].Image
             && edgeFiles.ContainsKey("bottom-sequence-v6.png") && !edgeFiles.ContainsKey("edge-bottom-v1.png"),
             "bottom atlas responses export and import with shared cached views instead of old body-stretch sprites");
-        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 240,
-            "expanded sequences stay within the bounded 384-reference package limit");
+        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 445,
+            "expanded sequences stay within the bounded 768-reference package limit");
+        check(edgeRoundTrip.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)
+            .SequenceEqual(tianyi.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)),
+            "source crops and canvas registration survive real export and import");
         foreach (var response in EdgeActions.TopResponses.Skip(1))
         {
             var orphan = tianyi.Manifest with {Id="top-orphan",Actions=new() {
@@ -184,10 +188,11 @@ internal static class CharacterPackVerification
         Reject(()=>other.Import(Zip("top-anchor",badTopAnchor,edgeFiles)),"top virtual suspension anchor remains in the upper half");
         var tooMany=new CharacterManifest {Id="frame-limit",Name="帧数边界测试",Actions=new() {
             ["idle"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences+1).Select(_=>("idle.png",40)).ToArray())}};
-        Reject(()=>other.Import(Zip("frame-limit",tooMany,new() { ["idle.png"]=imageBytes })),"384 reference package cap rejects excess even when artwork is shared");
+        Reject(()=>other.Import(Zip("frame-limit",tooMany,new() { ["idle.png"]=imageBytes })),"768 reference package cap rejects excess even when artwork is shared");
         var atLimit = tooMany with { Id="frame-at-limit", Actions=new() {
-            ["idle"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences).Select(_=>("idle.png",40)).ToArray())}};
-        check(other.Import(Zip("frame-at-limit",atLimit,new() { ["idle.png"]=imageBytes })).Idle.Frames.Count==CharacterPackLoader.MaxFrameReferences,
+            ["idle"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences/2).Select(_=>("idle.png",40)).ToArray()),
+            ["low"]=Clip(true,Enumerable.Range(0,CharacterPackLoader.MaxFrameReferences/2).Select(_=>("idle.png",40)).ToArray())}};
+        check(other.Import(Zip("frame-at-limit",atLimit,new() { ["idle.png"]=imageBytes })).Actions.Values.Sum(c=>c.Frames.Count)==CharacterPackLoader.MaxFrameReferences,
             "the exact frame-reference boundary remains loadable");
         var badBottomAnchor=tianyi.Manifest with {Id="bottom-anchor",Actions=new(tianyi.Manifest.Actions)};
         badBottomAnchor.Actions["edge-bottom-idle"]=new() {Loop=true,Frames=new() {
@@ -315,7 +320,7 @@ internal static class CharacterPackVerification
         player.Preview("low");
         check(player.Action == "low", "manager can preview a low clip without an account");
         player.Preview("blink");
-        player.Advance(TimeSpan.FromMilliseconds(200));
+        player.Advance(TimeSpan.FromMilliseconds(tianyi.Actions["blink"].Duration));
         check(player.Action == "idle", "previewing another action clears the previous low preview state");
         var extendedActions = new Dictionary<string, CharacterAction>(animated.Actions)
         {

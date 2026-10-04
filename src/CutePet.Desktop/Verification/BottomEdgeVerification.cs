@@ -19,8 +19,8 @@ internal static class BottomEdgeVerification
         window.CompletePetDrag(area,size,new Point(-1000,area.Bottom-size.Height),1);
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
         var frames=EdgeActions.BottomResponses.SelectMany(a=>window.SelectedCharacter.Actions[a].Frames).Select(f=>f.Image).Distinct().ToArray();
-        check(frames.Length==16 && frames.All(f=>f is CroppedBitmap {IsFrozen:true}),
-            "bottom gestures load sixteen distinct cached anatomical poses");
+        check(frames.Length==32 && frames.All(f=>f.IsFrozen),
+            "bottom gestures load thirty-two registered cached anatomical poses");
         foreach(var sprite in frames)
         {
             var frame=EdgeActions.BottomResponses.SelectMany(a=>window.SelectedCharacter.Actions[a].Frames).First(f=>f.Image==sprite);
@@ -42,14 +42,15 @@ internal static class BottomEdgeVerification
             window.PlayCharacterInteraction();
             check(window.ScreenEdgeResponse==action,"bottom supported responses rotate "+action);
             var seen=new HashSet<BitmapSource>();
-            for(var step=0;step<16;step++)
+            var steps=(int)Math.Ceiling(duration/40);
+            for(var step=0;step<steps;step++)
             {
                 seen.Add((BitmapSource)window.CharacterArt.Source);
                 var capture=VerticalEdgeVerification.Capture(window,ScreenEdge.Bottom,captions[index]);
                 encoder.Frames.Add(BitmapFrame.Create(capture));
-                delays.Add((int)Math.Round(duration/160));
-                if(step is 3 or 8 or 13)samples.Add(capture);
-                window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(duration/16));
+                delays.Add(4);
+                if(step==steps/4||step==steps/2||step==steps*3/4)samples.Add(capture);
+                window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(40,duration-step*40)));
                 var frame=window.CurrentSpriteFrame;
                 var height=Math.Min(window.CharacterArt.Height,window.CharacterArt.Width*frame.Image.PixelHeight/frame.Image.PixelWidth);
                 var top=16+148-window.CharacterArt.Height+(window.CharacterArt.Height-height)/2;
@@ -57,7 +58,7 @@ internal static class BottomEdgeVerification
                     && window.EdgeShift.X==0 && window.EdgeStretch.ScaleY==1 && window.SideEdgeTilt.Angle==0
                     && window.ScreenEdgePeekOffset==0,
                     "bottom pose keeps elbows at the work-area floor without body stretching "+action+step);
-                if(step==7)
+                if(step==steps/2)
                 {
                     window.BeginDetailsMenu();
                     var held=(window.EdgeShift.Y,window.CharacterArt.Source);

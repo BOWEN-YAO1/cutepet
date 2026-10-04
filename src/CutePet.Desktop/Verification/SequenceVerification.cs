@@ -15,8 +15,8 @@ internal static class SequenceVerification
     internal static void Run(CharacterPack pack, string directory, Action<bool,string> check)
     {
         var unique = pack.Actions.Values.SelectMany(c=>c.Frames).DistinctBy(f=>f.Image).ToArray();
-        check(unique.Length==96 && unique.All(f=>f.Image is CroppedBitmap { IsFrozen:true }),
-            "six atlases supply ninety-six genuinely distinct cached poses");
+        check(unique.Length==170 && unique.All(f=>f.Image.IsFrozen),
+            "keyframes plus seventy-four registered insertion poses share frozen caches");
         var hashes=new HashSet<string>();
         foreach(var frame in unique)
         {
@@ -27,7 +27,19 @@ internal static class SequenceVerification
                 && bytes[(rgba.PixelHeight-1)*stride+x*4+3]<200),
                 "registered pose preserves vertical transparent gutters "+hashes.Count);
         }
-        check(hashes.Count==96,"extra poses contain new painted pixels rather than duplicate stills");
+        check(hashes.Count==170,"extra poses contain new painted pixels rather than duplicate stills");
+        check(pack.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null && f.Image.Contains("inbetweens"))
+            .DistinctBy(f=>(f.Image,f.Region,f.Canvas)).Count()==74,
+            "insertion sources have explicit scale and placement registration");
+        check(ReferenceEquals(pack.Actions["greeting"].Frames[0].Image,pack.Idle.Frames[0].Image)
+            && ReferenceEquals(pack.Actions["happy"].Frames[0].Image,pack.Idle.Frames[0].Image),
+            "standing responses enter from the exact shared idle pose");
+        var reveal=pack.Actions["edge-peek"].Frames.Where(f=>f.Image is RenderTargetBitmap).Select(f=>f.Image).ToArray();
+        check(reveal.Length==16 && reveal.Take(8).SequenceEqual(reveal.Skip(8).Reverse()),
+            "shallow shoulder transition uses eight drawn stages and exactly reverses them on return");
+        check(pack.Actions["greeting"].Duration==880 && pack.Actions["conjure"].Duration==1500
+            && pack.Actions["stand"].Duration==1000 && pack.Actions["cloud-idle"].Duration==1260,
+            "extra drawings preserve wave, throne and cruising durations");
         var player=new CharacterAnimation();player.Configure(pack);
         player.Flying=true; var start=player.Image;
         player.Advance(TimeSpan.FromMilliseconds(180));

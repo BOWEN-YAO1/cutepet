@@ -15,7 +15,7 @@ internal sealed class CharacterPresenter
     private readonly MainWindow window;
     private readonly bool verification;
     private readonly DispatcherTimer blink = new() { Interval = TimeSpan.FromSeconds(4) };
-    private readonly DispatcherTimer frameTimer = new() { Interval = TimeSpan.FromMilliseconds(40) };
+    private readonly DispatcherTimer frameTimer = new() { Interval = TimeSpan.FromMilliseconds(20) };
     private readonly Stopwatch animationClock = new();
     private readonly CharacterAnimation characterAnimation = new();
     private readonly BehaviorRhythm rhythm;

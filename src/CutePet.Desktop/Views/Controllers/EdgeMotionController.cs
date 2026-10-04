@@ -168,8 +168,8 @@ internal sealed class EdgeMotionController
         var renderedWidth = Math.Min(width, window.CharacterArt.Height * image.PixelWidth / image.PixelHeight);
         var renderedHeight = Math.Min(window.CharacterArt.Height, width * image.PixelHeight / image.PixelWidth);
         // The package artwork's left canvas edge is the virtual border. Hands may overlap it.
-        var articulated = Attachment.Side is ScreenEdge.Left or ScreenEdge.Right && image is System.Windows.Media.Imaging.CroppedBitmap;
-        var bottomArticulated = Attachment.Side == ScreenEdge.Bottom && image is System.Windows.Media.Imaging.CroppedBitmap;
+        var articulated = Attachment.Side is ScreenEdge.Left or ScreenEdge.Right && window.SelectedCharacter.UsesFrameRegions(BaseAction);
+        var bottomArticulated = Attachment.Side == ScreenEdge.Bottom && window.SelectedCharacter.UsesFrameRegions(BaseAction);
         var current = window.CurrentSpriteFrame;
         var anchorX = articulated ? current.EdgeAnchorX ?? window.SelectedCharacter.Manifest.EdgeAnchorX : window.SelectedCharacter.Manifest.EdgeAnchorX;
         var anchor = (230 - renderedWidth) / 2 + renderedWidth * anchorX;

@@ -1,13 +1,3 @@
-# 天依角色素材（0.39.0）
-
-本版是非官方 AI 同人素材，原角色权利归相关权利人；代码的 GPL v3 不授予原角色权利。原形象来源与权利说明见仓库 THIRD_PARTY_NOTICES.md。参考沿用本项目已有 AI 图，未下载或传入新的官方立绘。
-
-保留 0.38.0 的 96 个姿势，新增六张透明图集，从中接入 74 个区域，总计 170 个姿势、28 个动作、445 次帧引用。内置小猫的四组动作保持。原始 PNG 原样复制，运行时先 region 取帧，再按可选 canvas 在 WPF 对齐尺寸、脚底和支撑点；同区域及登记画布跨动作共用冻结缓存。登记工具只读像素和写配置，不编辑原图。
-
-旧素材完整来源与生成提示词保留在匹配源码的 SOURCE-HISTORY-v038.md、SOURCE-HISTORY-v037.md 及更早档案。角色 ZIP 仅含当前引用图片、此说明和许可。完整补帧提示词附下，同时见 docs/inbetween-prompts.md。
-
-AI 帧间的发丝、衣纹、椅饰、表情仍可能变化；素材哈希不同及程序检查通过不能证明达到逐帧手绘的视觉连续性。
-
 # 天依中间帧生成记录（0.39.0）
 
 日期：2026-10-04。使用内置 image_gen.imagegen，全部 transparent_background=true，无 CLI/API key 回退。六张原始 PNG 原样复制入角色包，各有 16 个图格，从中接入 74 个不同区域；另 22 个图格没有引用。配置中的 canvas 在 WPF 加载时统一大小与落点，不改写源 PNG。生成提示词指定的精确表情、曝光比例不等于生成结果已全部满足，接入以实际图片及保存配置为准。
@@ -103,3 +93,4 @@ These are intermediateanimationframes to insertbetweenolderstillimages, not just
 - exec-61629754-f636-44e6-9eb2-dd8595fc2ff8.png：站立细化尝试改到了另一侧手臂，不适合原挥手顺序，未接入。
 
 这些原始输出留在工具生成目录，不进入运行包。图格登记及相邻帧映射见 tools/register-tianyi-inbetweens.py；使用 --check 可检查保存配置，维护者复现依赖 Pillow，但构建、运行、分发打包不需要。
+

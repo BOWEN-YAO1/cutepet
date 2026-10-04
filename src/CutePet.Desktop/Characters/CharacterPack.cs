@@ -59,9 +59,12 @@ public sealed record CharacterAction
     public List<CharacterActionFrame> Frames { get; init; } = new();
 }
 public sealed record CharacterFrameRegion(int X, int Y, int Width, int Height);
+// Optional registration of a differently sized source crop on the action canvas.
+public sealed record CharacterFrameCanvas(int Width, int Height, double Scale, double OffsetX, double OffsetY);
 public sealed record CharacterActionFrame(string Image, int DurationMs = 180)
 {
     public CharacterFrameRegion? Region { get; init; }
+    public CharacterFrameCanvas? Canvas { get; init; }
     public double? EdgeAnchorX { get; init; }
     public double? EdgeAnchorY { get; init; }
     public double? SwingSeatAnchorY { get; init; }
@@ -91,4 +94,5 @@ internal sealed record CharacterPack(CharacterManifest Manifest, bool BuiltIn,
     public string Id => Manifest.Id;
     public string Name => Manifest.Name;
     public LoadedAction Idle => Actions["idle"];
+    internal bool UsesFrameRegions(string action) => Manifest.Actions[action].Frames[0].Region is not null;
 }

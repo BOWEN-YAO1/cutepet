@@ -21,8 +21,8 @@ internal static class SideEdgeVerification
         var samples = new List<BitmapSource>();
         var labels = new[] { "微笑探头", "缩回再探出", "探头轻摇", "探头点头" };
         var artwork = SideEdgeMotion.Responses.SelectMany(a => window.SelectedCharacter.Actions[a].Frames).DistinctBy(f => f.Image).ToArray();
-        check(artwork.Length == 16 && artwork.All(f => f.Image is CroppedBitmap {IsFrozen: true}),
-            "side gestures use sixteen distinct cached articulated poses");
+        check(artwork.Length == 24 && artwork.All(f => f.Image.IsFrozen),
+            "side gestures use twenty-four cached articulated poses with shoulder insertion stages");
         long LowerVisible(LoadedFrame frame)
         {
             var rgba = new FormatConvertedBitmap(frame.Image,PixelFormats.Bgra32,null,0);
@@ -35,7 +35,7 @@ internal static class SideEdgeVerification
             return count;
         }
         var peekFrames = window.SelectedCharacter.Actions["edge-peek"].Frames;
-        check(LowerVisible(peekFrames[4]) > LowerVisible(peekFrames[0]) * 1.5,
+        check(peekFrames.Max(LowerVisible) > LowerVisible(peekFrames[0]) * 1.5,
             "deeper leaning artwork progressively exposes more of the connected lower silhouette");
         foreach (var side in new[] { ScreenEdge.Left, ScreenEdge.Right })
         {
@@ -51,19 +51,20 @@ internal static class SideEdgeVerification
                 var aligned = true;
                 window.PlayCharacterInteraction();
                 check(window.ScreenEdgeResponse == action, "side responses rotate through supported package actions " + side + action);
-                for (var step = 0; step < 20; step++)
+                var steps=(int)Math.Ceiling(duration/40);
+                for (var step = 0; step < steps; step++)
                 {
                     var frame = ScreenEdgeVerification.Capture(window, side, (side == ScreenEdge.Left ? "左侧 · " : "右侧 · ") + labels[index]);
-                    encoder.Frames.Add(BitmapFrame.Create(frame)); delays.Add((int)Math.Round(duration / 200));
+                    encoder.Frames.Add(BitmapFrame.Create(frame)); delays.Add(4);
                     seen.Add((BitmapSource)window.CharacterArt.Source);
-                    if (step == 7) samples.Add(frame);
-                    window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(duration / 20));
+                    if (step == steps/3) samples.Add(frame);
+                    window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(40,duration-step*40)));
                     maximumOutward = Math.Max(maximumOutward,window.ScreenEdgePeekOffset);
                     var current = window.CurrentSpriteFrame;
                     var width = Math.Min(window.CharacterArt.Width,window.CharacterArt.Height * current.Image.PixelWidth / current.Image.PixelHeight);
                     var gripX = 115 + (side == ScreenEdge.Left ? 1 : -1) * width * (current.EdgeAnchorX!.Value - .5) + window.EdgeShift.X;
                     aligned &= Math.Abs(gripX - (side == ScreenEdge.Left ? 0 : 230)) < .001 && window.SideEdgeTilt.Angle == 0;
-                    if (step == 9)
+                    if (step == steps/2)
                     {
                         if (side == ScreenEdge.Left) leftAngles[action] = window.SideEdgeTilt.Angle;
                         else check(Math.Abs(leftAngles[action] + window.SideEdgeTilt.Angle) < .0001,
@@ -96,7 +97,8 @@ internal static class SideEdgeVerification
         }
         using var bytes = new MemoryStream(); encoder.Save(bytes);
         File.WriteAllBytes(Path.Combine(directory,"side-edge-actions.gif"),ThroneMotionVerification.WithAnimationMetadata(bytes.ToArray(),delays));
-        check(encoder.Frames.Count == 160, "side preview records four finite gestures on both borders from the actual WPF visual tree");
+        check(encoder.Frames.Count == SideEdgeMotion.Responses.Sum(a=>(int)Math.Ceiling(window.SelectedCharacter.Actions[a].Duration/40))*2,
+            "side preview samples every forty milliseconds so insertion stages are not skipped");
         var contact = new DrawingVisual();
         using (var draw = contact.RenderOpen())
             for (var row = 0; row < 4; row++)
@@ -117,7 +119,7 @@ internal static class SideEdgeVerification
             {
                 var capture = ScreenEdgeVerification.Capture(window,ScreenEdge.Left,captions[i]);
                 draw.DrawImage(capture,new Rect((i % 3) * 680,(i / 3) * 390,680,390));
-                window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(peekFrames[i].DurationMs));
+                if(i<5)window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(window.SelectedCharacter.Actions["edge-peek"].Duration/10));
             }
         }
         var stageBitmap = new RenderTargetBitmap(2040,780,96,96,PixelFormats.Pbgra32); stageBitmap.Render(stages);

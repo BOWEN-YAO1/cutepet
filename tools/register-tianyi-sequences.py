@@ -7,6 +7,7 @@ from pathlib import Path
 from collections import Counter
 import json
 import argparse
+import importlib.util
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1] / 'src/CutePet.Desktop/Characters/Packs/tianyi'
@@ -52,9 +53,16 @@ def frame(key, index, duration=80):
     name, rows = ATLASES[key]
     edge = key in ('side','bottom','top')
     x = index % 4 * 256 + (0 if edge else 16 if key=='cloud' else 8)
-    return {'image': name, 'durationMs': duration,
+    result = {'image': name, 'durationMs': duration,
             'region': {'x': x, 'y': rows[index // 4], 'width': 256 if edge else 240, 'height': 352 if edge else 360},
             **anchors.get((key, index), {})}
+    if key=='cloud':
+        region=result['region']
+        bounds=images[key].getchannel('A').crop((x,region['y'],x+240,region['y']+360)).point(lambda a:255 if a>=200 else 0).getbbox()
+        scale=301/(bounds[3]-bounds[1])
+        result['canvas']={'width':240,'height':360,'scale':scale,
+                          'offsetX':120*(1-scale),'offsetY':min(344-bounds[3]*scale,360*(1-scale))}
+    return result
 
 def clip(key, stages, loop=False):
     frames=[]
@@ -96,6 +104,9 @@ actions = {
     'edge-top-smile': clip('top', [0,1,12,13,14,15,14,13,12,1,0]),
 }
 actions['stand'] = {'loop': False, 'frames': [dict(f, durationMs=100) for f in reversed(actions['conjure']['frames'])]}
+spec=importlib.util.spec_from_file_location('inbetweens',Path(__file__).with_name('register-tianyi-inbetweens.py'))
+inbetweens=importlib.util.module_from_spec(spec);spec.loader.exec_module(inbetweens)
+actions=inbetweens.insert_inbetweens(actions,frame)
 manifest['actions'] = actions
 manifest['edgeAnchorX'] = anchors['side',0]['edgeAnchorX']
 manifest['edgeTopAnchorY'] = anchors['top',0]['edgeAnchorY']
@@ -103,8 +114,8 @@ manifest['edgeBottomAnchorY'] = anchors['bottom',0]['edgeAnchorY']
 manifest['topSwing']['seatAnchorY'] = anchors['top',0]['swingSeatAnchorY']
 manifest['topSwing']['seatHalfWidth'] = .365
 content = json.dumps(manifest, ensure_ascii=False, indent=2)+'\n'
-assert len(content.encode()) <= 128*1024
-assert sum(len(c['frames']) for c in actions.values()) <= 384
+assert len(content.encode()) <= 256*1024
+assert sum(len(c['frames']) for c in actions.values()) <= 768
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--check', action='store_true', help='Check saved metadata without writing files')
 if parser.parse_args().check:

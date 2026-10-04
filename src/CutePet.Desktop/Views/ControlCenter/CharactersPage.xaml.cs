@@ -19,7 +19,7 @@ public partial class CharactersPage : UserControl, IDisposable
     private readonly Stopwatch clock = new();
     private double swingPreviewElapsed;
     private bool previewCloudPose;
-    private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(40) };
+    private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(20) };
     private CharacterPack? Selected => CharacterList.SelectedItem as CharacterPack;
     private string? lastUsedId;
     private sealed record ActionChoice(string Key, string Label);
@@ -126,7 +126,7 @@ public partial class CharactersPage : UserControl, IDisposable
         TopPreviewRopes.Visibility = Visibility.Collapsed;
         sidePreviewTilt.CenterY = 0;
         if (Selected is { Manifest.TopSwing: { } swing } top && EdgeActions.BaseOf(animation.Action) == "edge-top-idle"
-            && animation.Image is System.Windows.Media.Imaging.CroppedBitmap)
+            && top.UsesFrameRegions(animation.Action))
         {
             SidePreviewEdge.Visibility = Visibility.Collapsed;
             TopPreviewRopes.Visibility = Visibility.Visible;
@@ -152,7 +152,7 @@ public partial class CharactersPage : UserControl, IDisposable
             return;
         }
         if (Selected is { } bottom && EdgeActions.BaseOf(animation.Action) == "edge-bottom-idle"
-            && animation.Image is System.Windows.Media.Imaging.CroppedBitmap)
+            && bottom.UsesFrameRegions(animation.Action))
         {
             SidePreviewEdge.Visibility = Visibility.Collapsed;
             BottomPreviewEdge.Visibility = Visibility.Visible;
@@ -165,7 +165,7 @@ public partial class CharactersPage : UserControl, IDisposable
             return;
         }
         if (Selected is { } pack && EdgeActions.BaseOf(animation.Action) == "edge-idle"
-            && animation.Image is System.Windows.Media.Imaging.CroppedBitmap)
+            && pack.UsesFrameRegions(animation.Action))
         {
             SidePreviewEdge.Visibility = Visibility.Visible;
             var frame = animation.SpriteFrame;

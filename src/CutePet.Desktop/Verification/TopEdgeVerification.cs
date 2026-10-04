@@ -20,8 +20,8 @@ internal static class TopEdgeVerification
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
         var pack=window.SelectedCharacter;
         var frames=EdgeActions.TopResponses.SelectMany(a=>pack.Actions[a].Frames).GroupBy(f=>f.Image).Select(g=>g.First()).ToArray();
-        check(frames.Length==16&&frames.All(f=>f.Image is CroppedBitmap {IsFrozen:true}),
-            "top gestures share sixteen distinct frozen seated poses");
+        check(frames.Length==31&&frames.All(f=>f.Image.IsFrozen),
+            "top responses share thirty-one registered frozen poses plus one idle-only breathing stage");
         foreach(var frame in frames)
         {
             var rgba=new FormatConvertedBitmap(frame.Image,PixelFormats.Bgra32,null,0);
@@ -44,13 +44,14 @@ internal static class TopEdgeVerification
             window.PlayCharacterInteraction();
             check(window.ScreenEdgeResponse==action,"top responses rotate "+action);
             var seen=new HashSet<BitmapSource>();
-            for(var step=0;step<16;step++)
+            var steps=(int)Math.Ceiling(duration/40);
+            for(var step=0;step<steps;step++)
             {
                 seen.Add((BitmapSource)window.CharacterArt.Source);
                 var capture=VerticalEdgeVerification.Capture(window,ScreenEdge.Top,labels[index]);
-                encoder.Frames.Add(BitmapFrame.Create(capture));delays.Add((int)Math.Round(duration/160));
-                if(step is 3 or 8 or 13)samples.Add(capture);
-                window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(duration/16));
+                encoder.Frames.Add(BitmapFrame.Create(capture));delays.Add(4);
+                if(step==steps/4||step==steps/2||step==steps*3/4)samples.Add(capture);
+                window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(40,duration-step*40)));
                 var frame=window.CurrentSpriteFrame;var art=window.CharacterArt;
                 var height=Math.Min(art.Height,art.Width*frame.Image.PixelHeight/frame.Image.PixelWidth);
                 var width=Math.Min(art.Width,art.Height*frame.Image.PixelWidth/frame.Image.PixelHeight);
@@ -65,7 +66,7 @@ internal static class TopEdgeVerification
                     && roots==(window.SwingRopeLeft.X1,window.SwingRopeLeft.Y1,window.SwingRopeRight.X1,window.SwingRopeRight.Y1)
                     && Math.Abs(window.EdgeSwing.Angle)<=4 && window.EdgeStretch.ScaleY==1 && window.EdgeShift.X==0,
                     "top pose keeps suspension roots fixed and transformed seat connected "+action+step);
-                if(step==7)
+                if(step==steps/2)
                 {
                     window.BeginDetailsMenu();
                     var held=(window.CharacterArt.Source,window.EdgeSwing.Angle,window.EdgeShift.Y,window.SwingRopeLeft.X2,window.SwingRopeLeft.Y2);

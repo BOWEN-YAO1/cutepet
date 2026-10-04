@@ -15,7 +15,7 @@ internal static class ThroneMotionVerification
         var pack = window.Characters.Find("tianyi");
         var player = new CharacterAnimation();
         var lowering = pack.Actions["conjure"];
-        check(lowering.Frames.Count == 10 && pack.Actions["stand"].Frames.Count == 10
+        check(lowering.Frames.Count == 18 && pack.Actions["stand"].Frames.Count == 18
             && lowering.Duration == 1500 && pack.Actions["stand"].Duration == 1000,
             "throne uses more intermediate poses while preserving total action durations");
         double before = 0;
