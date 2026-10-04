@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -20,8 +21,25 @@ internal static class TopEdgeVerification
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
         var pack=window.SelectedCharacter;
         var frames=EdgeActions.TopResponses.SelectMany(a=>pack.Actions[a].Frames).GroupBy(f=>f.Image).Select(g=>g.First()).ToArray();
-        check(frames.Length==31&&frames.All(f=>f.Image.IsFrozen),
-            "top responses share thirty-one registered frozen poses plus one idle-only breathing stage");
+        check(frames.Length==16&&frames.All(f=>f.Image.IsFrozen),
+            "top responses use one coherent sixteen-pose seated atlas");
+        check(EdgeActions.TopResponses.All(a=>pack.Actions[a].SmoothFrames&&pack.Actions[a].Frames.All(f=>f.DurationMs==40)),
+            "all top response keyframes use forty-millisecond samples with continuous presentation");
+        var heads=frames.Select(f=>SideEdgeVerification.HeadHeight(f.Image)).ToArray();
+        for(var i=0;i<frames.Length;i++)
+        {
+            var pose=new PngBitmapEncoder();pose.Frames.Add(BitmapFrame.Create(frames[i].Image));
+            using var file=File.Create(Path.Combine(directory,$"top-registered-{i:00}.png"));pose.Save(file);
+        }
+        check(heads.Max()-heads.Min()<=5,
+            "actual rendered top head heights remain stable across blink, look and tilt: "+string.Join(",",heads));
+        check(frames.All(f=>f.EdgeAnchorY==pack.Manifest.EdgeTopAnchorY&&f.SwingSeatAnchorY==pack.Manifest.TopSwing!.SeatAnchorY),
+            "top poses share fixed suspension and seat registration");
+        check(pack.Actions["edge-top-idle"].Frames.Count==1&&EdgeActions.TopResponses.All(a=>
+            ReferenceEquals(pack.Actions[a].Frames[0].Image,pack.Actions["edge-top-idle"].Frames[0].Image)
+            &&ReferenceEquals(pack.Actions[a].Frames[^1].Image,pack.Actions["edge-top-idle"].Frames[0].Image)),
+            "all top responses start and finish at the exact same idle drawing");
+        CheckHeadInterpolation(check);
         foreach(var frame in frames)
         {
             var rgba=new FormatConvertedBitmap(frame.Image,PixelFormats.Bgra32,null,0);
@@ -44,14 +62,14 @@ internal static class TopEdgeVerification
             window.PlayCharacterInteraction();
             check(window.ScreenEdgeResponse==action,"top responses rotate "+action);
             var seen=new HashSet<BitmapSource>();
-            var steps=(int)Math.Ceiling(duration/40);
+            var steps=(int)Math.Ceiling(duration/20);
             for(var step=0;step<steps;step++)
             {
-                seen.Add((BitmapSource)window.CharacterArt.Source);
+                seen.Add(window.CurrentSpriteFrame.Image);
                 var capture=VerticalEdgeVerification.Capture(window,ScreenEdge.Top,labels[index]);
-                encoder.Frames.Add(BitmapFrame.Create(capture));delays.Add(4);
+                encoder.Frames.Add(BitmapFrame.Create(capture));delays.Add(2);
                 if(step==steps/4||step==steps/2||step==steps*3/4)samples.Add(capture);
-                window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(40,duration-step*40)));
+                window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(20,duration-step*20)));
                 var frame=window.CurrentSpriteFrame;var art=window.CharacterArt;
                 var height=Math.Min(art.Height,art.Width*frame.Image.PixelHeight/frame.Image.PixelWidth);
                 var width=Math.Min(art.Width,art.Height*frame.Image.PixelWidth/frame.Image.PixelHeight);
@@ -70,9 +88,12 @@ internal static class TopEdgeVerification
                 {
                     window.BeginDetailsMenu();
                     var held=(window.CharacterArt.Source,window.EdgeSwing.Angle,window.EdgeShift.Y,window.SwingRopeLeft.X2,window.SwingRopeLeft.Y2);
+                    var heldPixels=PixelHash((BitmapSource)window.CharacterArt.Source);
                     window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(10));
                     check(held==(window.CharacterArt.Source,window.EdgeSwing.Angle,window.EdgeShift.Y,window.SwingRopeLeft.X2,window.SwingRopeLeft.Y2),
                         "menu freezes top expression, swing phase and suspension together "+action);
+                    check(heldPixels==PixelHash((BitmapSource)window.CharacterArt.Source),
+                        "menu pause also freezes pixels inside the reused interpolation bitmap "+action);
                     window.EndDetailsMenu();window.PlayCharacterInteraction();
                     check(window.ScreenEdgeResponse==action,"busy top clicks do not accumulate or skip poses "+action);
                     window.RefreshScreenEdgeBounds(new Rect(-1920,-200,1920,1000),size);
@@ -104,4 +125,30 @@ internal static class TopEdgeVerification
             player.Configure(pack);
         }
     }
+
+    private static void CheckHeadInterpolation(Action<bool,string> check)
+    {
+        BitmapSource Marker(int x)
+        {
+            var pixels=new byte[13*100*4];var eye=(5*13+x)*4;pixels[eye+2]=pixels[eye+3]=255;
+            foreach(var seatX in new[]{2,10}){var seat=(80*13+seatX)*4;pixels[seat+1]=pixels[seat+3]=255;}
+            return BitmapSource.Create(13,100,96,96,PixelFormats.Pbgra32,null,pixels,13*4);
+        }
+        var a=new LoadedFrame(Marker(3),40,EdgeAnchorY:0,SwingSeatAnchorY:.75,HeadAnchorX:3.0/13,HeadAnchorY:.05);
+        var b=new LoadedFrame(Marker(9),40,EdgeAnchorY:0,SwingSeatAnchorY:.75,HeadAnchorX:9.0/13,HeadAnchorY:.05);
+        var interpolator=new FrameInterpolator();var result=interpolator.Sample(a,b,.5);var bytes=new byte[13*100*4];result.CopyPixels(bytes,13*4,0);
+        check(bytes[(5*13+6)*4+3]>=240&&bytes[(5*13+3)*4+3]==0&&bytes[(5*13+9)*4+3]==0,
+            "swing interpolation aligns the moving head even when the suspension is above it");
+        check(new[]{2,10}.All(x=>bytes[(80*13+x)*4+1]==255&&bytes[(80*13+x)*4+3]==255),
+            "swing head interpolation leaves both lower rope attachment pixels fixed");
+        var pack=CharacterCatalog.BuiltIns[0];
+        var loop=new LoadedAction(true,new[]{a,b},SmoothFrames:true);
+        var player=new CharacterAnimation();player.Configure(pack with {Actions=new Dictionary<string,LoadedAction>(pack.Actions){["edge-top-idle"]=loop}});
+        player.Preview("edge-top-idle");player.Advance(TimeSpan.FromMilliseconds(60));var sample=player.Presentation;
+        check(ReferenceEquals(sample.From.Image,b.Image)&&ReferenceEquals(sample.To.Image,a.Image)&&Math.Abs(sample.Fraction-.5)<1e-9,
+            "an opted-in looping top clip interpolates from its final frame back to the first");
+    }
+
+    private static string PixelHash(BitmapSource image)
+    {var bytes=new byte[image.PixelWidth*image.PixelHeight*4];image.CopyPixels(bytes,image.PixelWidth*4,0);return Convert.ToHexString(SHA256.HashData(bytes));}
 }

@@ -110,11 +110,14 @@ actions=inbetweens.insert_inbetweens(actions,frame)
 spec=importlib.util.spec_from_file_location('side_registration',Path(__file__).with_name('register-tianyi-side.py'))
 side_registration=importlib.util.module_from_spec(spec);spec.loader.exec_module(side_registration)
 actions=side_registration.register_side(actions)
+spec=importlib.util.spec_from_file_location('top_registration',Path(__file__).with_name('register-tianyi-top.py'))
+top_registration=importlib.util.module_from_spec(spec);spec.loader.exec_module(top_registration)
+actions=top_registration.register_top(actions)
 manifest['actions'] = actions
 manifest['edgeAnchorX'] = actions['edge-idle']['frames'][0]['edgeAnchorX']
-manifest['edgeTopAnchorY'] = anchors['top',0]['edgeAnchorY']
+manifest['edgeTopAnchorY'] = actions['edge-top-idle']['frames'][0]['edgeAnchorY']
 manifest['edgeBottomAnchorY'] = anchors['bottom',0]['edgeAnchorY']
-manifest['topSwing']['seatAnchorY'] = anchors['top',0]['swingSeatAnchorY']
+manifest['topSwing']['seatAnchorY'] = actions['edge-top-idle']['frames'][0]['swingSeatAnchorY']
 manifest['topSwing']['seatHalfWidth'] = .365
 content = json.dumps(manifest, ensure_ascii=False, indent=2)+'\n'
 assert len(content.encode()) <= 256*1024

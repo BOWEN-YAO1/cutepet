@@ -15,7 +15,7 @@ internal static class SequenceVerification
     internal static void Run(CharacterPack pack, string directory, Action<bool,string> check)
     {
         var unique = pack.Actions.Values.SelectMany(c=>c.Frames).DistinctBy(f=>f.Image).ToArray();
-        check(unique.Length==161 && unique.All(f=>f.Image.IsFrozen),
+        check(unique.Length==145 && unique.All(f=>f.Image.IsFrozen),
             "registered standing poses and a replacement side sequence share frozen caches");
         var hashes=new HashSet<string>();
         foreach(var frame in unique)
@@ -27,9 +27,9 @@ internal static class SequenceVerification
                 && bytes[(rgba.PixelHeight-1)*stride+x*4+3]<200),
                 "registered pose preserves vertical transparent gutters "+hashes.Count);
         }
-        check(hashes.Count==161,"adopted poses contain distinct painted pixels rather than duplicate stills");
+        check(hashes.Count==145,"adopted poses contain distinct painted pixels rather than duplicate stills");
         check(pack.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null && f.Image.Contains("inbetweens"))
-            .DistinctBy(f=>(f.Image,f.Region,f.Canvas)).Count()==66,
+            .DistinctBy(f=>(f.Image,f.Region,f.Canvas)).Count()==50,
             "remaining insertion sources have explicit scale and placement registration");
         check(ReferenceEquals(pack.Actions["greeting"].Frames[0].Image,pack.Idle.Frames[0].Image)
             && ReferenceEquals(pack.Actions["happy"].Frames[0].Image,pack.Idle.Frames[0].Image),

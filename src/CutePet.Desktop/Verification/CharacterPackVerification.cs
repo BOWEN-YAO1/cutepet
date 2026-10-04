@@ -149,7 +149,7 @@ internal static class CharacterPackVerification
             && edgeRoundTrip.Actions["edge-bottom-peek"].Frames[0].Image == edgeRoundTrip.Actions["edge-bottom-idle"].Frames[0].Image
             && edgeFiles.ContainsKey("bottom-sequence-v6.png") && !edgeFiles.ContainsKey("edge-bottom-v1.png"),
             "bottom atlas responses export and import with shared cached views instead of old body-stretch sprites");
-        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 459,
+        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 439,
             "expanded sequences stay within the bounded 768-reference package limit");
         check(edgeRoundTrip.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)
             .SequenceEqual(tianyi.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)),
@@ -194,9 +194,21 @@ internal static class CharacterPackVerification
             Reject(() => other.Import(Zip("bottom-loop",looping,edgeFiles)), "bottom response cannot loop indefinitely " + response);
         }
         check(EdgeActions.TopResponses.All(edgeRoundTrip.Actions.ContainsKey)
-            && edgeFiles.ContainsKey("top-sequence-v4.png") && !edgeFiles.ContainsKey("swing-jade-v2.png")
+            && edgeFiles.ContainsKey("top-sequence-v5.png") && !edgeFiles.ContainsKey("top-sequence-v4.png")
+            && !edgeFiles.ContainsKey("top-inbetweens-v1.png") && !edgeFiles.ContainsKey("swing-jade-v2.png")
             && edgeRoundTrip.Manifest.Actions["edge-top-smile"].Frames.All(f=>f.Region is not null&&f.SwingSeatAnchorY is not null),
             "top atlas and per-frame suspension anchors survive actual export and import");
+        check(EdgeActions.TopResponses.All(a=>edgeRoundTrip.Actions[a].SmoothFrames
+            &&edgeRoundTrip.Manifest.Actions[a].Frames.SequenceEqual(tianyi.Manifest.Actions[a].Frames)),
+            "top smoothing, forehead landmarks and fixed seat survive actual export and import");
+        var movingSeat=tianyi.Manifest with {Id="smooth-moving-seat",Actions=new(tianyi.Manifest.Actions)};
+        movingSeat.Actions["edge-top-peek"]=movingSeat.Actions["edge-top-peek"] with {Frames=new() {
+            movingSeat.Actions["edge-top-peek"].Frames[0],movingSeat.Actions["edge-top-peek"].Frames[1] with {SwingSeatAnchorY=.72}}};
+        Reject(()=>other.Import(Zip("smooth-moving-seat",movingSeat,edgeFiles)),"smooth top clips reject moving seat registration");
+        var partialHead=tianyi.Manifest with {Id="smooth-partial-head",Actions=new(tianyi.Manifest.Actions)};
+        partialHead.Actions["edge-top-peek"]=partialHead.Actions["edge-top-peek"] with {Frames=new() {
+            partialHead.Actions["edge-top-peek"].Frames[0],partialHead.Actions["edge-top-peek"].Frames[1] with {HeadAnchorX=null,HeadAnchorY=null}}};
+        Reject(()=>other.Import(Zip("smooth-partial-head",partialHead,edgeFiles)),"smooth top clips reject partially missing forehead landmarks");
         foreach(var seatY in new[] {double.NaN,.05,.96})
         {
             var invalid=tianyi.Manifest with {Id="top-seat-invalid",Actions=new(tianyi.Manifest.Actions)};

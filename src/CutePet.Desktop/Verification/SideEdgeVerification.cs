@@ -176,7 +176,7 @@ internal static class SideEdgeVerification
         interpolator.Reset();
     }
 
-    private static int HeadHeight(BitmapSource image)
+    internal static int HeadHeight(BitmapSource image)
     {
         var rgba=new FormatConvertedBitmap(image,PixelFormats.Bgra32,null,0);
         var width=rgba.PixelWidth;var height=rgba.PixelHeight;

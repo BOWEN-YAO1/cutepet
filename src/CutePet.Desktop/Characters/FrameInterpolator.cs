@@ -21,7 +21,9 @@ internal sealed class FrameInterpolator
         var delta = from.HeadAnchorX is double x && from.HeadAnchorY is double y
             && to.HeadAnchorX is double tx && to.HeadAnchorY is double ty
             ? new Vector((tx-x)*from.Image.PixelWidth,(ty-y)*from.Image.PixelHeight) : default;
-        return Sample(from.Image,to.Image,fraction,delta,(from.EdgeAnchorY ?? 0)*from.Image.PixelHeight);
+        // On a swing the fixed lower landmark is the seat, not the suspension
+        // above the character. Never warp the board or its rope attachments.
+        return Sample(from.Image,to.Image,fraction,delta,(from.SwingSeatAnchorY ?? from.EdgeAnchorY ?? 0)*from.Image.PixelHeight);
     }
 
     internal BitmapSource Sample(BitmapSource from, BitmapSource to, double fraction)

@@ -60,7 +60,8 @@ internal sealed class CharacterAnimation
             var clip = pack.Actions[Action];
             var position = clip.PositionAt(transient is null ? baseElapsed : transientElapsed);
             var current = clip.Frames[position.Index];
-            var next = clip.SmoothFrames && position.Index + 1 < clip.Frames.Count ? clip.Frames[position.Index + 1] : current;
+            var next = clip.SmoothFrames && (position.Index + 1 < clip.Frames.Count || clip.Loop)
+                ? clip.Frames[(position.Index + 1) % clip.Frames.Count] : current;
             return (current, next, position.Fraction);
         }
     }
