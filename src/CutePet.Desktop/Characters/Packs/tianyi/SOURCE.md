@@ -1,3 +1,7 @@
+# 天依角色素材（0.45.0）
+
+本版沿用0.44.0的全部源图：144张探出、16张点头、16张轻摇，侧边共176张不同姿势。没有新增源PNG或把实时混合帧计为新绘图。应用内统一预览和桌宠的呈现，添加35毫秒局部头部/纹理稳定过渡，保持手掌固定，结束前恢复精确终点。源图、裁切登记、角色包格式和所有许可沿用以下记录。新播放行为需0.45.0；角色图片包仍兼容0.44.0。源码中的docs/side-playback-stability.md记录实现与验证。
+
 # 天依角色素材（0.44.0）
 
 本版使用内置 imagegen 新绘七张透明 4×4 图集（112 张不同姿势）：side-transition-1-v9.png 至 side-transition-6-v9.png，以及 side-transition-deep-v9.png。原样复制并保留 alpha，未用程序修改源 PNG。参考原探出 A/B 图集；末段追加图以实际 WPF 登记画面的深探出起止姿势为参考。原生成文件依次为 exec-4fb12300-3f66-42ff-9dc7-b677430b8d7f.png、exec-b1ebcab5-dab9-440f-900c-eb681644dec3.png、exec-25f4701c-bf3a-48fb-a19d-8865fe316738.png、exec-a9b9f458-8bed-4bb8-85e9-53346e86a645.png、exec-043a62a2-40d0-4a60-a80e-1a047ff80376.png、exec-130e0e31-7f03-4c0d-9799-c5109766d424.png、exec-edd8d11b-8ffd-4c43-9456-be5b47406b29.png。完整提示词随匹配源码的 docs/side-dense-prompts-v044.md 提供。

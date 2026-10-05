@@ -140,6 +140,15 @@ internal static class ControlCenterVerification
             await Settle();
             check(characters.Preview.Clip is RectangleGeometry && characters.SidePreviewEdge.Visibility == Visibility.Visible,
                 "character-page articulated preview masks the hidden body and shows the fixed border");
+            characters.AdvancePreview(TimeSpan.FromMilliseconds(16));
+            var smoothPreview=characters.Preview.Source as System.Windows.Media.Imaging.WriteableBitmap;
+            check(smoothPreview is not null,"character-page side preview uses the same interpolated presentation as the desktop");
+            var previewPixels=new byte[smoothPreview!.PixelWidth*smoothPreview.PixelHeight*4];
+            smoothPreview.CopyPixels(previewPixels,smoothPreview.PixelWidth*4,0);
+            characters.AdvancePreview(TimeSpan.FromMilliseconds(16));
+            var nextPreviewPixels=new byte[previewPixels.Length];smoothPreview.CopyPixels(nextPreviewPixels,smoothPreview.PixelWidth*4,0);
+            check(ReferenceEquals(smoothPreview,characters.Preview.Source)&&!previewPixels.SequenceEqual(nextPreviewPixels),
+                "preview generates changing inbetween pixels while reusing one presentation surface");
             Render(center,directory,"app-side-preview");
             characters.PreviewAction.SelectedValue="edge-bottom-look";
             characters.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));

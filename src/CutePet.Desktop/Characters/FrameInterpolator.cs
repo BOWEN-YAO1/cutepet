@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -6,7 +7,8 @@ using System.Windows.Media.Imaging;
 namespace CutePet.Desktop;
 
 // Blend only registered, package-opted-in frames. The two source buffers and one
-// output are reused; no interpolated frame library accumulates in memory.
+// output are reused. Frozen source bytes share a bounded cache to avoid copying
+// two large arrays on every refresh; mutable images never enter that cache.
 internal sealed class FrameInterpolator
 {
     private BitmapSource? first, second;
@@ -15,6 +17,11 @@ internal sealed class FrameInterpolator
     private int lastWeight = -1;
     private Vector lastDelta;
     private double lastGrip;
+    internal const long MaxCachedPixelBytes = 80 * 1024 * 1024;
+    private readonly Dictionary<BitmapSource,byte[]> pixelCache = new();
+    private readonly Queue<BitmapSource> cacheOrder = new();
+    internal long CachedPixelBytes { get; private set; }
+    internal int SourceReadCount { get; private set; }
 
     internal BitmapSource Sample(LoadedFrame from, LoadedFrame to, double fraction)
     {
@@ -80,36 +87,52 @@ internal sealed class FrameInterpolator
         return bitmap;
     }
 
-    private readonly struct SampleRow
+    internal readonly struct SampleRow
     {
         private readonly byte[] pixels;
         private readonly int width,height,xOffset,y0;
-        private readonly double w00,w01,w10,w11;
+        private readonly int w00,w01,w10,w11;
         internal SampleRow(byte[] pixels,int width,int height,double offset,double y)
         {
             this.pixels=pixels;this.width=width;this.height=height;
             xOffset=(int)Math.Floor(offset);y0=(int)Math.Floor(y);
             var fx=offset-xOffset;var fy=y-y0;
-            w00=(1-fx)*(1-fy);w01=fx*(1-fy);w10=(1-fx)*fy;w11=fx*fy;
+            var ix=(int)Math.Round(fx*256);var iy=(int)Math.Round(fy*256);
+            w00=(256-ix)*(256-iy);w01=ix*(256-iy);
+            w10=(256-ix)*iy;w11=ix*iy;
         }
         internal int At(int x,int channel)
         {
             var sx=x+xOffset;
-            return (int)Math.Round(Get(sx,y0,channel)*w00+Get(sx+1,y0,channel)*w01
-                +Get(sx,y0+1,channel)*w10+Get(sx+1,y0+1,channel)*w11);
+            if(sx>=0&&sx+1<width&&y0>=0&&y0+1<height)
+            {
+                var p=(y0*width+sx)*4+channel;var next=p+width*4;
+                return (pixels[p]*w00+pixels[p+4]*w01+pixels[next]*w10+pixels[next+4]*w11+32768)>>16;
+            }
+            return (Get(sx,y0,channel)*w00+Get(sx+1,y0,channel)*w01
+                +Get(sx,y0+1,channel)*w10+Get(sx+1,y0+1,channel)*w11+32768)>>16;
         }
         private byte Get(int x,int y,int channel)
             => x>=0&&x<width&&y>=0&&y<height?pixels[(y*width+x)*4+channel]:(byte)0;
     }
 
-    private static byte[] Pixels(BitmapSource source)
+    private byte[] Pixels(BitmapSource source)
     {
+        if(source.IsFrozen&&pixelCache.TryGetValue(source,out var cached))return cached;
         var image = source.Format == PixelFormats.Pbgra32 ? source
             : new FormatConvertedBitmap(source, PixelFormats.Pbgra32, null, 0);
         var stride = image.PixelWidth * 4;
         var bytes = new byte[stride * image.PixelHeight]; image.CopyPixels(bytes, stride, 0);
+        SourceReadCount++;
+        if(source.IsFrozen&&bytes.Length<=MaxCachedPixelBytes)
+        {
+            while(CachedPixelBytes+bytes.Length>MaxCachedPixelBytes&&cacheOrder.Count>0)
+            {var oldest=cacheOrder.Dequeue();CachedPixelBytes-=pixelCache[oldest].Length;pixelCache.Remove(oldest);}
+            pixelCache.Add(source,bytes);cacheOrder.Enqueue(source);CachedPixelBytes+=bytes.Length;
+        }
         return bytes;
     }
     internal void Reset()
-    { first = second = null; firstPixels = secondPixels = output = null; bitmap = null; lastWeight = -1; }
+    { first = second = null; firstPixels = secondPixels = output = null; bitmap = null; lastWeight = -1;
+        pixelCache.Clear();cacheOrder.Clear();CachedPixelBytes=0;SourceReadCount=0; }
 }

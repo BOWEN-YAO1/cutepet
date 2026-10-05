@@ -13,6 +13,12 @@ public partial class App : Application
     {
         base.OnStartup(e);
         CenterColors.Apply(Resources, new Preferences());
+        if (e.Args.Length == 2 && e.Args[0] == "--benchmark-animation")
+        {
+            AnimationPerformanceVerification.Run(e.Args[1]);
+            Shutdown();
+            return;
+        }
         if (e.Args.Length == 2 && e.Args[0] is "--verify" or "--verify-live")
         {
             var result = await DesktopVerification.RunAsync(e.Args[1], e.Args[0] == "--verify-live");

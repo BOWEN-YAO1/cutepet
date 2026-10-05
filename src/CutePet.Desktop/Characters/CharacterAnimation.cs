@@ -51,6 +51,9 @@ internal sealed class CharacterAnimation
     }
     public string Action => transient ?? (Low && pack.Actions.ContainsKey("low") ? "low" : onEdge ? edgeBase : resting ? "sit"
         : flying && pack.Actions.ContainsKey("cloud-idle") ? "cloud-idle" : "idle");
+    internal double PresentationTime => transient is null ? baseElapsed : transientElapsed;
+    internal double RemainingTime => pack.Actions[Action].Duration - PresentationTime;
+    internal bool SmoothFrames => pack.Actions[Action].SmoothFrames;
     internal double ActionProgress => (transient is null ? baseElapsed : transientElapsed) / pack.Actions[Action].Duration;
     internal LoadedFrame SpriteFrame => pack.Actions[Action].Frames[pack.Actions[Action].PositionAt(transient is null ? baseElapsed : transientElapsed).Index];
     internal (LoadedFrame From, LoadedFrame To, double Fraction) Presentation

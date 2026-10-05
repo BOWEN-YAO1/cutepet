@@ -94,7 +94,13 @@ internal static class SideEdgeVerification
                 for (var step = 0; step < steps; step++)
                 {
                     var frame = ScreenEdgeVerification.Capture(window, side, (side == ScreenEdge.Left ? "左侧 · " : "右侧 · ") + labels[index]);
-                    if(step%2==0){encoder.Frames.Add(BitmapFrame.Create(frame));delays.Add(4);}
+                    // Keep the GIF at 50 fps so it does not hide the new
+                    // inbetweens. A smaller preview keeps memory/file size near
+                    // the previous 25 fps export without changing window checks.
+                    var preview=new DrawingVisual();using(var draw=preview.RenderOpen())
+                        draw.DrawImage(frame,new Rect(0,0,476,273));
+                    var previewBitmap=new RenderTargetBitmap(476,273,96,96,PixelFormats.Pbgra32);previewBitmap.Render(preview);
+                    encoder.Frames.Add(BitmapFrame.Create(previewBitmap));delays.Add(2);
                     seen.Add(window.CurrentSpriteFrame.Image);
                     if (step == steps/3) samples.Add(frame);
                     window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(20,duration-step*20)));
@@ -136,8 +142,8 @@ internal static class SideEdgeVerification
         }
         using var bytes = new MemoryStream(); encoder.Save(bytes);
         File.WriteAllBytes(Path.Combine(directory,"side-edge-actions.gif"),ThroneMotionVerification.WithAnimationMetadata(bytes.ToArray(),delays));
-        check(encoder.Frames.Count == SideEdgeMotion.Responses.Sum(a=>(int)Math.Ceiling(Math.Ceiling(window.SelectedCharacter.Actions[a].Duration/20)/2))*2,
-            "side GIF samples every forty milliseconds while window assertions advance every twenty milliseconds");
+        check(encoder.Frames.Count == SideEdgeMotion.Responses.Sum(a=>(int)Math.Ceiling(window.SelectedCharacter.Actions[a].Duration/20))*2,
+            "side window GIF and assertions both sample every twenty milliseconds for fifty-fps inbetween playback");
         var contact = new DrawingVisual();
         using (var draw = contact.RenderOpen())
             for (var row = 0; row < 4; row++)
@@ -204,7 +210,46 @@ internal static class SideEdgeVerification
             "head landmark warping produces one moving eye instead of two crossfaded eyes");
         check(new[]{134,170}.All(y=>actual[(y*13+2)*4+1]==255&&actual[(y*13+2)*4+3]==255),
             "head warping leaves both upper and lower palms fixed around the side anchor midpoint");
+        var smoother=new SideFrameSmoother();
+        smoother.Sample(a.Image,new Point(3,5),125,0,1000,"edge-peek");
+        var stable=smoother.Sample(b.Image,new Point(9,5),125,16,984,"edge-peek");
+        stable.CopyPixels(actual,13*4,0);
+        var headMass=Enumerable.Range(0,13).Sum(x=>actual[(5*13+x)*4+3]);
+        var center=Enumerable.Range(0,13).Sum(x=>x*actual[(5*13+x)*4+3])/(double)headMass;
+        check(center>3&&center<9&&actual[(5*13+3)*4+3]==0&&actual[(5*13+9)*4+3]==0,
+            "a sudden new pose receives moving inbetweens at one aligned head location instead of two ghost heads");
+        check(new[]{134,170}.All(y=>actual[(y*13+2)*4+1]==255&&actual[(y*13+2)*4+3]==255),
+            "time-based pose stabilization leaves both side palms exactly attached");
+        var held=actual.ToArray();
+        check(ReferenceEquals(stable,smoother.Sample(a.Image,new Point(3,5),125,16,984,"edge-peek")),
+            "repainting the same animation time reuses the paused stabilized output");
+        stable.CopyPixels(actual,13*4,0);
+        check(held.SequenceEqual(actual),"paused stabilization never moves or changes pixels on repeated refresh");
+        smoother.Sample(b.Image,new Point(9,5),125,200,0,"edge-peek").CopyPixels(actual,13*4,0);
+        check(actual[(5*13+9)*4+3]==255&&Enumerable.Range(0,13).Where(x=>x!=9).All(x=>actual[(5*13+x)*4+3]==0),
+            "stabilization drains before the exact final pose without a lagging exit silhouette");
+        smoother.Sample(a.Image,new Point(3,5),125,0,1000,"edge-nod").CopyPixels(actual,13*4,0);
+        check(actual[(5*13+3)*4+3]==255&&actual[(5*13+9)*4+3]==0,
+            "switching actions resets pose history rather than carrying an old head into the next action");
+        red.Freeze();blue.Freeze();
         interpolator.Reset();
+        interpolator.Sample(red,blue,.25);interpolator.Sample(blue,red,.75);interpolator.Sample(red,blue,.5);
+        check(interpolator.SourceReadCount==2&&interpolator.CachedPixelBytes==8,
+            "frozen source pixels are copied once and reused when the timeline reverses");
+        for(var i=0;i<22;i++)
+        {
+            var large=BitmapSource.Create(1024,1024,96,96,PixelFormats.Pbgra32,null,new byte[1024*1024*4],1024*4);large.Freeze();
+            interpolator.Sample(large,large,.5);
+            // Same-image output needs no source buffer; pair each distinct image
+            // with the previous size-matched frozen source to exercise eviction.
+            var next=BitmapSource.Create(1024,1024,96,96,PixelFormats.Pbgra32,null,new byte[1024*1024*4],1024*4);next.Freeze();
+            interpolator.Sample(large,next,.5);
+        }
+        check(interpolator.CachedPixelBytes<=FrameInterpolator.MaxCachedPixelBytes,
+            "frozen pixel cache stays below eighty MiB after more distinct sources than fit its budget");
+        interpolator.Reset();
+        check(interpolator.CachedPixelBytes==0&&interpolator.SourceReadCount==0,
+            "changing the character releases cached pixels and stabilization state");
     }
 
     private static void SaveDrawings(CharacterPack pack,string directory)

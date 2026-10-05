@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Threading;
 using System.Windows.Media;
 
 namespace CutePet.Desktop;
@@ -19,7 +18,9 @@ public partial class CharactersPage : UserControl, IDisposable
     private readonly Stopwatch clock = new();
     private double swingPreviewElapsed;
     private bool previewCloudPose;
-    private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(20) };
+    private readonly CharacterFrameRenderer renderer = new();
+    private bool rendering;
+    private TimeSpan? lastRenderingTime;
     private CharacterPack? Selected => CharacterList.SelectedItem as CharacterPack;
     private string? lastUsedId;
     private sealed record ActionChoice(string Key, string Label);
@@ -38,22 +39,11 @@ public partial class CharactersPage : UserControl, IDisposable
         host.SetCharacterPackage(host.SelectedCharacter.Id);
         RefreshList(host.SelectedCharacter.Id);
         StatusText.Text = host.Characters.Warning ?? "";
-        timer.Tick += (_, _) =>
-        {
-            var elapsed = clock.Elapsed;
-            clock.Restart();
-            animation.Advance(elapsed);
-            swingPreviewElapsed = (swingPreviewElapsed + elapsed.TotalMilliseconds) % 3200;
-            cloudPreview.Advance(elapsed);
-            animation.Flying = previewCloudPose || cloudPreview.Active && cloudPreview.Opacity == 1;
-            CloudPreview.Opacity = previewCloudPose ? 1 : cloudPreview.Opacity;
-            Preview.Source = animation.Image;
-            RefreshSidePreview();
-        };
         IsVisibleChanged += (_, _) =>
         {
-            if (IsVisible) { clock.Restart(); timer.Start(); }
-            else { timer.Stop(); clock.Reset(); }
+            if (IsVisible&&!rendering)
+            {clock.Restart();lastRenderingTime=null;CompositionTarget.Rendering+=OnRendering;rendering=true;}
+            else if(!IsVisible){StopRendering();}
         };
         host.DesktopStateChanged += OnHostStateChanged;
         OnHostStateChanged();
@@ -68,7 +58,27 @@ public partial class CharactersPage : UserControl, IDisposable
         if (CharacterList.ItemsSource is not CharacterPack[] shown || !shown.SequenceEqual(installed))
             RefreshList(Selected?.Id ?? host.SelectedCharacter.Id);
     }
-    public void Dispose() { host.DesktopStateChanged -= OnHostStateChanged; timer.Stop(); clock.Stop(); }
+    private void OnRendering(object? sender,EventArgs args)
+    {
+        if(args is RenderingEventArgs frame)
+        {if(lastRenderingTime==frame.RenderingTime)return;lastRenderingTime=frame.RenderingTime;}
+        var elapsed=clock.Elapsed;clock.Restart();AdvancePreview(elapsed);
+    }
+    internal void AdvancePreview(TimeSpan elapsed)
+    {
+        animation.Advance(elapsed);
+        swingPreviewElapsed=(swingPreviewElapsed+elapsed.TotalMilliseconds)%3200;
+        cloudPreview.Advance(elapsed);
+        animation.Flying=previewCloudPose||cloudPreview.Active&&cloudPreview.Opacity==1;
+        CloudPreview.Opacity=previewCloudPose?1:cloudPreview.Opacity;
+        Preview.Source=renderer.Render(animation);RefreshSidePreview();
+    }
+    private void StopRendering()
+    {
+        if(rendering)CompositionTarget.Rendering-=OnRendering;
+        rendering=false;lastRenderingTime=null;clock.Reset();renderer.Reset();
+    }
+    public void Dispose() { host.DesktopStateChanged -= OnHostStateChanged;StopRendering();renderer.Reset(); }
     private void RefreshList(string? selected)
     {
         CharacterList.ItemsSource = host.Characters.Packs.ToArray();
@@ -78,6 +88,7 @@ public partial class CharactersPage : UserControl, IDisposable
     {
         if (Selected is not CharacterPack pack) return;
         animation.Configure(pack);
+        renderer.Reset();
         swingPreviewElapsed = 0;
         cloudPreview.Cancel();
         previewCloudPose = false;
@@ -85,7 +96,7 @@ public partial class CharactersPage : UserControl, IDisposable
         CloudPreview.Source = pack.CloudImage;
         CloudPreview.Width = pack.Manifest.Cloud?.DisplayWidth ?? 140;
         CloudPreview.Height = pack.Manifest.Cloud?.DisplayHeight ?? 32;
-        Preview.Source = animation.Image;
+        Preview.Source = renderer.Render(animation);
         RefreshSidePreview();
         var labels = new[] { ("idle", "待机"), ("blink", "眨眼"), ("greeting", "打招呼"), ("low", "低额度"),
             ("look", "张望"), ("hover", "悬停"), ("happy", "开心"), ("conjure", "召唤王座"), ("sit", "坐下休息"), ("stand", "起身收起"), ("summon-cloud", "召唤小云"), ("cloud-idle", "乘云随风"), ("cloud-blink", "乘云眨眼"),
@@ -102,6 +113,7 @@ public partial class CharactersPage : UserControl, IDisposable
             .Select(pair => new ActionChoice(pair.Item1, pair.Item2)).ToArray();
         PreviewAction.SelectedValue = pack.Actions.ContainsKey("greeting") ? "greeting" : "idle";
         PreviewButton.IsEnabled = true;
+        clock.Restart();
     }
     private void OnUse(object sender, RoutedEventArgs e)
     {
@@ -111,14 +123,18 @@ public partial class CharactersPage : UserControl, IDisposable
     }
     private void OnPreview(object sender, RoutedEventArgs e)
     {
+        renderer.Reset();
         swingPreviewElapsed = 0;
         cloudPreview.Cancel();
         previewCloudPose = PreviewAction.SelectedValue is "cloud-idle" or "cloud-blink";
         if (PreviewAction.SelectedValue is string action)
         { animation.Preview(action); if (action == "summon-cloud") cloudPreview.Start(Selected!.Actions[action].Duration); }
         CloudPreview.Opacity = previewCloudPose ? 1 : 0;
-        Preview.Source = animation.Image;
+        Preview.Source = renderer.Render(animation);
         RefreshSidePreview();
+        // Loading/selecting a role may have blocked the UI. Start the new clip's
+        // clock after its initial drawing, not at the previous rendering event.
+        clock.Restart();
     }
     private void RefreshSidePreview()
     {

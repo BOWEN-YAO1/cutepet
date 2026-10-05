@@ -17,8 +17,10 @@ internal sealed class CharacterPresenter
     private readonly DispatcherTimer blink = new() { Interval = TimeSpan.FromSeconds(4) };
     private readonly Stopwatch animationClock = new();
     private bool rendering;
+    private TimeSpan? lastRenderingTime;
     private readonly CharacterAnimation characterAnimation = new();
-    private readonly FrameInterpolator interpolator = new();
+    private readonly CharacterFrameRenderer renderer = new();
+    private string? renderedAction;
     private readonly BehaviorRhythm rhythm;
     private readonly IdleFloat idleFloat = new();
     private bool hovered, hoverPlayed;
@@ -51,6 +53,8 @@ internal sealed class CharacterPresenter
 
     private void OnRendering(object? sender, EventArgs args)
     {
+        if(args is RenderingEventArgs frame)
+        {if(lastRenderingTime==frame.RenderingTime)return;lastRenderingTime=frame.RenderingTime;}
         var elapsed = animationClock.Elapsed;
         animationClock.Restart();
         AdvanceCharacterAnimation(elapsed);
@@ -60,7 +64,7 @@ internal sealed class CharacterPresenter
         window.CancelScreenEdge();
         window.CancelCloud();
         characterAnimation.Configure(window.SelectedCharacter);
-        interpolator.Reset();
+        renderer.Reset();
         rhythm.Reset(); idleFloat.Reset(); floating = false; window.Bob.Y = 0;
         ResetAmbient();
         window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
@@ -88,6 +92,7 @@ internal sealed class CharacterPresenter
     {
         if (rendering) return;
         animationClock.Restart();
+        lastRenderingTime=null;
         CompositionTarget.Rendering += OnRendering;
         rendering = true;
     }
@@ -248,8 +253,9 @@ internal sealed class CharacterPresenter
         if (window.Model.IsLow && !window.Model.IsStale) window.CancelCloud();
         characterAnimation.Low = window.Model.IsLow && !window.Model.IsStale;
         characterAnimation.Flying = window.CloudActive && window.CloudArt.Opacity == 1;
-        var sample = characterAnimation.Presentation;
-        var image = interpolator.Sample(sample.From, sample.To, sample.Fraction);
+        if(renderedAction!=characterAnimation.Action)
+        {renderedAction=characterAnimation.Action;animationClock.Restart();}
+        var image = renderer.Render(characterAnimation);
         if (window.CharacterArt.Source != image) window.CharacterArt.Source = image;
         ApplyFloating();
     }
@@ -280,7 +286,7 @@ internal sealed class CharacterPresenter
             rendering = false;
             animationClock.Reset();
             characterAnimation.Reset();
-            interpolator.Reset();
+            renderer.Reset();
             ResetAmbient();
             window.GreetingTilt.BeginAnimation(RotateTransform.AngleProperty, null);
             RefreshCharacterFrame();
