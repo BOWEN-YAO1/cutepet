@@ -19,8 +19,8 @@ public partial class CharactersPage : UserControl, IDisposable
     private double swingPreviewElapsed;
     private bool previewCloudPose;
     private readonly CharacterFrameRenderer renderer = new();
-    private readonly SideAnimationPreviewRenderer nativePreview = new();
-    internal SideAnimationView SideAnimationPreview => nativePreview.View;
+    private readonly NativeAnimationPreviewRenderer nativePreview = new();
+    internal NativeAnimationView NativeAnimationPreview => nativePreview.View;
     private bool rendering;
     private TimeSpan? lastRenderingTime;
     private CharacterPack? Selected => CharacterList.SelectedItem as CharacterPack;

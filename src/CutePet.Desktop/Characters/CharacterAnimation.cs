@@ -55,6 +55,9 @@ internal sealed class CharacterAnimation
     internal double RemainingTime => pack.Actions[Action].Duration - PresentationTime;
     internal bool SmoothFrames => pack.Actions[Action].SmoothFrames;
     internal CharacterSideAnimation? SideAnimation => EdgeActions.BaseOf(Action)=="edge-idle"?pack.Manifest.SideAnimation:null;
+    internal CharacterTopAnimation? TopAnimation => EdgeActions.BaseOf(Action)=="edge-top-idle"?pack.Manifest.TopAnimation:null;
+    internal BitmapSource? TopClosedEyesImage => pack.TopClosedEyesImage;
+    internal double SwingSeat => pack.Manifest.TopSwing?.SeatAnchorY ?? .69;
     internal double ActionProgress => (transient is null ? baseElapsed : transientElapsed) / pack.Actions[Action].Duration;
     internal LoadedFrame SpriteFrame => pack.Actions[Action].Frames[pack.Actions[Action].PositionAt(transient is null ? baseElapsed : transientElapsed).Index];
     internal (LoadedFrame From, LoadedFrame To, double Fraction) Presentation

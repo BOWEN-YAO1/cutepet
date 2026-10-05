@@ -141,14 +141,14 @@ internal static class ControlCenterVerification
             check(characters.Preview.Clip is RectangleGeometry && characters.SidePreviewEdge.Visibility == Visibility.Visible,
                 "character-page articulated preview masks the hidden body and shows the fixed border");
             characters.AdvancePreview(TimeSpan.FromMilliseconds(40));
-            check(characters.SideAnimationPreview.Active && characters.Preview.Opacity==1,
+            check(characters.NativeAnimationPreview.Active && characters.Preview.Opacity==1,
                 "character-page side preview uses the desktop mesh through a reusable transparent surface");
             var texture=characters.Preview.Source;
-            var before=characters.SideAnimationPreview.Mesh!.Positions.ToArray();
+            var before=characters.NativeAnimationPreview.Mesh!.Positions.ToArray();
             var previousPixels=new byte[144*192*4];((BitmapSource)texture).CopyPixels(previousPixels,144*4,0);
             characters.AdvancePreview(TimeSpan.FromMilliseconds(40));
             var nextPixels=new byte[previousPixels.Length];((BitmapSource)characters.Preview.Source).CopyPixels(nextPixels,144*4,0);
-            check(ReferenceEquals(texture,characters.Preview.Source) && !before.SequenceEqual(characters.SideAnimationPreview.Mesh!.Positions)
+            check(ReferenceEquals(texture,characters.Preview.Source) && !before.SequenceEqual(characters.NativeAnimationPreview.Mesh!.Positions)
                 && !previousPixels.SequenceEqual(nextPixels),
                 "preview changes continuous mesh pixels while reusing one small presentation surface");
             check(nextPixels.Where((_,i)=>i%4==3).Count(a=>a>128)>500,
@@ -172,6 +172,12 @@ internal static class ControlCenterVerification
                 &&Math.Abs(characters.TopPreviewLeft.X2-characters.TopPreviewLeft.X1)<15
                 &&Math.Abs(characters.TopPreviewRight.X2-characters.TopPreviewRight.X1)<15,
                 "top preview suspension is centered over the rendered character instead of the image's tight layout origin");
+            characters.AdvancePreview(TimeSpan.FromMilliseconds(400));
+            var topPreview=characters.Preview.Source as WriteableBitmap;
+            check(characters.NativeAnimationPreview.Active&&topPreview is not null,
+                "top page preview uses the shared native mesh and reusable surface");
+            var topPixels=new byte[topPreview!.PixelWidth*topPreview.PixelHeight*4];topPreview.CopyPixels(topPixels,topPreview.PixelWidth*4,0);
+            check(topPixels.Where((_,i)=>i%4==3).Count(a=>a>128)>500,"top preview paints visible seated artwork");
             Render(center,directory,"app-top-preview");
             characters.CharacterList.SelectedItem = host.Characters.Find("cat");
             check(characters.Preview.Clip is null && characters.SidePreviewEdge.Visibility == Visibility.Collapsed

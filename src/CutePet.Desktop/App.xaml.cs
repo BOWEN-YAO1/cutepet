@@ -19,6 +19,28 @@ public partial class App : Application
             catch(Exception ex){System.IO.Directory.CreateDirectory(e.Args[1]);System.IO.File.WriteAllText(System.IO.Path.Combine(e.Args[1],"failure.txt"),ex.ToString());Shutdown(1);}
             return;
         }
+        if(e.Args.Length==2&&e.Args[0]=="--verify-top-animation")
+        {
+            try{TopAnimationVerification.Run(e.Args[1]);Shutdown();}
+            catch(Exception ex){System.IO.Directory.CreateDirectory(e.Args[1]);System.IO.File.WriteAllText(System.IO.Path.Combine(e.Args[1],"failure.txt"),ex.ToString());Shutdown(1);}
+            return;
+        }
+        if(e.Args.Length==2&&e.Args[0]=="--verify-top-window")
+        {
+            var directory=e.Args[1];System.IO.Directory.CreateDirectory(directory);
+            var host=new MainWindow(new PreferencesStore(System.IO.Path.Combine(directory,"isolated-settings")),verification:true);
+            var checks=new System.Collections.Generic.List<string>();
+            try
+            {
+                host.SetCharacter(PetCharacter.Tianyi);
+                TopEdgeVerification.Run(host,directory,(passed,label)=>{if(!passed)throw new InvalidOperationException(label);checks.Add(label);});
+                SwingVerification.Run(host,directory,(passed,label)=>{if(!passed)throw new InvalidOperationException(label);checks.Add(label);});
+                System.IO.File.WriteAllText(System.IO.Path.Combine(directory,"top-window-verification.json"),System.Text.Json.JsonSerializer.Serialize(new{passed=true,checks=checks.Count}));
+                await host.StopAsync();host.Close();Shutdown();
+            }
+            catch(Exception ex){System.IO.File.WriteAllText(System.IO.Path.Combine(directory,"failure.txt"),ex.ToString());await host.StopAsync();host.Close();Shutdown(1);}
+            return;
+        }
         if (e.Args.Length == 2 && e.Args[0] == "--benchmark-animation")
         {
             AnimationPerformanceVerification.Run(e.Args[1]);

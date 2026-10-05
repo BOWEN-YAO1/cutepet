@@ -206,10 +206,14 @@ internal static class CharacterPackLoader
             actions.Add(name, clip);
         }
         SideAnimationClip.Validate(manifest,actions);
+        if(manifest.TopAnimation is { } topAnimation && (topAnimation.ClosedEyesImage is null || !SafeFile(topAnimation.ClosedEyesImage)))
+            throw new InvalidDataException("上侧闭眼图层需要合法的本地图片路径。");
+        var topEyesImage=manifest.TopAnimation is { } topRig ? LoadLayer(topRig.ClosedEyesImage) : null;
+        TopAnimationClip.Validate(manifest,actions,topEyesImage);
         var cloudImage = manifest.Cloud is { } layer ? LoadLayer(layer.Image) : null;
         var ornamentImage = manifest.TopSwing?.Ornament is { } decoration ? LoadLayer(decoration.Image) : null;
         var sceneryImage = manifest.TopSwing?.Scenery is { } sceneryLayer ? LoadLayer(sceneryLayer.Image) : null;
-        return new(manifest, builtIn, actions, directory, cloudImage, ornamentImage, sceneryImage);
+        return new(manifest, builtIn, actions, directory, cloudImage, ornamentImage, sceneryImage,topEyesImage);
 
         BitmapSource LoadLayer(string name)
         {

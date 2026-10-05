@@ -14,7 +14,7 @@ internal static class AnimationPerformanceVerification
         var pack=CharacterCatalog.BuiltIns.Single(p=>p.Id=="tianyi");
         var player=new CharacterAnimation();player.Configure(pack);
         var renderer=new CharacterFrameRenderer();
-        var native=new SideAnimationView();
+        var native=new NativeAnimationView();
         var times=new System.Collections.Generic.List<double>();
         var allocated=GC.GetAllocatedBytesForCurrentThread();
         foreach(var action in SideEdgeMotion.Responses)

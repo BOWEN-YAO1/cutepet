@@ -17,7 +17,7 @@ internal static class SideAnimationVerification
         void Check(bool passed,string text){if(!passed)throw new InvalidOperationException(text);checks.Add(text);}
         var pack=CharacterCatalog.BuiltIns.Single(p=>p.Id=="tianyi");
         var player=new CharacterAnimation();player.Configure(pack);
-        var view=new SideAnimationView();var texture=pack.Actions["edge-idle"].Frames[0].Image;
+        var view=new NativeAnimationView();var texture=pack.Actions["edge-idle"].Frames[0].Image;
         var encoder=new GifBitmapEncoder();var contact=new DrawingVisual();var captures=new List<BitmapSource>();
         var previousPose=default(SideAnimationPose);var maximumDelta=0.0;
         Check(pack.Manifest.SideAnimation is not null,"native side animation is declared by the character pack");

@@ -51,6 +51,8 @@ def main():
                     assert manifest['actions'] == built_in['actions']
                     assert manifest.get('sideAnimation') == built_in.get('sideAnimation')
                     active = {frame['image'] for action in manifest['actions'].values() for frame in action['frames']}
+                    if manifest.get('topAnimation'): active.add(manifest['topAnimation']['closedEyesImage'])
+                    assert manifest.get('topAnimation') == built_in.get('topAnimation')
                     if manifest.get('cloud'): active.add(manifest['cloud']['image'])
                     for key in ('ornament', 'scenery'):
                         if manifest.get('topSwing', {}).get(key): active.add(manifest['topSwing'][key]['image'])
@@ -61,10 +63,10 @@ def main():
                 checks.append(f'{role}: portable dialogue and every active sprite match attached source')
         checks.append('License, exact commit and matching source checksum attached')
         assert {'previews/interface/app-dialogue-settings.png', 'previews/dialogue/dialogue-preview.png'}.issubset(names)
-        assert 'previews/animations/side-native-stages.png' in names
+        assert {'previews/animations/side-native-stages.png','previews/animations/top-native-stages.png'}.issubset(names)
         assert {name for name in names if name.startswith('previews/animations/') and name.endswith('.gif')} == {
             'previews/animations/'+name for name in ('side-edge-actions.gif','bottom-edge-actions.gif','top-edge-actions.gif','cloud-landing.gif',
-                                                   'pose-sequences.gif','throne-motion.gif','seated-motion.gif','top-drawn-keyframes.gif')}
+                                                   'pose-sequences.gif','throne-motion.gif','seated-motion.gif')}
         checks.append('Fresh interface, dialogue, pose sequences, throne, seated, edges and landing grouped correctly')
     digest = hashlib.sha256(args.package.read_bytes()).hexdigest()
     assert args.package.with_name(args.package.name+'.sha256').read_text().split()[0] == digest

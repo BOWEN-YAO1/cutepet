@@ -56,12 +56,12 @@ internal static class ScreenEdgeVerification
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(window.SelectedCharacter.Actions["edge-peek"].Duration / 2));
         var smile = window.CharacterArt.Source;
         check(window.CurrentCharacterFrame == CharacterFrame.EdgePeek && window.ScreenEdgePeekOffset == 0
-            && ReferenceEquals(smile,window.SelectedCharacter.Actions["edge-idle"].Frames[0].Image) && window.SideAnimationArt.Active,
+            && ReferenceEquals(smile,window.SelectedCharacter.Actions["edge-idle"].Frames[0].Image) && window.NativeAnimationArt.Active,
             "click reaches a continuous native leaning pose without whole-body peeking translation");
-        var heldMesh = window.SideAnimationArt.Mesh!.Positions.ToArray();
+        var heldMesh = window.NativeAnimationArt.Mesh!.Positions.ToArray();
         window.BeginDetailsMenu();
         window.AdvanceCharacterAnimation(TimeSpan.FromMinutes(1));
-        check(heldMesh.SequenceEqual(window.SideAnimationArt.Mesh!.Positions) && ReferenceEquals(smile, window.CharacterArt.Source) && window.ScreenEdgePeekOffset == 0,
+        check(heldMesh.SequenceEqual(window.NativeAnimationArt.Mesh!.Positions) && ReferenceEquals(smile, window.CharacterArt.Source) && window.ScreenEdgePeekOffset == 0,
             "menu pauses both edge expression and movement clocks");
         window.EndDetailsMenu();
         window.PlayCharacterInteraction();

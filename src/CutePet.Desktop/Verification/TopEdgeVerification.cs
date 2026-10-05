@@ -21,65 +21,17 @@ internal static class TopEdgeVerification
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
         var pack=window.SelectedCharacter;
         var frames=EdgeActions.TopResponses.SelectMany(a=>pack.Actions[a].Frames).GroupBy(f=>f.Image).Select(g=>g.First()).ToArray();
-        check(frames.Length==64&&frames.All(f=>f.Image.IsFrozen),
-            "top responses use sixty-four drawn poses across four continuous sixteen-stage motions");
-        check(EdgeActions.TopResponses.All(a=>pack.Actions[a].Frames.Select(f=>f.Image).Distinct().Count()>=16),
-            "each top response contains at least sixteen actual source drawings, excluding repeats and interpolation");
-        var blinkFrames=pack.Actions["edge-top-peek"].Frames;
-        check(blinkFrames.Count==31&&blinkFrames.Take(16).Select(f=>f.Image).SequenceEqual(blinkFrames.TakeLast(16).Reverse().Select(f=>f.Image)),
-            "dense blink closes through all sixteen drawings and reopens with the exact reverse sequence");
-        var iris=blinkFrames.Take(16).Select(f=>VisibleIris(f.Image)).ToArray();
-        check(iris[0]>=50&&iris[^1]<=iris[0]*.05&&iris.Select(n=>n/10).Distinct().Count()>=8
-            &&iris.Zip(iris.Skip(1),(a,b)=>Math.Abs(a-b)).Max()<=iris[0]*.35,
-            "drawn eyelids progressively cover the green irises through at least eight visible openness levels: "+string.Join(",",iris));
-        check(iris.Zip(iris.Skip(1),(a,b)=>b-a).Max()<=iris[0]*.04,
-            "blink drawings close in measured openness order without reopening between closing stages");
-        check(EdgeActions.TopResponses.All(a=>pack.Actions[a].SmoothFrames&&pack.Actions[a].Frames.All(f=>f.DurationMs==40)),
-            "all top response keyframes use forty-millisecond samples with continuous presentation");
-        var heads=frames.Select(f=>SideEdgeVerification.HeadHeight(f.Image)).ToArray();
-        for(var i=0;i<frames.Length;i++)
-        {
-            var pose=new PngBitmapEncoder();pose.Frames.Add(BitmapFrame.Create(frames[i].Image));
-            using var file=File.Create(Path.Combine(directory,$"top-registered-{i:00}.png"));pose.Save(file);
-        }
-        check(heads.Max()-heads.Min()<=5,
-            "actual rendered top head heights remain stable across blink, look and tilt: "+string.Join(",",heads));
+        check(frames.Length==1&&frames[0].Image.IsFrozen,
+            "all top responses retain one stable frozen body texture");
+        check(EdgeActions.TopResponses.All(a=>pack.Actions[a].Frames.Count==1&&!pack.Actions[a].SmoothFrames)
+            &&pack.Manifest.TopAnimation?.Clips.Count==3&&pack.TopClosedEyesImage is {IsFrozen:true},
+            "top gestures use continuous curves and independent eyelids instead of pose sequences");
         check(frames.All(f=>f.EdgeAnchorY==pack.Manifest.EdgeTopAnchorY&&f.SwingSeatAnchorY==pack.Manifest.TopSwing!.SeatAnchorY),
-            "top poses share fixed suspension and seat registration");
-        check(pack.Actions["edge-top-idle"].Frames.Count==1&&EdgeActions.TopResponses.All(a=>
-            ReferenceEquals(pack.Actions[a].Frames[0].Image,pack.Actions["edge-top-idle"].Frames[0].Image)
-            &&ReferenceEquals(pack.Actions[a].Frames[^1].Image,pack.Actions["edge-top-idle"].Frames[0].Image)),
-            "all top responses start and finish at the exact same idle drawing");
-        // Show only painted keyframes, without the interpolator or swing transforms.
-        var drawn=new GifBitmapEncoder();var drawnDelays=new List<int>();
-        foreach(var action in EdgeActions.TopResponses)
-            foreach(var frame in pack.Actions[action].Frames)
-            {
-                var visualFrame=new DrawingVisual();
-                using(var draw=visualFrame.RenderOpen())
-                {
-                    draw.DrawRectangle(Brushes.WhiteSmoke,null,new Rect(0,0,256,352));
-                    draw.DrawImage(frame.Image,new Rect(0,0,256,352));
-                }
-                var capture=new RenderTargetBitmap(256,352,96,96,PixelFormats.Pbgra32);capture.Render(visualFrame);
-                drawn.Frames.Add(BitmapFrame.Create(capture));drawnDelays.Add(frame.DurationMs/10);
-            }
-        using(var bytes=new MemoryStream())
-        {drawn.Save(bytes);File.WriteAllBytes(Path.Combine(directory,"top-drawn-keyframes.gif"),ThroneMotionVerification.WithAnimationMetadata(bytes.ToArray(),drawnDelays));}
-        CheckHeadInterpolation(check);
-        foreach(var frame in frames)
-        {
-            var rgba=new FormatConvertedBitmap(frame.Image,PixelFormats.Bgra32,null,0);
-            var stride=rgba.PixelWidth*4;var pixels=new byte[stride*rgba.PixelHeight];rgba.CopyPixels(pixels,stride,0);
-            var y=(int)Math.Round(frame.SwingSeatAnchorY!.Value*rgba.PixelHeight);
-            bool Contact(double center)=>Enumerable.Range(Math.Max(0,(int)(center*rgba.PixelWidth)-8),17)
-                .Any(x=>pixels[y*stride+x*4+3]>=200);
-            check(Contact(.5-pack.Manifest.TopSwing!.SeatHalfWidth)&&Contact(.5+pack.Manifest.TopSwing.SeatHalfWidth),
-                "both top rope connections land on visible jade seat pixels");
-            check(Math.Abs(frame.SwingSeatAnchorY.Value-frame.EdgeAnchorY!.Value
-                -pack.Manifest.TopSwing.SeatAnchorY+pack.Manifest.EdgeTopAnchorY)<1e-9,
-                "registered top poses keep a consistent suspension-to-seat distance");
-        }
+            "native top texture has fixed suspension and seat registration");
+        check(Math.Abs(((System.Windows.Media.Media3D.OrthographicCamera)window.NativeAnimationArt.Camera).Width
+            -Math.Max(frames[0].Image.PixelWidth,frames[0].Image.PixelHeight*window.CharacterArt.Width/window.CharacterArt.Height))<1e-9,
+            "top texture uses the same uniform-fit scale as the image even after side-to-top reuse");
+        CheckHeadInterpolation(check); // Legacy custom packs still support registered frames.
         var roots=(window.SwingRopeLeft.X1,window.SwingRopeLeft.Y1,window.SwingRopeRight.X1,window.SwingRopeRight.Y1);
         var encoder=new GifBitmapEncoder();var delays=new List<int>();var samples=new List<BitmapSource>();
         var labels=new[] {"闭眼微笑","左右张望","歪头微笑"};
@@ -89,13 +41,19 @@ internal static class TopEdgeVerification
             window.PlayCharacterInteraction();
             check(window.ScreenEdgeResponse==action,"top responses rotate "+action);
             var seen=new HashSet<BitmapSource>();
+            var meshPositions=new HashSet<System.Windows.Media.Media3D.Point3D>();
             var steps=(int)Math.Ceiling(duration/20);
             for(var step=0;step<steps;step++)
             {
                 seen.Add(window.CurrentSpriteFrame.Image);
-                var capture=VerticalEdgeVerification.Capture(window,ScreenEdge.Top,labels[index]);
-                encoder.Frames.Add(BitmapFrame.Create(capture));delays.Add(2);
-                if(step==steps/4||step==steps/2||step==steps*3/4)samples.Add(capture);
+                meshPositions.Add(window.NativeAnimationArt.Mesh!.Positions[20*33+16]);
+                var sampled=step==steps/4||step==steps/2||step==steps*3/4;
+                if(step%2==0||sampled)
+                {
+                    var capture=VerticalEdgeVerification.Capture(window,ScreenEdge.Top,labels[index]);
+                    if(step%2==0){encoder.Frames.Add(BitmapFrame.Create(capture));delays.Add((int)Math.Min(40,duration-step*20)/10);}
+                    if(sampled)samples.Add(capture);
+                }
                 window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(20,duration-step*20)));
                 var frame=window.CurrentSpriteFrame;var art=window.CharacterArt;
                 var height=Math.Min(art.Height,art.Width*frame.Image.PixelHeight/frame.Image.PixelWidth);
@@ -116,18 +74,22 @@ internal static class TopEdgeVerification
                     window.BeginDetailsMenu();
                     var held=(window.CharacterArt.Source,window.EdgeSwing.Angle,window.EdgeShift.Y,window.SwingRopeLeft.X2,window.SwingRopeLeft.Y2);
                     var heldPixels=PixelHash((BitmapSource)window.CharacterArt.Source);
+                    var heldMesh=window.NativeAnimationArt.Mesh!.Positions.ToArray();
+                    var heldNative=PixelHash(WindowPreview.Surface((FrameworkElement)window.Content,window.Width,window.Height,96));
                     window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(10));
                     check(held==(window.CharacterArt.Source,window.EdgeSwing.Angle,window.EdgeShift.Y,window.SwingRopeLeft.X2,window.SwingRopeLeft.Y2),
                         "menu freezes top expression, swing phase and suspension together "+action);
-                    check(heldPixels==PixelHash((BitmapSource)window.CharacterArt.Source),
-                        "menu pause also freezes pixels inside the reused interpolation bitmap "+action);
+                    check(heldMesh.SequenceEqual(window.NativeAnimationArt.Mesh!.Positions)
+                        &&heldNative==PixelHash(WindowPreview.Surface((FrameworkElement)window.Content,window.Width,window.Height,96))
+                        &&heldPixels==PixelHash((BitmapSource)window.CharacterArt.Source),
+                        "menu pause freezes native mesh and eyelid pixels "+action);
                     window.EndDetailsMenu();window.PlayCharacterInteraction();
                     check(window.ScreenEdgeResponse==action,"busy top clicks do not accumulate or skip poses "+action);
                     window.RefreshScreenEdgeBounds(new Rect(-1920,-200,1920,1000),size);
                     check(window.ScreenEdgeResponse==action,"top work-area change preserves the running gesture "+action);
                 }
             }
-            check(seen.Count>=4&&window.ScreenEdgeResponse is null&&window.CurrentCharacterFrame==CharacterFrame.EdgeIdle
+            check(seen.Count==1&&meshPositions.Count>20&&window.ScreenEdgeResponse is null&&window.CurrentCharacterFrame==CharacterFrame.EdgeIdle
                 &&window.QuotaHost.Position==quota&&window.SwingRopes.Visibility==Visibility.Visible,
                 "top gesture settles into the suspended base with fixed quota "+action);
         }
@@ -141,7 +103,7 @@ internal static class TopEdgeVerification
             for(var i=0;i<samples.Count;i++)draw.DrawImage(samples[i],new Rect(i%3*680,i/3*390,680,390));
         var bitmap=new RenderTargetBitmap(2040,1170,96,96,PixelFormats.Pbgra32);bitmap.Render(visual);
         var png=new PngBitmapEncoder();png.Frames.Add(BitmapFrame.Create(bitmap));
-        using(var file=File.Create(Path.Combine(directory,"top-edge-contact-sheet.png")))png.Save(file);
+        using(var file=File.Create(Path.Combine(directory,"top-native-stages.png")))png.Save(file);
         var player=new CharacterAnimation();player.Configure(pack);
         foreach(var action in EdgeActions.TopResponses)
         {
@@ -151,19 +113,6 @@ internal static class TopEdgeVerification
             check(player.Action=="low","low quota clears top preview "+action);
             player.Configure(pack);
         }
-    }
-
-    private static int VisibleIris(BitmapSource image)
-    {
-        var rgba=new FormatConvertedBitmap(image,PixelFormats.Bgra32,null,0);
-        var width=rgba.PixelWidth;var bytes=new byte[width*rgba.PixelHeight*4];rgba.CopyPixels(bytes,width*4,0);
-        var top=rgba.PixelHeight;var count=0;
-        for(var y=0;y<rgba.PixelHeight;y++)for(var x=0;x<width;x++)
-            if(bytes[(y*width+x)*4+3]>=200)top=Math.Min(top,y);
-        // Fixed registered eye band excludes forehead jade, earrings and seat.
-        for(var y=top+100;y<top+142;y++)for(var x=65;x<190;x++)
-        {var p=(y*width+x)*4;if(bytes[p+3]>=200&&bytes[p+1]>bytes[p+2]*1.15&&bytes[p+1]>bytes[p]*1.05)count++;}
-        return count;
     }
 
     private static void CheckHeadInterpolation(Action<bool,string> check)

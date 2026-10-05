@@ -6,7 +6,7 @@ using System.Windows;
 
 namespace CutePet.Desktop;
 
-internal readonly record struct SideAnimationPose(double Peek,double Lift,double Angle,double Sway);
+internal readonly record struct SideAnimationPose(double Peek,double Lift,double Angle,double Sway,double Blink=0);
 
 internal static class SideAnimationClip
 {
@@ -37,7 +37,7 @@ internal static class SideAnimationClip
             {
                 var key=keys[i];
                 if(key is null||!double.IsFinite(key.At)||key.At<0||key.At>1||i>0&&key.At<=keys[i-1].At
-                    ||!Bound(key.Peek,-16,40)||!Bound(key.Lift,-8,8)||!Bound(key.Angle,-6,6)||!Bound(key.Sway,-4,4))
+                    ||!Bound(key.Peek,-16,40)||!Bound(key.Lift,-8,8)||!Bound(key.Angle,-6,6)||!Bound(key.Sway,-4,4)||key.Blink!=0)
                     throw new InvalidDataException("运动曲线时间必须递增且位移、角度在允许范围内。");
             }
             if(keys[0].At!=0||keys[^1].At!=1||keys[0]!=new CharacterMotionKey(0)||keys[^1]!=new CharacterMotionKey(1))
@@ -51,7 +51,7 @@ internal static class SideAnimationClip
         var t=Math.Clamp(progress,0,1);var i=0;
         while(i+2<keys.Count&&t>keys[i+1].At)i++;
         return new(Curve(keys,i,t,k=>k.Peek),Curve(keys,i,t,k=>k.Lift),
-            Curve(keys,i,t,k=>k.Angle),Curve(keys,i,t,k=>k.Sway));
+            Curve(keys,i,t,k=>k.Angle),Curve(keys,i,t,k=>k.Sway),Curve(keys,i,t,k=>k.Blink));
     }
     // Shape-preserving cubic Hermite: continuous velocity, no overshoot into the border.
     private static double Curve(IReadOnlyList<CharacterMotionKey> keys,int i,double at,Func<CharacterMotionKey,double> value)

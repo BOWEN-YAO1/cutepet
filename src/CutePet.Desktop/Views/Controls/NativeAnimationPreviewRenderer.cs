@@ -7,9 +7,9 @@ namespace CutePet.Desktop;
 
 // The scrolling 2D character page receives a small reusable transparent surface.
 // Motion still comes from the same native mesh; there is no bitmap sequence.
-internal sealed class SideAnimationPreviewRenderer
+internal sealed class NativeAnimationPreviewRenderer
 {
-    internal SideAnimationView View { get; } = new();
+    internal NativeAnimationView View { get; } = new();
     private RenderTargetBitmap? target;
     private WriteableBitmap? output;
     private byte[]? pixels;

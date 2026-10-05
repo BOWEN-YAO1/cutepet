@@ -47,17 +47,20 @@ internal static class SideEdgeVerification
                 var steps=(int)Math.Ceiling(duration/20);
                 for (var step = 0; step < steps; step++)
                 {
-                    var frame = ScreenEdgeVerification.Capture(window, side, (side == ScreenEdge.Left ? "左侧 · " : "右侧 · ") + labels[index]);
-                    // Keep the GIF at 50 fps so it does not hide the new
-                    // inbetweens. A smaller preview keeps memory/file size near
-                    // the previous 25 fps export without changing window checks.
-                    var preview=new DrawingVisual();using(var draw=preview.RenderOpen())
-                        draw.DrawImage(frame,new Rect(0,0,476,273));
-                    var previewBitmap=new RenderTargetBitmap(476,273,96,96,PixelFormats.Pbgra32);previewBitmap.Render(preview);
-                    encoder.Frames.Add(BitmapFrame.Create(previewBitmap));delays.Add(2);
+                    var label=(side == ScreenEdge.Left ? "左侧 · " : "右侧 · ") + labels[index];
+                    if(step%2==0||step==steps/3)
+                    {
+                        var frame=ScreenEdgeVerification.Capture(window,side,label);
+                        if(step%2==0)
+                        {
+                            var preview=new DrawingVisual();using(var draw=preview.RenderOpen())draw.DrawImage(frame,new Rect(0,0,476,273));
+                            var previewBitmap=new RenderTargetBitmap(476,273,96,96,PixelFormats.Pbgra32);previewBitmap.Render(preview);
+                            encoder.Frames.Add(BitmapFrame.Create(previewBitmap));delays.Add((int)Math.Min(40,duration-step*20)/10);
+                        }
+                        if(step==steps/3)samples.Add(frame);
+                    }
                     seen.Add(window.CurrentSpriteFrame.Image);
-                    positions.Add(window.SideAnimationArt.Mesh!.Positions[84]);
-                    if (step == steps/3) samples.Add(frame);
+                    positions.Add(window.NativeAnimationArt.Mesh!.Positions[84]);
                     window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(20,duration-step*20)));
                     maximumOutward = Math.Max(maximumOutward,window.ScreenEdgePeekOffset);
                     var current = window.CurrentSpriteFrame;
@@ -70,10 +73,10 @@ internal static class SideEdgeVerification
                         else check(Math.Abs(leftAngles[action] + window.SideEdgeTilt.Angle) < .0001,
                             "right-side gesture mirrors its corresponding left tilt " + action);
                         window.BeginDetailsMenu();
-                        var heldMesh = window.SideAnimationArt.Mesh!.Positions.ToArray();
+                        var heldMesh = window.NativeAnimationArt.Mesh!.Positions.ToArray();
                         var held = (window.EdgeShift.X,window.EdgeShift.Y,window.SideEdgeTilt.Angle,window.CharacterArt.Source);
                         window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(10));
-                        check(heldMesh.SequenceEqual(window.SideAnimationArt.Mesh!.Positions) && held == (window.EdgeShift.X,window.EdgeShift.Y,window.SideEdgeTilt.Angle,window.CharacterArt.Source),
+                        check(heldMesh.SequenceEqual(window.NativeAnimationArt.Mesh!.Positions) && held == (window.EdgeShift.X,window.EdgeShift.Y,window.SideEdgeTilt.Angle,window.CharacterArt.Source),
                             "menu freezes gesture motion and expression together " + side + action);
                         window.EndDetailsMenu();
                         window.PlayCharacterInteraction();
@@ -98,8 +101,8 @@ internal static class SideEdgeVerification
         }
         using var bytes = new MemoryStream(); encoder.Save(bytes);
         File.WriteAllBytes(Path.Combine(directory,"side-edge-actions.gif"),ThroneMotionVerification.WithAnimationMetadata(bytes.ToArray(),delays));
-        check(encoder.Frames.Count == SideEdgeMotion.Responses.Sum(a=>(int)Math.Ceiling(window.SelectedCharacter.Actions[a].Duration/20))*2,
-            "side window GIF and assertions both sample every twenty milliseconds for fifty-fps inbetween playback");
+        check(encoder.Frames.Count == SideEdgeMotion.Responses.Sum(a=>(int)Math.Ceiling(window.SelectedCharacter.Actions[a].Duration/40))*2,
+            "side assertions sample at fifty Hz; lightweight preview samples at twenty-five fps");
         var contact = new DrawingVisual();
         using (var draw = contact.RenderOpen())
             for (var row = 0; row < 4; row++)

@@ -256,8 +256,8 @@ internal sealed class CharacterPresenter
         characterAnimation.Flying = window.CloudActive && window.CloudArt.Opacity == 1;
         if(renderedAction!=characterAnimation.Action)
         {renderedAction=characterAnimation.Action;animationClock.Restart();}
-        var continuous=window.SideAnimationArt.Present(characterAnimation);
-        window.SideAnimationArt.Visibility=continuous?Visibility.Visible:Visibility.Collapsed;
+        var continuous=window.NativeAnimationArt.Present(characterAnimation);
+        window.NativeAnimationArt.Visibility=continuous?Visibility.Visible:Visibility.Collapsed;
         window.CharacterArt.Opacity=continuous?0:1;
         var image = continuous?characterAnimation.Image:renderer.Render(characterAnimation);
         if (window.CharacterArt.Source != image) window.CharacterArt.Source = image;

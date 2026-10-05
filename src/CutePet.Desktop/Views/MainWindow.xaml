@@ -30,7 +30,7 @@
               <TranslateTransform x:Name="EdgeShift" /><RotateTransform x:Name="CloudLean" />
               <TranslateTransform x:Name="CloudCharacterBob" /></TransformGroup></Image.RenderTransform>
           </Image>
-          <local:SideAnimationView x:Name="SideAnimationArt" Visibility="Collapsed"
+          <local:NativeAnimationView x:Name="NativeAnimationArt" Visibility="Collapsed"
               Width="{Binding ElementName=CharacterArt,Path=Width}" Height="{Binding ElementName=CharacterArt,Path=Height}"
               VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5"
               RenderTransform="{Binding ElementName=CharacterArt,Path=RenderTransform}"/>

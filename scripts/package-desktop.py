@@ -61,7 +61,7 @@ def main():
         for name in ('app-overview.png', 'app-characters.png', 'app-activity.png', 'app-settings.png', 'app-dialogue-settings.png'):
             shutil.copy2(args.verification_dir/name, stage/'previews/interface'/name)
         for name in ('side-edge-actions.gif', 'side-edge-contact-sheet.png', 'side-native-stages.png', 'bottom-edge-actions.gif',
-                     'bottom-edge-contact-sheet.png', 'top-edge-actions.gif', 'top-edge-contact-sheet.png', 'top-drawn-keyframes.gif', 'cloud-landing.gif',
+                     'bottom-edge-contact-sheet.png', 'top-edge-actions.gif', 'top-native-stages.png', 'cloud-landing.gif',
                      'pose-sequences.gif', 'pose-contact-sheet.png', 'throne-motion.gif', 'seated-motion.gif'):
             shutil.copy2(args.verification_dir/name, stage/'previews/animations'/name)
         shutil.copy2(args.verification_dir/'dialogue-preview.png', stage/'previews/dialogue/dialogue-preview.png')
@@ -71,6 +71,7 @@ def main():
             manifest = json.loads((pack/'character.json').read_text(encoding='utf-8-sig'))
             assert sum(map(len, manifest['dialogue'].values())) == count
             files = {frame['image'] for action in manifest['actions'].values() for frame in action['frames']}
+            if manifest.get('topAnimation'): files.add(manifest['topAnimation']['closedEyesImage'])
             if manifest.get('cloud'): files.add(manifest['cloud']['image'])
             for name in ('ornament', 'scenery'):
                 if manifest.get('topSwing', {}).get(name): files.add(manifest['topSwing'][name]['image'])
@@ -91,13 +92,17 @@ def main():
 需要 Windows x64 和 .NET 8 Desktop Runtime；运行文件请保持在同一个目录。
 原有设置和已导入的角色包继续沿用，无需删除设置。以前导入的角色不会被自动覆盖。
 
-这版先将天依左右侧边改为单张贴图＋连续网格动画，支持探出、缩回再探出、轻摇和点头。
-每个动作使用少量运动控制点；人物沿连续曲线变形，双手保持固定，不再切换侧边序列图。
-previews/animations/side-edge-actions.gif 展示实际左右窗口效果；side-native-stages.png 展示探出过程。
-脸部表情沿用基础贴图，暂未拆分眼睛、嘴巴、头发等独立图层。这是新方案的侧边试版。
-上侧、下侧、乘云和坐姿暂沿用原有播放方式；旧自定义角色包也保留原播放方式。
-天依共179个活跃绘图、28个动作，新天依角色包需要应用0.46.0。
-上侧秋千保留固定座椅、悬挂点和花藤绳饰。GIF仅供预览，程序内侧边由原生网格实时绘制。
+本版把上侧秋千也改为连续网格动画，保留花藤、绳饰和固定座椅。
+上侧人物共用一张固定底图；闭眼采用独立眼部图层，头部、发梢与小幅腿部运动按连续曲线计算。
+支持闭眼点头、左右张望、歪头；动作首尾回归同一姿态，座椅与绳索连接区域不参与局部变形。
+左右侧边保留探出、缩回再探出、轻摇和点头的原生连续动画。
+previews/animations/top-edge-actions.gif 展示实际秋千效果；top-native-stages.png 展示三个动作的阶段。
+side-edge-actions.gif 展示左右窗口效果；side-native-stages.png 展示探出过程。
+GIF预览为25fps，程序中的原生网格随屏幕刷新按实际经过时间更新；实际帧率取决于设备和窗口环境。
+角色页使用同一网格动作，绘制到可复用的小尺寸30fps透明预览表面。
+下侧、乘云和坐姿暂沿用已有播放方式；旧自定义角色包也保留原播放方式。
+当前116种动作底图及1个额外闭眼图层，28个动作，新天依角色包需要应用0.47.0。
+尚未完整拆分发丝、嘴型、手臂与服装，当前为连续网格动画试版。
 请选择内置天依体验新版；此前导入的角色包保留原动作，可另行导入本版 characters 内的天依包。
 乘云和自动休息继续统一轮换，坐姿和贴边自动动作减少重复。
 点击时立即回应，云朵与浮动姿态柔和收回。拖动、锁定、隐藏、角色切换和低额度仍能立即中止移动。
