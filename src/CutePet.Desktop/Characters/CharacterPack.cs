@@ -23,6 +23,7 @@ public sealed record CharacterManifest
     public double EdgeBottomAnchorY { get; init; } = 1;
     public CharacterCloud? Cloud { get; init; }
     public CharacterTopSwing? TopSwing { get; init; }
+    public CharacterSideAnimation? SideAnimation { get; init; }
     public Dictionary<string, string[]>? Dialogue { get; init; }
     public Dictionary<string, CharacterAction> Actions { get; init; } = new();
 }
@@ -59,6 +60,15 @@ public sealed record CharacterAction
     public bool SmoothFrames { get; init; }
     public List<CharacterActionFrame> Frames { get; init; } = new();
 }
+// Continuous motion curves use a single registered texture, not pose sequences.
+public sealed record CharacterSideAnimation
+{
+    public double IdleOffsetX { get; init; } = -32;
+    public double HeadPivotX { get; init; } = .5;
+    public double HeadPivotY { get; init; } = .52;
+    public Dictionary<string, List<CharacterMotionKey>> Clips { get; init; } = new();
+}
+public sealed record CharacterMotionKey(double At, double Peek = 0, double Lift = 0, double Angle = 0, double Sway = 0);
 public sealed record CharacterFrameRegion(int X, int Y, int Width, int Height);
 // Optional registration of a differently sized source crop on the action canvas.
 public sealed record CharacterFrameCanvas(int Width, int Height, double Scale, double OffsetX, double OffsetY);

@@ -140,15 +140,19 @@ internal static class ControlCenterVerification
             await Settle();
             check(characters.Preview.Clip is RectangleGeometry && characters.SidePreviewEdge.Visibility == Visibility.Visible,
                 "character-page articulated preview masks the hidden body and shows the fixed border");
-            characters.AdvancePreview(TimeSpan.FromMilliseconds(16));
-            var smoothPreview=characters.Preview.Source as System.Windows.Media.Imaging.WriteableBitmap;
-            check(smoothPreview is not null,"character-page side preview uses the same interpolated presentation as the desktop");
-            var previewPixels=new byte[smoothPreview!.PixelWidth*smoothPreview.PixelHeight*4];
-            smoothPreview.CopyPixels(previewPixels,smoothPreview.PixelWidth*4,0);
-            characters.AdvancePreview(TimeSpan.FromMilliseconds(16));
-            var nextPreviewPixels=new byte[previewPixels.Length];smoothPreview.CopyPixels(nextPreviewPixels,smoothPreview.PixelWidth*4,0);
-            check(ReferenceEquals(smoothPreview,characters.Preview.Source)&&!previewPixels.SequenceEqual(nextPreviewPixels),
-                "preview generates changing inbetween pixels while reusing one presentation surface");
+            characters.AdvancePreview(TimeSpan.FromMilliseconds(40));
+            check(characters.SideAnimationPreview.Active && characters.Preview.Opacity==1,
+                "character-page side preview uses the desktop mesh through a reusable transparent surface");
+            var texture=characters.Preview.Source;
+            var before=characters.SideAnimationPreview.Mesh!.Positions.ToArray();
+            var previousPixels=new byte[144*192*4];((BitmapSource)texture).CopyPixels(previousPixels,144*4,0);
+            characters.AdvancePreview(TimeSpan.FromMilliseconds(40));
+            var nextPixels=new byte[previousPixels.Length];((BitmapSource)characters.Preview.Source).CopyPixels(nextPixels,144*4,0);
+            check(ReferenceEquals(texture,characters.Preview.Source) && !before.SequenceEqual(characters.SideAnimationPreview.Mesh!.Positions)
+                && !previousPixels.SequenceEqual(nextPixels),
+                "preview changes continuous mesh pixels while reusing one small presentation surface");
+            check(nextPixels.Where((_,i)=>i%4==3).Count(a=>a>128)>500,
+                "native preview actually paints visible artwork");
             Render(center,directory,"app-side-preview");
             characters.PreviewAction.SelectedValue="edge-bottom-look";
             characters.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));

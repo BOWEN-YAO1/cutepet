@@ -19,6 +19,8 @@ public partial class CharactersPage : UserControl, IDisposable
     private double swingPreviewElapsed;
     private bool previewCloudPose;
     private readonly CharacterFrameRenderer renderer = new();
+    private readonly SideAnimationPreviewRenderer nativePreview = new();
+    internal SideAnimationView SideAnimationPreview => nativePreview.View;
     private bool rendering;
     private TimeSpan? lastRenderingTime;
     private CharacterPack? Selected => CharacterList.SelectedItem as CharacterPack;
@@ -66,17 +68,18 @@ public partial class CharactersPage : UserControl, IDisposable
     }
     internal void AdvancePreview(TimeSpan elapsed)
     {
+        nativePreview.Advance(elapsed);
         animation.Advance(elapsed);
         swingPreviewElapsed=(swingPreviewElapsed+elapsed.TotalMilliseconds)%3200;
         cloudPreview.Advance(elapsed);
         animation.Flying=previewCloudPose||cloudPreview.Active&&cloudPreview.Opacity==1;
         CloudPreview.Opacity=previewCloudPose?1:cloudPreview.Opacity;
-        Preview.Source=renderer.Render(animation);RefreshSidePreview();
+        PresentCharacter();RefreshSidePreview();
     }
     private void StopRendering()
     {
         if(rendering)CompositionTarget.Rendering-=OnRendering;
-        rendering=false;lastRenderingTime=null;clock.Reset();renderer.Reset();
+        rendering=false;lastRenderingTime=null;clock.Reset();renderer.Reset();nativePreview.Reset();
     }
     public void Dispose() { host.DesktopStateChanged -= OnHostStateChanged;StopRendering();renderer.Reset(); }
     private void RefreshList(string? selected)
@@ -96,7 +99,7 @@ public partial class CharactersPage : UserControl, IDisposable
         CloudPreview.Source = pack.CloudImage;
         CloudPreview.Width = pack.Manifest.Cloud?.DisplayWidth ?? 140;
         CloudPreview.Height = pack.Manifest.Cloud?.DisplayHeight ?? 32;
-        Preview.Source = renderer.Render(animation);
+        PresentCharacter();
         RefreshSidePreview();
         var labels = new[] { ("idle", "待机"), ("blink", "眨眼"), ("greeting", "打招呼"), ("low", "低额度"),
             ("look", "张望"), ("hover", "悬停"), ("happy", "开心"), ("conjure", "召唤王座"), ("sit", "坐下休息"), ("stand", "起身收起"), ("summon-cloud", "召唤小云"), ("cloud-idle", "乘云随风"), ("cloud-blink", "乘云眨眼"),
@@ -130,11 +133,15 @@ public partial class CharactersPage : UserControl, IDisposable
         if (PreviewAction.SelectedValue is string action)
         { animation.Preview(action); if (action == "summon-cloud") cloudPreview.Start(Selected!.Actions[action].Duration); }
         CloudPreview.Opacity = previewCloudPose ? 1 : 0;
-        Preview.Source = renderer.Render(animation);
+        PresentCharacter();
         RefreshSidePreview();
         // Loading/selecting a role may have blocked the UI. Start the new clip's
         // clock after its initial drawing, not at the previous rendering event.
         clock.Restart();
+    }
+    private void PresentCharacter()
+    {
+        Preview.Source=nativePreview.Present(animation) ?? renderer.Render(animation);
     }
     private void RefreshSidePreview()
     {

@@ -60,8 +60,8 @@ def main():
             f'Commit: {sha}\nMatching GPL v3 source: {source.name}\nSHA256: {checksum(source)}\n', encoding='utf-8')
         for name in ('app-overview.png', 'app-characters.png', 'app-activity.png', 'app-settings.png', 'app-dialogue-settings.png'):
             shutil.copy2(args.verification_dir/name, stage/'previews/interface'/name)
-        for name in ('side-edge-actions.gif', 'side-edge-contact-sheet.png', 'side-144-stages.png', 'bottom-edge-actions.gif',
-                     'bottom-edge-contact-sheet.png', 'top-edge-actions.gif', 'top-edge-contact-sheet.png', 'top-drawn-keyframes.gif', 'side-drawn-keyframes.gif', 'cloud-landing.gif',
+        for name in ('side-edge-actions.gif', 'side-edge-contact-sheet.png', 'side-native-stages.png', 'bottom-edge-actions.gif',
+                     'bottom-edge-contact-sheet.png', 'top-edge-actions.gif', 'top-edge-contact-sheet.png', 'top-drawn-keyframes.gif', 'cloud-landing.gif',
                      'pose-sequences.gif', 'pose-contact-sheet.png', 'throne-motion.gif', 'seated-motion.gif'):
             shutil.copy2(args.verification_dir/name, stage/'previews/animations'/name)
         shutil.copy2(args.verification_dir/'dialogue-preview.png', stage/'previews/dialogue/dialogue-preview.png')
@@ -91,21 +91,13 @@ def main():
 需要 Windows x64 和 .NET 8 Desktop Runtime；运行文件请保持在同一个目录。
 原有设置和已导入的角色包继续沿用，无需删除设置。以前导入的角色不会被自动覆盖。
 
-这版统一预览和桌宠的连续播放，为侧边加入头部与画面细节的实时过渡，减少逐张跳图。
-保留144级探出、16张点头、16张轻摇，共176张不同姿势。
-左右共用绘图并镜像，缩回使用原路倒放，扶边点固定。
-previews/animations/side-drawn-keyframes.gif直接播放原绘图；side-edge-actions.gif展示左右窗口效果。
-上侧继续保留64张绘图：闭眼、向左张望、向右张望、微笑歪头各16张。
-天依共354个活跃绘图、28个动作。固定座椅与悬挂点，保留花藤绳饰，动作沿原路倒放回收。
-previews/animations/top-drawn-keyframes.gif直接播放原绘图，不经过图片混合；top-edge-actions.gif展示实际窗口效果。
-新天依角色包需应用0.44.0。
-回应开始、结束和待机共用同一姿势，头部配准后的过渡不会拖动秋千板。
-侧边统一头部尺寸，头部短过渡在上方手掌前归零，两只手保持扶边；原始 PNG 不修改。
-侧边探出源图每张10毫秒，点头和轻摇每张40毫秒；随屏幕刷新连续采样，GIF预览为50 fps。
-侧边采用35毫秒的局部稳定过渡，双手仍保持扶边，动作结束前恢复准确待机姿势。
-源像素缓存最多80 MiB，减少反复分配造成的偶发停顿；切换角色或隐藏后释放。
-保留侧边探头、缩回再探出、轻摇和点头。回收共用逆序，停留重复引用原图，不计作新增绘图。
-帧间过渡为像素混合，复杂结构仍可能有轻微重影；发丝、衣纹和表情仍有 AI 绘图差异。
+这版先将天依左右侧边改为单张贴图＋连续网格动画，支持探出、缩回再探出、轻摇和点头。
+每个动作使用少量运动控制点；人物沿连续曲线变形，双手保持固定，不再切换侧边序列图。
+previews/animations/side-edge-actions.gif 展示实际左右窗口效果；side-native-stages.png 展示探出过程。
+脸部表情沿用基础贴图，暂未拆分眼睛、嘴巴、头发等独立图层。这是新方案的侧边试版。
+上侧、下侧、乘云和坐姿暂沿用原有播放方式；旧自定义角色包也保留原播放方式。
+天依共179个活跃绘图、28个动作，新天依角色包需要应用0.46.0。
+上侧秋千保留固定座椅、悬挂点和花藤绳饰。GIF仅供预览，程序内侧边由原生网格实时绘制。
 请选择内置天依体验新版；此前导入的角色包保留原动作，可另行导入本版 characters 内的天依包。
 乘云和自动休息继续统一轮换，坐姿和贴边自动动作减少重复。
 点击时立即回应，云朵与浮动姿态柔和收回。拖动、锁定、隐藏、角色切换和低额度仍能立即中止移动。

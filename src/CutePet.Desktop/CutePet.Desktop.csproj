@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>disable</ImplicitUsings>
     <AssemblyName>CutePet</AssemblyName>
-    <Version>0.45.0</Version>
+    <Version>0.46.0</Version>
     <ApplicationIcon>Assets/cutepet.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
@@ -16,9 +16,7 @@
     <Resource Include="Characters/Packs/tianyi/standing-sequence-v4.png" />
     <Resource Include="Characters/Packs/tianyi/throne-sequence-v4.png" />
     <Resource Include="Characters/Packs/tianyi/cloud-sequence-v5.png" />
-    <Resource Include="Characters/Packs/tianyi/side-*-v7.png" Exclude="Characters/Packs/tianyi/side-reveal-b-v7.png" />
-    <Resource Include="Characters/Packs/tianyi/side-reveal-b-v8.png" />
-    <Resource Include="Characters/Packs/tianyi/side-transition-*-v9.png" />
+    <Resource Include="Characters/Packs/tianyi/side-rig-v1.png" />
     <Resource Include="Characters/Packs/tianyi/bottom-sequence-v6.png" />
     <Resource Include="Characters/Packs/tianyi/top-*-v6.png" />
     <Resource Include="Characters/Packs/tianyi/*-inbetweens-v1.png" Exclude="Characters/Packs/tianyi/side-inbetweens-v1.png;Characters/Packs/tianyi/top-inbetweens-v1.png" />

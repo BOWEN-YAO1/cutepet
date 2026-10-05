@@ -205,6 +205,7 @@ internal static class CharacterPackLoader
             if (clip.Duration > 30000) throw new InvalidDataException("一个动作最多持续 30 秒。");
             actions.Add(name, clip);
         }
+        SideAnimationClip.Validate(manifest,actions);
         var cloudImage = manifest.Cloud is { } layer ? LoadLayer(layer.Image) : null;
         var ornamentImage = manifest.TopSwing?.Ornament is { } decoration ? LoadLayer(decoration.Image) : null;
         var sceneryImage = manifest.TopSwing?.Scenery is { } sceneryLayer ? LoadLayer(sceneryLayer.Image) : null;

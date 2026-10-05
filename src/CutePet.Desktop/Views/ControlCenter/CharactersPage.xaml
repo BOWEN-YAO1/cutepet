@@ -23,7 +23,8 @@
                 <Line x:Name="TopPreviewRight" Stroke="{DynamicResource CenterInk}" StrokeThickness="1"/>
               </Canvas>
               <Image x:Name="CloudPreview" Width="140" Height="32" VerticalAlignment="Bottom" Margin="0,0,0,12" Opacity="0" Stretch="Uniform"/>
-              <Image x:Name="Preview" Margin="16,12,16,24" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="所选角色动作预览"/></Grid>
+              <Image x:Name="Preview" Margin="16,12,16,24" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="所选角色动作预览"/>
+            </Grid>
           </Border>
           <TextBlock x:Name="CharacterInfo" TextWrapping="Wrap" FontSize="17" FontWeight="SemiBold" Margin="0,14,0,14"/>
           <WrapPanel Margin="0,0,0,10"><Button x:Name="UseButton" Content="使用此角色" Style="{StaticResource CenterPrimary}" Click="OnUse"/>

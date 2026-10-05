@@ -15,7 +15,7 @@ internal static class SequenceVerification
     internal static void Run(CharacterPack pack, string directory, Action<bool,string> check)
     {
         var unique = pack.Actions.Values.SelectMany(c=>c.Frames).DistinctBy(f=>f.Image).ToArray();
-        check(unique.Length==354 && unique.All(f=>f.Image.IsFrozen),
+        check(unique.Length==179 && unique.All(f=>f.Image.IsFrozen),
             "registered standing poses and a replacement side sequence share frozen caches");
         var hashes=new HashSet<string>();
         foreach(var frame in unique)
@@ -27,16 +27,15 @@ internal static class SequenceVerification
                 && bytes[(rgba.PixelHeight-1)*stride+x*4+3]<200),
                 "registered pose preserves vertical transparent gutters "+hashes.Count);
         }
-        check(hashes.Count==354,"adopted poses contain distinct painted pixels rather than duplicate stills");
+        check(hashes.Count==179,"adopted poses contain distinct painted pixels rather than duplicate stills");
         check(pack.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null && f.Image.Contains("inbetweens"))
             .DistinctBy(f=>(f.Image,f.Region,f.Canvas)).Count()==50,
             "remaining insertion sources have explicit scale and placement registration");
         check(ReferenceEquals(pack.Actions["greeting"].Frames[0].Image,pack.Idle.Frames[0].Image)
             && ReferenceEquals(pack.Actions["happy"].Frames[0].Image,pack.Idle.Frames[0].Image),
             "standing responses enter from the exact shared idle pose");
-        var reveal=pack.Actions["edge-peek"].Frames.Where(f=>f.Image is RenderTargetBitmap).Select(f=>f.Image).ToArray();
-        check(reveal.Length==287 && reveal.Take(144).SequenceEqual(reveal.TakeLast(144).Reverse()),
-            "side reveal uses 144 registered drawings and exactly reverses them on return");
+        check(pack.Actions["edge-peek"].Frames.Count==1 && pack.Manifest.SideAnimation is not null,
+            "side reveal carries one texture and continuous curves");
         check(pack.Actions["greeting"].Duration==880 && pack.Actions["conjure"].Duration==1500
             && pack.Actions["stand"].Duration==1000 && pack.Actions["cloud-idle"].Duration==1260,
             "extra drawings preserve wave, throne and cruising durations");

@@ -13,6 +13,12 @@ public partial class App : Application
     {
         base.OnStartup(e);
         CenterColors.Apply(Resources, new Preferences());
+        if(e.Args.Length==2&&e.Args[0]=="--verify-side-animation")
+        {
+            try{SideAnimationVerification.Run(e.Args[1]);Shutdown();}
+            catch(Exception ex){System.IO.Directory.CreateDirectory(e.Args[1]);System.IO.File.WriteAllText(System.IO.Path.Combine(e.Args[1],"failure.txt"),ex.ToString());Shutdown(1);}
+            return;
+        }
         if (e.Args.Length == 2 && e.Args[0] == "--benchmark-animation")
         {
             AnimationPerformanceVerification.Run(e.Args[1]);

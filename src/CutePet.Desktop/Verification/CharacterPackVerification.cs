@@ -109,11 +109,9 @@ internal static class CharacterPackVerification
         check(player.Action == "greeting", "old four-action packs retain their greeting on either click choice");
         var tianyi = library.Find("tianyi");
         using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
-            check(new[]{"side-reveal-a-v7.png","side-reveal-b-v8.png","side-nod-v7.png","side-sway-v7.png"}
-                .All(name=>edgeArchive.GetEntry(name) is not null)
-                && edgeArchive.GetEntry("side-sequence-v6.png") is null && edgeArchive.GetEntry("edge-sequence-v5.png") is null
-                && edgeArchive.GetEntry("side-inbetweens-v1.png") is null,
-                "Tianyi export carries the articulated atlas without the superseded floating full-body sprites");
+            check(edgeArchive.GetEntry("side-rig-v1.png") is not null
+                && edgeArchive.GetEntry("side-transition-v9.png") is null && edgeArchive.GetEntry("side-nod-v7.png") is null,
+                "Tianyi export carries only the active side texture");
         var edgeFiles = new Dictionary<string, byte[]>();
         using (var edgeArchive = ZipFile.OpenRead(Path.Combine(area, "tianyi.cutepet.zip")))
             foreach (var entry in edgeArchive.Entries.Where(entry => entry.FullName.EndsWith(".png", StringComparison.OrdinalIgnoreCase)))
@@ -124,7 +122,7 @@ internal static class CharacterPackVerification
         check(SideEdgeMotion.Responses.All(edgeRoundTrip.Actions.ContainsKey)
             && ReferenceEquals(edgeRoundTrip.Actions["edge-shy"].Frames[0].Image,edgeRoundTrip.Actions["edge-idle"].Frames[0].Image),
             "all side gestures export and import while deduplicating their shared artwork");
-        check(edgeRoundTrip.Actions["edge-peek"].Frames.Select(f => f.Image).Distinct().Count() >= 6
+        check(edgeRoundTrip.Actions["edge-peek"].Frames.Select(f => f.Image).Distinct().Count() == 1
             && edgeRoundTrip.Manifest.Actions["edge-peek"].Frames.All(f => f.Region is not null && f.EdgeAnchorX is not null && f.EdgeAnchorY is not null),
             "atlas regions and per-frame gripping anchors survive actual export and import");
         foreach (var region in new[] {new CharacterFrameRegion(-1,0,384,512), new CharacterFrameRegion(0,0,0,512),
@@ -151,25 +149,35 @@ internal static class CharacterPackVerification
             && edgeRoundTrip.Actions["edge-bottom-peek"].Frames[0].Image == edgeRoundTrip.Actions["edge-bottom-idle"].Frames[0].Image
             && edgeFiles.ContainsKey("bottom-sequence-v6.png") && !edgeFiles.ContainsKey("edge-bottom-v1.png"),
             "bottom atlas responses export and import with shared cached views instead of old body-stretch sprites");
-        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 1720,
+        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 370,
             "expanded sequences stay within the bounded 2048-reference package limit");
         check(edgeRoundTrip.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)
             .SequenceEqual(tianyi.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)),
             "source crops and canvas registration survive real export and import");
-        check(SideEdgeMotion.Responses.All(a=>edgeRoundTrip.Actions[a].SmoothFrames
+        check(SideEdgeMotion.Responses.All(a=>!edgeRoundTrip.Actions[a].SmoothFrames
             && edgeRoundTrip.Actions[a].Frames.Select(f=>f.DurationMs).SequenceEqual(tianyi.Actions[a].Frames.Select(f=>f.DurationMs))),
-            "registered side smoothing and mixed ten/forty-millisecond timings survive actual export and import");
+            "native side duration and static texture survive export and import");
+        check(SideEdgeMotion.Responses.All(a=>edgeRoundTrip.Manifest.SideAnimation!.Clips[a]
+            .SequenceEqual(tianyi.Manifest.SideAnimation!.Clips[a])), "continuous motion curves survive real export and import");
+        foreach(var keys in new[] {new List<CharacterMotionKey>{new(0),new(1,1)},
+            new List<CharacterMotionKey>{new(0),new(.6),new(.4),new(1)},
+            new List<CharacterMotionKey>{new(0),new(.5,Angle:100),new(1)}})
+        {
+            var bad=tianyi.Manifest with {Id="bad-native-curve",SideAnimation=tianyi.Manifest.SideAnimation! with {Clips=new(tianyi.Manifest.SideAnimation!.Clips)}};
+            bad.SideAnimation.Clips["edge-peek"]=keys;
+            Reject(()=>other.Import(Zip("bad-native-curve",bad,edgeFiles)), "native animation rejects discontinuous, unordered or excessive motion");
+        }
         var tooFast=tianyi.Manifest with {Id="dense-too-fast",Actions=new(tianyi.Manifest.Actions)};
         tooFast.Actions["edge-peek"]=tooFast.Actions["edge-peek"] with {Frames=new() {
             tooFast.Actions["edge-peek"].Frames[0] with {DurationMs=9}}};
-        Reject(()=>other.Import(Zip("dense-too-fast",tooFast,edgeFiles)),"dense registered side frames reject durations below ten milliseconds");
+        Reject(()=>other.Import(Zip("dense-too-fast",tooFast,edgeFiles)),"native texture frames reject invalid duration");
         var unsmoothed=tianyi.Manifest with {Id="dense-unsmoothed",Actions=new(tianyi.Manifest.Actions)};
-        unsmoothed.Actions["edge-peek"]=unsmoothed.Actions["edge-peek"] with {SmoothFrames=false};
-        Reject(()=>other.Import(Zip("dense-unsmoothed",unsmoothed,edgeFiles)),"ten-millisecond timings require registered smoothing rather than widening all action timings");
+        unsmoothed.Actions["edge-peek"]=unsmoothed.Actions["edge-peek"] with {SmoothFrames=true};
+        Reject(()=>other.Import(Zip("dense-unsmoothed",unsmoothed,edgeFiles)),"native motion clips reject simultaneous bitmap smoothing");
         var movingGrip=tianyi.Manifest with {Id="smooth-moving-grip",Actions=new(tianyi.Manifest.Actions)};
         movingGrip.Actions["edge-peek"]=movingGrip.Actions["edge-peek"] with {Frames=new() {
-            movingGrip.Actions["edge-peek"].Frames[0],movingGrip.Actions["edge-peek"].Frames[1] with {EdgeAnchorX=.3}}};
-        Reject(()=>other.Import(Zip("smooth-moving-grip",movingGrip,edgeFiles)),"smooth clips cannot interpolate changing grip registration");
+            movingGrip.Actions["edge-peek"].Frames[0],movingGrip.Actions["edge-peek"].Frames[0] with {EdgeAnchorX=.3}}};
+        Reject(()=>other.Import(Zip("smooth-moving-grip",movingGrip,edgeFiles)),"native clips reject additional textures or moving grip registration");
         var unregistered=tianyi.Manifest with {Id="smooth-unregistered",Actions=new(tianyi.Manifest.Actions)};
         unregistered.Actions["edge-peek"]=unregistered.Actions["edge-peek"] with {Frames=unregistered.Actions["edge-peek"].Frames
             .Select(f=>f with {Canvas=null}).ToList()};
