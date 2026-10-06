@@ -149,8 +149,42 @@ internal static class CharacterPackVerification
             && edgeRoundTrip.Actions["edge-bottom-peek"].Frames[0].Image == edgeRoundTrip.Actions["edge-bottom-idle"].Frames[0].Image
             && edgeFiles.ContainsKey("bottom-sequence-v6.png") && !edgeFiles.ContainsKey("edge-bottom-v1.png"),
             "bottom atlas responses export and import with shared cached views instead of old body-stretch sprites");
-        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 244,
+        check(edgeRoundTrip.Manifest.Actions.Values.Sum(a => a.Frames.Count) == 177,
             "expanded sequences stay within the bounded 2048-reference package limit");
+        check(EdgeActions.BottomResponses.All(a=>edgeRoundTrip.Manifest.BottomAnimation!.Clips[a]
+            .SequenceEqual(tianyi.Manifest.BottomAnimation!.Clips[a]))
+            &&edgeRoundTrip.Manifest.BottomAnimation!.ClosedEyesRegion==tianyi.Manifest.BottomAnimation!.ClosedEyesRegion
+            &&edgeRoundTrip.BottomClosedEyesImage is {IsFrozen:true,PixelWidth:256,PixelHeight:352}
+            &&!edgeFiles.ContainsKey("bottom-inbetweens-v1.png"),
+            "bottom continuous curves and cropped eyelids survive actual export and import without transition atlases");
+        foreach(var keys in new[]{new List<CharacterMotionKey>{new(0),new(1,1)},
+            new List<CharacterMotionKey>{new(0),new(.6),new(.4),new(1)},
+            new List<CharacterMotionKey>{new(0),new(.5,Angle:10),new(1)},
+            new List<CharacterMotionKey>{new(0),new(.5,Blink:1.1),new(1)}})
+        {
+            var bad=tianyi.Manifest with {Id="bad-bottom-curve",BottomAnimation=tianyi.Manifest.BottomAnimation! with {Clips=new(tianyi.Manifest.BottomAnimation!.Clips)}};
+            bad.BottomAnimation.Clips["edge-bottom-peek"]=keys;
+            Reject(()=>other.Import(Zip("bad-bottom-curve",bad,edgeFiles)),"bottom curves reject discontinuous, unordered or excessive motion");
+        }
+        foreach(var region in new[]{new CharacterFrameRegion(-1,0,256,352),new CharacterFrameRegion(512,422,2048,352),new CharacterFrameRegion(0,0,1,1)})
+        {
+            var bad=tianyi.Manifest with {Id="bad-bottom-crop",BottomAnimation=tianyi.Manifest.BottomAnimation! with {ClosedEyesRegion=region}};
+            Reject(()=>other.Import(Zip("bad-bottom-crop",bad,edgeFiles)),"bottom eyelid crop rejects outside or mismatched canvases");
+        }
+        foreach(var eyes in new[]{new List<CharacterFrameRegion>{new(-1,199,44,42),new(137,194,48,44)},
+            new List<CharacterFrameRegion>{new(80,199,44,42),new(90,194,48,44)}})
+        {
+            var bad=tianyi.Manifest with {Id="bad-bottom-eyes",BottomAnimation=tianyi.Manifest.BottomAnimation! with {Eyes=eyes}};
+            Reject(()=>other.Import(Zip("bad-bottom-eyes",bad,edgeFiles)),"bottom rejects outside or overlapping eye regions");
+        }
+        var unsafeBottom=tianyi.Manifest with {Id="bad-bottom-path",BottomAnimation=tianyi.Manifest.BottomAnimation! with {ClosedEyesImage="../eyes.png"}};
+        Reject(()=>other.Import(Zip("bad-bottom-path",unsafeBottom,edgeFiles)),"bottom eyelid image cannot escape the character package");
+        var missingBottom=tianyi.Manifest with {Id="missing-bottom-curve",BottomAnimation=tianyi.Manifest.BottomAnimation! with {Clips=new(tianyi.Manifest.BottomAnimation!.Clips)}};
+        missingBottom.BottomAnimation.Clips.Remove("edge-bottom-look");
+        Reject(()=>other.Import(Zip("missing-bottom-curve",missingBottom,edgeFiles)),"each bottom response requires its declared curve");
+        var movingBottom=tianyi.Manifest with {Id="moving-bottom-support",Actions=new(tianyi.Manifest.Actions)};
+        movingBottom.Actions["edge-bottom-look"]=movingBottom.Actions["edge-bottom-look"] with {Frames=new(){movingBottom.Actions["edge-bottom-look"].Frames[0] with {EdgeAnchorY=.9}}};
+        Reject(()=>other.Import(Zip("moving-bottom-support",movingBottom,edgeFiles)),"bottom response cannot move the fixed sleeve support line");
         check(edgeRoundTrip.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)
             .SequenceEqual(tianyi.Manifest.Actions.Values.SelectMany(a=>a.Frames).Where(f=>f.Canvas is not null)),
             "source crops and canvas registration survive real export and import");

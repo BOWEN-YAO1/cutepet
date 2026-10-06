@@ -25,6 +25,7 @@ public sealed record CharacterManifest
     public CharacterTopSwing? TopSwing { get; init; }
     public CharacterSideAnimation? SideAnimation { get; init; }
     public CharacterTopAnimation? TopAnimation { get; init; }
+    public CharacterBottomAnimation? BottomAnimation { get; init; }
     public Dictionary<string, string[]>? Dialogue { get; init; }
     public Dictionary<string, CharacterAction> Actions { get; init; } = new();
 }
@@ -104,7 +105,8 @@ internal sealed record LoadedAction(bool Loop, IReadOnlyList<LoadedFrame> Frames
 }
 internal sealed record CharacterPack(CharacterManifest Manifest, bool BuiltIn,
     IReadOnlyDictionary<string, LoadedAction> Actions, string? Directory = null, BitmapSource? CloudImage = null,
-    BitmapSource? SwingOrnamentImage = null, BitmapSource? SwingSceneryImage = null, BitmapSource? TopClosedEyesImage = null)
+    BitmapSource? SwingOrnamentImage = null, BitmapSource? SwingSceneryImage = null, BitmapSource? TopClosedEyesImage = null,
+    BitmapSource? BottomClosedEyesImage = null)
 {
     public string Id => Manifest.Id;
     public string Name => Manifest.Name;
@@ -117,6 +119,16 @@ public sealed record CharacterTopAnimation
     public double HeadPivotX { get; init; } = .5;
     public double HeadPivotY { get; init; } = .46;
     public string ClosedEyesImage { get; init; } = "";
+    public List<CharacterFrameRegion> Eyes { get; init; } = new();
+    public Dictionary<string,List<CharacterMotionKey>> Clips { get; init; } = new();
+}
+
+public sealed record CharacterBottomAnimation
+{
+    public double HeadPivotX { get; init; } = .5;
+    public double HeadPivotY { get; init; } = .74;
+    public string ClosedEyesImage { get; init; } = "";
+    public CharacterFrameRegion? ClosedEyesRegion { get; init; }
     public List<CharacterFrameRegion> Eyes { get; init; } = new();
     public Dictionary<string,List<CharacterMotionKey>> Clips { get; init; } = new();
 }

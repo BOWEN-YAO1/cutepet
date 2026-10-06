@@ -160,6 +160,11 @@ internal static class ControlCenterVerification
             check(characters.Preview.Clip is RectangleGeometry && characters.BottomPreviewEdge.Visibility == Visibility.Visible
                 && characters.SidePreviewEdge.Visibility == Visibility.Collapsed,
                 "bottom preview clips below the fixed elbow support instead of using the side mask");
+            var bottomMesh=characters.NativeAnimationPreview.Mesh!.Positions.ToArray();
+            var bottomSurface=characters.Preview.Source;
+            characters.AdvancePreview(TimeSpan.FromMilliseconds(160));
+            check(ReferenceEquals(bottomSurface,characters.Preview.Source)&&!bottomMesh.SequenceEqual(characters.NativeAnimationPreview.Mesh!.Positions),
+                "bottom preview reuses one surface while continuously moving its supported head mesh");
             Render(center,directory,"app-bottom-preview");
             characters.PreviewAction.SelectedValue="edge-top-look";
             characters.PreviewButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));

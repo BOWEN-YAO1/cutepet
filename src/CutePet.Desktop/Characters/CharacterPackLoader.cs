@@ -210,10 +210,26 @@ internal static class CharacterPackLoader
             throw new InvalidDataException("上侧闭眼图层需要合法的本地图片路径。");
         var topEyesImage=manifest.TopAnimation is { } topRig ? LoadLayer(topRig.ClosedEyesImage) : null;
         TopAnimationClip.Validate(manifest,actions,topEyesImage);
+        BitmapSource? bottomEyesImage=null;
+        if(manifest.BottomAnimation is { } bottomRig)
+        {
+            if(bottomRig.ClosedEyesImage is null||!SafeFile(bottomRig.ClosedEyesImage))
+                throw new InvalidDataException("下侧闭眼图层需要合法的本地图片路径。");
+            bottomEyesImage=LoadLayer(bottomRig.ClosedEyesImage);
+            if(bottomRig.ClosedEyesRegion is { } region)
+            {
+                if(region.X<0||region.Y<0||region.Width<1||region.Height<1
+                    ||(long)region.X+region.Width>bottomEyesImage.PixelWidth||(long)region.Y+region.Height>bottomEyesImage.PixelHeight
+                    ||(pixels+=(long)region.Width*region.Height)>MaxDecodedPixels)
+                    throw new InvalidDataException("下侧闭眼图集区域超出图片或总解码大小限制。");
+                var cropped=new CroppedBitmap(bottomEyesImage,new Int32Rect(region.X,region.Y,region.Width,region.Height));cropped.Freeze();bottomEyesImage=cropped;
+            }
+        }
+        BottomAnimationClip.Validate(manifest,actions,bottomEyesImage);
         var cloudImage = manifest.Cloud is { } layer ? LoadLayer(layer.Image) : null;
         var ornamentImage = manifest.TopSwing?.Ornament is { } decoration ? LoadLayer(decoration.Image) : null;
         var sceneryImage = manifest.TopSwing?.Scenery is { } sceneryLayer ? LoadLayer(sceneryLayer.Image) : null;
-        return new(manifest, builtIn, actions, directory, cloudImage, ornamentImage, sceneryImage,topEyesImage);
+        return new(manifest, builtIn, actions, directory, cloudImage, ornamentImage, sceneryImage,topEyesImage,bottomEyesImage);
 
         BitmapSource LoadLayer(string name)
         {

@@ -55,14 +55,7 @@ internal static class TopAnimationClip
     private static double Smooth(double value){value=Math.Clamp(value,0,1);return value*value*(3-2*value);}
     internal static Point Deform(Point source,Size size,CharacterTopAnimation rig,SideAnimationPose pose,double seat)
     {
-        var x=source.X;var y=source.Y;
-        foreach(var eye in rig.Eyes)
-        {
-            var dx=x-eye.X-eye.Width/2.0;var dy=y-eye.Y-eye.Height/2.0;
-            var weight=(1-Smooth((Math.Abs(dx)/(eye.Width/2.0)-.72)/.28))
-                *(1-Smooth((Math.Abs(dy)/(eye.Height/2.0)-.7)/.3));
-            y-=dy*.92*pose.Blink*weight;
-        }
+        var x=source.X;var y=DeformEyes(source,rig.Eyes,pose.Blink);
         // The head influence ends before the jade board; all seat vertices stay fixed.
         var fadeStart=Math.Min(.44,seat-.12);
         var head=1-Smooth((source.Y/size.Height-fadeStart)/(seat-.06-fadeStart));
@@ -74,5 +67,17 @@ internal static class TopAnimationClip
         var legs=Smooth((source.Y/size.Height-.76)/.16)*(1-Smooth((Math.Abs(x/size.Width-.5)-.18)/.18));
         return new Point(x+(pose.Peek+rx+pose.Sway*hair)*head+pose.Sway*.45*legs,
             y+(pose.Lift+ry)*head+pose.Lift*.3*legs);
+    }
+    internal static double DeformEyes(Point source,IReadOnlyList<CharacterFrameRegion> eyes,double blink)
+    {
+        var y=source.Y;
+        foreach(var eye in eyes)
+        {
+            var dx=source.X-eye.X-eye.Width/2.0;var dy=y-eye.Y-eye.Height/2.0;
+            var weight=(1-Smooth((Math.Abs(dx)/(eye.Width/2.0)-.72)/.28))
+                *(1-Smooth((Math.Abs(dy)/(eye.Height/2.0)-.7)/.3));
+            y-=dy*.92*blink*weight;
+        }
+        return y;
     }
 }

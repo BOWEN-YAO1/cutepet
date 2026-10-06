@@ -133,6 +133,7 @@ internal sealed class CharacterLibrary
             using (var stream = config.Open()) JsonSerializer.Serialize(stream, pack.Manifest, CharacterPackLoader.Json);
             var imageNames = pack.Manifest.Actions.Values.SelectMany(action => action.Frames).Select(frame => frame.Image);
             if (pack.Manifest.TopAnimation is { } top) imageNames = imageNames.Append(top.ClosedEyesImage);
+            if (pack.Manifest.BottomAnimation is { } bottom) imageNames = imageNames.Append(bottom.ClosedEyesImage);
             if (pack.Manifest.Cloud is { } cloud) imageNames = imageNames.Append(cloud.Image);
             if (pack.Manifest.TopSwing?.Ornament is { } ornament) imageNames = imageNames.Append(ornament.Image);
             if (pack.Manifest.TopSwing?.Scenery is { } scenery) imageNames = imageNames.Append(scenery.Image);

@@ -2241,337 +2241,7 @@
       "frames": [
         {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 0,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9403409090909091
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 18,
-            "y": 114,
-            "width": 230,
-            "height": 304
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8980263157894737,
-            "offsetX": 24.726973684210535,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380793959330144
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 256,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9403409090909091
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 275,
-            "y": 117,
-            "width": 229,
-            "height": 300
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.91,
-            "offsetX": 23.804999999999993,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380113636363636
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 512,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9403409090909091
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 523,
-            "y": 117,
-            "width": 237,
-            "height": 301
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.9069767441860465,
-            "offsetX": 20.523255813953497,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380285412262155
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 768,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 776,
-            "y": 117,
-            "width": 236,
-            "height": 301
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.9069767441860465,
-            "offsetX": 20.976744186046517,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380285412262155
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 0,
-            "y": 422,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 21,
-            "y": 462,
-            "width": 227,
-            "height": 307
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8892508143322475,
-            "offsetX": 27.070032573289907,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9381292567367485
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 256,
-            "y": 422,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 274,
-            "y": 463,
-            "width": 230,
-            "height": 306
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8921568627450981,
-            "offsetX": 25.401960784313715,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9381127450980393
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 512,
-            "y": 422,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9460227272727273
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 524,
-            "y": 462,
-            "width": 236,
-            "height": 308
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8863636363636364,
-            "offsetX": 23.409090909090907,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.935627582644628
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
-          "region": {
-            "x": 768,
-            "y": 422,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 0,
-            "y": 422,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 776,
-            "y": 117,
-            "width": 236,
-            "height": 301
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.9069767441860465,
-            "offsetX": 20.976744186046517,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380285412262155
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 768,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 523,
-            "y": 117,
-            "width": 237,
-            "height": 301
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.9069767441860465,
-            "offsetX": 20.523255813953497,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380285412262155
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 512,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9403409090909091
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 275,
-            "y": 117,
-            "width": 229,
-            "height": 300
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.91,
-            "offsetX": 23.804999999999993,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380113636363636
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 256,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9403409090909091
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 18,
-            "y": 114,
-            "width": 230,
-            "height": 304
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8980263157894737,
-            "offsetX": 24.726973684210535,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380793959330144
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 1560,
           "region": {
             "x": 0,
             "y": 65,
@@ -2587,355 +2257,7 @@
       "frames": [
         {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 0,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9403409090909091
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 18,
-            "y": 114,
-            "width": 230,
-            "height": 304
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8980263157894737,
-            "offsetX": 24.726973684210535,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380793959330144
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 256,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9403409090909091
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 275,
-            "y": 117,
-            "width": 229,
-            "height": 300
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.91,
-            "offsetX": 23.804999999999993,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380113636363636
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 512,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9403409090909091
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 24,
-            "y": 815,
-            "width": 224,
-            "height": 291
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.9381443298969072,
-            "offsetX": 22.927835051546396,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9378514526710403
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 0,
-            "y": 776,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 264,
-            "y": 813,
-            "width": 240,
-            "height": 293
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.931740614334471,
-            "offsetX": 16.191126279863482,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9378878374185541
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 256,
-            "y": 776,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 264,
-            "y": 813,
-            "width": 240,
-            "height": 293
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.931740614334471,
-            "offsetX": 16.191126279863482,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9378878374185541
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 0,
-            "y": 776,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 24,
-            "y": 815,
-            "width": 224,
-            "height": 291
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.9381443298969072,
-            "offsetX": 22.927835051546396,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9378514526710403
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 512,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9403409090909091
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 526,
-            "y": 808,
-            "width": 234,
-            "height": 298
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.9161073825503355,
-            "offsetX": 20.81543624161074,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9379766625991458
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 512,
-            "y": 776,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 776,
-            "y": 810,
-            "width": 237,
-            "height": 297
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.9191919191919192,
-            "offsetX": 19.075757575757578,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9353477961432507
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 768,
-            "y": 776,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9460227272727273
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 776,
-            "y": 810,
-            "width": 237,
-            "height": 297
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.9191919191919192,
-            "offsetX": 19.075757575757578,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9353477961432507
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 512,
-            "y": 776,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 526,
-            "y": 808,
-            "width": 234,
-            "height": 298
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.9161073825503355,
-            "offsetX": 20.81543624161074,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9379766625991458
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 512,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9403409090909091
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 275,
-            "y": 117,
-            "width": 229,
-            "height": 300
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.91,
-            "offsetX": 23.804999999999993,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380113636363636
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 256,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9403409090909091
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 18,
-            "y": 114,
-            "width": 230,
-            "height": 304
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8980263157894737,
-            "offsetX": 24.726973684210535,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380793959330144
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 2600,
           "region": {
             "x": 0,
             "y": 65,
@@ -2951,297 +2273,7 @@
       "frames": [
         {
           "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 0,
-            "y": 65,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9403409090909091
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 776,
-            "y": 462,
-            "width": 236,
-            "height": 307
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8892508143322475,
-            "offsetX": 23.068403908794792,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9381292567367485
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 0,
-            "y": 422,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 23,
-            "y": 1153,
-            "width": 225,
-            "height": 304
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8980263157894737,
-            "offsetX": 26.972039473684205,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380793959330144
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 0,
-            "y": 1119,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9460227272727273
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 264,
-            "y": 1153,
-            "width": 240,
-            "height": 304
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8980263157894737,
-            "offsetX": 20.236842105263165,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380793959330144
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 256,
-            "y": 1119,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9460227272727273
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 264,
-            "y": 1153,
-            "width": 240,
-            "height": 304
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8980263157894737,
-            "offsetX": 20.236842105263165,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380793959330144
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 0,
-            "y": 1119,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9460227272727273
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 520,
-            "y": 1152,
-            "width": 239,
-            "height": 305
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8950819672131147,
-            "offsetX": 21.037704918032787,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380961251862892
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 512,
-            "y": 1119,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 776,
-            "y": 1149,
-            "width": 237,
-            "height": 307
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8892508143322475,
-            "offsetX": 22.623778501628664,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9381292567367485
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 768,
-            "y": 1119,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9460227272727273
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 776,
-            "y": 1149,
-            "width": 237,
-            "height": 307
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8892508143322475,
-            "offsetX": 22.623778501628664,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9381292567367485
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 512,
-            "y": 1119,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 520,
-            "y": 1152,
-            "width": 239,
-            "height": 305
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8950819672131147,
-            "offsetX": 21.037704918032787,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380961251862892
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 0,
-            "y": 1119,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9460227272727273
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 23,
-            "y": 1153,
-            "width": 225,
-            "height": 304
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8980263157894737,
-            "offsetX": 26.972039473684205,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9380793959330144
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 40,
-          "region": {
-            "x": 0,
-            "y": 422,
-            "width": 256,
-            "height": 352
-          },
-          "edgeAnchorY": 0.9431818181818182
-        },
-        {
-          "image": "bottom-inbetweens-v1.png",
-          "durationMs": 40,
-          "region": {
-            "x": 776,
-            "y": 462,
-            "width": 236,
-            "height": 307
-          },
-          "canvas": {
-            "width": 256,
-            "height": 352,
-            "scale": 0.8892508143322475,
-            "offsetX": 23.068403908794792,
-            "offsetY": 59.0
-          },
-          "edgeAnchorY": 0.9381292567367485
-        },
-        {
-          "image": "bottom-sequence-v6.png",
-          "durationMs": 80,
+          "durationMs": 1800,
           "region": {
             "x": 0,
             "y": 65,
@@ -4056,6 +3088,117 @@
           "angle": 0,
           "sway": 0,
           "blink": 0
+        }
+      ]
+    }
+  },
+  "bottomAnimation": {
+    "headPivotX": 0.5,
+    "headPivotY": 0.74,
+    "closedEyesImage": "bottom-sequence-v6.png",
+    "closedEyesRegion": {
+      "x": 512,
+      "y": 422,
+      "width": 256,
+      "height": 352
+    },
+    "eyes": [
+      {
+        "x": 80,
+        "y": 199,
+        "width": 44,
+        "height": 42
+      },
+      {
+        "x": 137,
+        "y": 194,
+        "width": 48,
+        "height": 44
+      }
+    ],
+    "clips": {
+      "edge-bottom-peek": [
+        {
+          "at": 0
+        },
+        {
+          "at": 0.3,
+          "lift": -4,
+          "angle": -0.5,
+          "sway": 0.5
+        },
+        {
+          "at": 0.56,
+          "lift": -4,
+          "angle": -0.5,
+          "sway": 0.5
+        },
+        {
+          "at": 0.82,
+          "lift": -1,
+          "blink": 0.65
+        },
+        {
+          "at": 1
+        }
+      ],
+      "edge-bottom-look": [
+        {
+          "at": 0
+        },
+        {
+          "at": 0.2,
+          "peek": -4,
+          "angle": -2.2,
+          "sway": -1
+        },
+        {
+          "at": 0.34,
+          "peek": -4,
+          "angle": -2.2,
+          "sway": -1
+        },
+        {
+          "at": 0.62,
+          "peek": 4,
+          "angle": 2.2,
+          "sway": 1
+        },
+        {
+          "at": 0.76,
+          "peek": 4,
+          "angle": 2.2,
+          "sway": 1
+        },
+        {
+          "at": 1
+        }
+      ],
+      "edge-bottom-smile": [
+        {
+          "at": 0
+        },
+        {
+          "at": 0.32,
+          "lift": 1,
+          "angle": 3,
+          "sway": 1,
+          "blink": 1
+        },
+        {
+          "at": 0.58,
+          "lift": 1,
+          "angle": 3,
+          "sway": 0.5,
+          "blink": 1
+        },
+        {
+          "at": 0.83,
+          "angle": 1,
+          "blink": 0.15
+        },
+        {
+          "at": 1
         }
       ]
     }

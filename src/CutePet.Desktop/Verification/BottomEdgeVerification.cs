@@ -19,8 +19,12 @@ internal static class BottomEdgeVerification
         window.CompletePetDrag(area,size,new Point(-1000,area.Bottom-size.Height),1);
         window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(320));
         var frames=EdgeActions.BottomResponses.SelectMany(a=>window.SelectedCharacter.Actions[a].Frames).Select(f=>f.Image).Distinct().ToArray();
-        check(frames.Length==32 && frames.All(f=>f.IsFrozen),
-            "bottom gestures load thirty-two registered cached anatomical poses");
+        check(frames.Length==1 && frames.All(f=>f.IsFrozen),
+            "bottom gestures retain exactly one registered frozen body texture");
+        check(EdgeActions.BottomResponses.All(a=>window.SelectedCharacter.Actions[a].Frames.Count==1
+            &&!window.SelectedCharacter.Actions[a].SmoothFrames)&&window.SelectedCharacter.Manifest.BottomAnimation?.Clips.Count==3
+            &&window.SelectedCharacter.BottomClosedEyesImage is {IsFrozen:true},
+            "bottom responses use continuous curves and independent eyelids");
         foreach(var sprite in frames)
         {
             var frame=EdgeActions.BottomResponses.SelectMany(a=>window.SelectedCharacter.Actions[a].Frames).First(f=>f.Image==sprite);
@@ -42,15 +46,20 @@ internal static class BottomEdgeVerification
             window.PlayCharacterInteraction();
             check(window.ScreenEdgeResponse==action,"bottom supported responses rotate "+action);
             var seen=new HashSet<BitmapSource>();
-            var steps=(int)Math.Ceiling(duration/40);
+            var motion=new HashSet<System.Windows.Media.Media3D.Point3D>();
+            var steps=(int)Math.Ceiling(duration/20);
             for(var step=0;step<steps;step++)
             {
                 seen.Add((BitmapSource)window.CharacterArt.Source);
-                var capture=VerticalEdgeVerification.Capture(window,ScreenEdge.Bottom,captions[index]);
-                encoder.Frames.Add(BitmapFrame.Create(capture));
-                delays.Add(4);
-                if(step==steps/4||step==steps/2||step==steps*3/4)samples.Add(capture);
-                window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(40,duration-step*40)));
+                motion.Add(window.NativeAnimationArt.Mesh!.Positions[40*33+16]);
+                var sampled=step==steps/4||step==steps/2||step==steps*3/4;
+                if(step%2==0||sampled)
+                {
+                    var capture=VerticalEdgeVerification.Capture(window,ScreenEdge.Bottom,captions[index]);
+                    if(step%2==0){encoder.Frames.Add(BitmapFrame.Create(capture));delays.Add((int)Math.Min(40,duration-step*20)/10);}
+                    if(sampled)samples.Add(capture);
+                }
+                window.AdvanceCharacterAnimation(TimeSpan.FromMilliseconds(Math.Min(20,duration-step*20)));
                 var frame=window.CurrentSpriteFrame;
                 var height=Math.Min(window.CharacterArt.Height,window.CharacterArt.Width*frame.Image.PixelHeight/frame.Image.PixelWidth);
                 var top=16+148-window.CharacterArt.Height+(window.CharacterArt.Height-height)/2;
@@ -62,8 +71,13 @@ internal static class BottomEdgeVerification
                 {
                     window.BeginDetailsMenu();
                     var held=(window.EdgeShift.Y,window.CharacterArt.Source);
+                    var heldMesh=window.NativeAnimationArt.Mesh!.Positions.ToArray();
+                    var heldPixels=Pixels(WindowPreview.Surface((FrameworkElement)window.Content,window.Width,window.Height,96));
                     window.AdvanceCharacterAnimation(TimeSpan.FromSeconds(10));
                     check(held==(window.EdgeShift.Y,window.CharacterArt.Source),"menu freezes bottom support and pose "+action);
+                    check(heldMesh.SequenceEqual(window.NativeAnimationArt.Mesh!.Positions)
+                        &&heldPixels.SequenceEqual(Pixels(WindowPreview.Surface((FrameworkElement)window.Content,window.Width,window.Height,96))),
+                        "menu freezes bottom mesh and independent eyelid pixels "+action);
                     window.EndDetailsMenu();
                     window.PlayCharacterInteraction();
                     check(window.ScreenEdgeResponse==action,"busy bottom clicks do not queue or skip responses "+action);
@@ -71,9 +85,9 @@ internal static class BottomEdgeVerification
                     check(window.ScreenEdgeResponse==action,"bottom reanchor preserves the running clip "+action);
                 }
             }
-            check(seen.Count>=4 && window.ScreenEdgeResponse is null && window.CurrentCharacterFrame==CharacterFrame.EdgeIdle
+            check(seen.Count==1 && motion.Count>20 && window.ScreenEdgeResponse is null && window.CurrentCharacterFrame==CharacterFrame.EdgeIdle
                 && window.QuotaHost.Position==quota && area.Contains(new Rect(window.ScreenEdgeAttachment!.Position,size)),
-                "bottom articulated clip returns to chin-rest with safe HWND and fixed quota "+action);
+                "bottom continuous clip returns to chin-rest with safe HWND and fixed quota "+action);
         }
         window.PlayCharacterInteraction();
         check(window.ScreenEdgeResponse=="edge-bottom-peek","bottom response order wraps without accumulating clicks");
@@ -100,4 +114,6 @@ internal static class BottomEdgeVerification
             check(player.Action=="low","fresh low quota clears bottom preview "+action);
         }
     }
+    private static byte[] Pixels(BitmapSource source)
+    {var bitmap=new FormatConvertedBitmap(source,PixelFormats.Bgra32,null,0);var bytes=new byte[bitmap.PixelWidth*bitmap.PixelHeight*4];bitmap.CopyPixels(bytes,bitmap.PixelWidth*4,0);return bytes;}
 }

@@ -53,6 +53,8 @@ def main():
                     active = {frame['image'] for action in manifest['actions'].values() for frame in action['frames']}
                     if manifest.get('topAnimation'): active.add(manifest['topAnimation']['closedEyesImage'])
                     assert manifest.get('topAnimation') == built_in.get('topAnimation')
+                    if manifest.get('bottomAnimation'): active.add(manifest['bottomAnimation']['closedEyesImage'])
+                    assert manifest.get('bottomAnimation') == built_in.get('bottomAnimation')
                     if manifest.get('cloud'): active.add(manifest['cloud']['image'])
                     for key in ('ornament', 'scenery'):
                         if manifest.get('topSwing', {}).get(key): active.add(manifest['topSwing'][key]['image'])

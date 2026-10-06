@@ -34,34 +34,37 @@ public sealed class NativeAnimationView : Viewport3D
     }
     internal bool Present(CharacterAnimation animation)
     {
-        var side=animation.SideAnimation;var top=animation.TopAnimation;
-        if(side is null&&top is null){Reset();return false;}
-        var source=animation.SpriteFrame.Image;
+        var side=animation.SideAnimation;var top=animation.TopAnimation;var bottom=animation.BottomAnimation;
+        if(side is null&&top is null&&bottom is null){Reset();return false;}
+        var frame=animation.SpriteFrame;var source=frame.Image;
         if(!ReferenceEquals(texture,source))Configure(source,animation);
-        (side?.Clips??top!.Clips).TryGetValue(animation.Action,out var keys);
+        (side?.Clips??top?.Clips??bottom!.Clips).TryGetValue(animation.Action,out var keys);
         var pose=SideAnimationClip.Sample(keys,animation.ActionProgress);
         FitCamera();
         if(previousPose==pose)return true;
         previousPose=pose;
+        var size=new Size(source.PixelWidth,source.PixelHeight);
+        var support=frame.EdgeAnchorY.GetValueOrDefault();
         // Detach before modifying collections to avoid one scene invalidation
         // per vertex. Double-buffer the collections instead of allocating them.
         model!.Geometry=null;
         for(var i=0;i<rest.Length;i++)
         {
-            var size=new Size(source.PixelWidth,source.PixelHeight);
-            var point=top is null?SideAnimationClip.Deform(rest[i],size,side!,pose)
-                :TopAnimationClip.Deform(rest[i],size,top,pose,animation.SwingSeat);
+            var point=side is not null?SideAnimationClip.Deform(rest[i],size,side,pose)
+                :top is not null?TopAnimationClip.Deform(rest[i],size,top,pose,animation.SwingSeat)
+                :BottomAnimationClip.Deform(rest[i],size,bottom!,pose,support);
             spare![i]=new Point3D(point.X,source.PixelHeight-point.Y,0);
         }
         var old=mesh!.Positions;mesh.Positions=spare;spare=old;model.Geometry=mesh;
-        if(top is not null)
+        if(top is not null||bottom is not null)
         {
             for(var eye=0;eye<eyes.Length;eye++)
             {
                 eyeModels[eye].Geometry=null;
                 for(var j=0;j<4;j++)
                 {
-                    var p=TopAnimationClip.Deform(eyeRest[eye*4+j],new Size(source.PixelWidth,source.PixelHeight),top,pose with {Blink=0},animation.SwingSeat);
+                    var p=top is not null?TopAnimationClip.Deform(eyeRest[eye*4+j],size,top,pose with {Blink=0},animation.SwingSeat)
+                        :BottomAnimationClip.Deform(eyeRest[eye*4+j],size,bottom!,pose with {Blink=0},support);
                     eyeSpares[eye][j]=new Point3D(p.X,source.PixelHeight-p.Y,.2);
                 }
                 var held=eyes[eye].Positions;eyes[eye].Positions=eyeSpares[eye];eyeSpares[eye]=held;eyeModels[eye].Geometry=eyes[eye];
@@ -73,7 +76,7 @@ public sealed class NativeAnimationView : Viewport3D
     private void Configure(BitmapSource source,CharacterAnimation animation)
     {
         Reset();texture=source;
-        columns=animation.TopAnimation is null?12:32;rows=animation.TopAnimation is null?24:72;
+        columns=animation.SideAnimation is not null?12:32;rows=animation.SideAnimation is not null?24:72;
         rest=new Point[(columns+1)*(rows+1)];
         var positions=new Point3DCollection(rest.Length);spare=new Point3DCollection(rest.Length);
         var coordinates=new PointCollection(rest.Length);var indices=new Int32Collection(columns*rows*6);
@@ -95,18 +98,19 @@ public sealed class NativeAnimationView : Viewport3D
         var material=new DiffuseMaterial(brush);material.Freeze();
         model=new GeometryModel3D(mesh,material);
         var scene=new Model3DGroup();scene.Children.Add(new AmbientLight(Colors.White));scene.Children.Add(model);
-        if(animation.TopAnimation is { } top)ConfigureEyes(scene,source,animation.TopClosedEyesImage!,top);
+        if(animation.TopAnimation is { } top)ConfigureEyes(scene,source,animation.TopClosedEyesImage!,top.Eyes);
+        if(animation.BottomAnimation is { } bottom)ConfigureEyes(scene,source,animation.BottomClosedEyesImage!,bottom.Eyes);
         Children.Add(new ModelVisual3D{Content=scene});
         camera.Position=new Point3D(source.PixelWidth/2.0,source.PixelHeight/2.0,1000);
         camera.LookDirection=new Vector3D(0,0,-1);camera.UpDirection=new Vector3D(0,1,0);FitCamera();
     }
-    private void ConfigureEyes(Model3DGroup scene,BitmapSource source,BitmapSource closed,CharacterTopAnimation top)
+    private void ConfigureEyes(Model3DGroup scene,BitmapSource source,BitmapSource closed,System.Collections.Generic.IReadOnlyList<CharacterFrameRegion> regions)
     {
         eyes=new MeshGeometry3D[2];eyeModels=new GeometryModel3D[2];eyeBrushes=new Brush[2];
         eyeSpares=new Point3DCollection[2];eyeRest=new Point[8];
         for(var eye=0;eye<2;eye++)
         {
-            var r=top.Eyes[eye];var points=new[]{new Point(r.X,r.Y),new Point(r.X+r.Width,r.Y),
+            var r=regions[eye];var points=new[]{new Point(r.X,r.Y),new Point(r.X+r.Width,r.Y),
                 new Point(r.X,r.Y+r.Height),new Point(r.X+r.Width,r.Y+r.Height)};
             var positions=new Point3DCollection(4);eyeSpares[eye]=new Point3DCollection(4);
             for(var j=0;j<4;j++)
